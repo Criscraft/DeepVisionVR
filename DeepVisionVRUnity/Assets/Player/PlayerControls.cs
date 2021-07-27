@@ -1,0 +1,417 @@
+// GENERATED AUTOMATICALLY FROM 'Assets/Player/PlayerControls.inputactions'
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
+
+public class @PlayerControls : IInputActionCollection, IDisposable
+{
+    public InputActionAsset asset { get; }
+    public @PlayerControls()
+    {
+        asset = InputActionAsset.FromJson(@"{
+    ""name"": ""PlayerControls"",
+    ""maps"": [
+        {
+            ""name"": ""GroundMovement"",
+            ""id"": ""9d328e67-77de-4f9c-ba82-52950e919890"",
+            ""actions"": [
+                {
+                    ""name"": ""HorizontalMovement"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""1a563ffe-2c5c-4e30-a050-c0669c8128f2"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""b024258b-81b3-4151-8d19-6cf64a8823e7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""52c40dad-259a-41d9-8e2c-a4012df3028a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""MouseX"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""5c5c08fc-27d1-4a10-885f-5510fdef7ae6"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""MouseY"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""f0c70bdd-47e0-4719-847a-5959458d10b3"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""900cc0dc-df36-40e6-9d4d-f2da8e4643a8"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HorizontalMovement"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""8c9a0776-9a0a-4607-9453-2f83f27ecaa2"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HorizontalMovement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""7cf38f21-c411-4811-9aa6-491861243604"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HorizontalMovement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""506b6bb6-c417-4bb5-b7ba-590176acfb5b"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HorizontalMovement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""3f25656a-0401-4d52-936b-e2f7efbd6779"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HorizontalMovement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""631f7f74-c947-413f-b86a-5dc51242dc4d"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e0231138-e046-4150-8891-447b44b0485b"",
+                    ""path"": ""<Mouse>/delta/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseX"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""66269a9d-ece3-4f45-bf22-ca991b42dde3"",
+                    ""path"": ""<Mouse>/delta/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseY"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60035f26-85bb-46ee-947e-e682625f97a8"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Interact"",
+            ""id"": ""4b96e8c1-cb79-4c27-b36a-09cb229cba24"",
+            ""actions"": [
+                {
+                    ""name"": ""Pickup"",
+                    ""type"": ""Button"",
+                    ""id"": ""2df3d066-235b-496f-9779-b5027d257d11"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Drop"",
+                    ""type"": ""Button"",
+                    ""id"": ""d0871d46-2dd0-45c2-8981-71ab0ec9a48a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Fire1"",
+                    ""type"": ""Button"",
+                    ""id"": ""fc23b9e6-6cd9-432e-a046-d3ddf6a5431a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""8f973b1a-6952-4914-b304-49c1d6c89fff"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pickup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""22d0e5a8-8beb-4c63-8826-ea0f7c2feb80"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Drop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f16b9e40-5dcb-485a-a3cf-db69fda69299"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        }
+    ],
+    ""controlSchemes"": []
+}");
+        // GroundMovement
+        m_GroundMovement = asset.FindActionMap("GroundMovement", throwIfNotFound: true);
+        m_GroundMovement_HorizontalMovement = m_GroundMovement.FindAction("HorizontalMovement", throwIfNotFound: true);
+        m_GroundMovement_Jump = m_GroundMovement.FindAction("Jump", throwIfNotFound: true);
+        m_GroundMovement_Sprint = m_GroundMovement.FindAction("Sprint", throwIfNotFound: true);
+        m_GroundMovement_MouseX = m_GroundMovement.FindAction("MouseX", throwIfNotFound: true);
+        m_GroundMovement_MouseY = m_GroundMovement.FindAction("MouseY", throwIfNotFound: true);
+        // Interact
+        m_Interact = asset.FindActionMap("Interact", throwIfNotFound: true);
+        m_Interact_Pickup = m_Interact.FindAction("Pickup", throwIfNotFound: true);
+        m_Interact_Drop = m_Interact.FindAction("Drop", throwIfNotFound: true);
+        m_Interact_Fire1 = m_Interact.FindAction("Fire1", throwIfNotFound: true);
+    }
+
+    public void Dispose()
+    {
+        UnityEngine.Object.Destroy(asset);
+    }
+
+    public InputBinding? bindingMask
+    {
+        get => asset.bindingMask;
+        set => asset.bindingMask = value;
+    }
+
+    public ReadOnlyArray<InputDevice>? devices
+    {
+        get => asset.devices;
+        set => asset.devices = value;
+    }
+
+    public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
+
+    public bool Contains(InputAction action)
+    {
+        return asset.Contains(action);
+    }
+
+    public IEnumerator<InputAction> GetEnumerator()
+    {
+        return asset.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public void Enable()
+    {
+        asset.Enable();
+    }
+
+    public void Disable()
+    {
+        asset.Disable();
+    }
+
+    // GroundMovement
+    private readonly InputActionMap m_GroundMovement;
+    private IGroundMovementActions m_GroundMovementActionsCallbackInterface;
+    private readonly InputAction m_GroundMovement_HorizontalMovement;
+    private readonly InputAction m_GroundMovement_Jump;
+    private readonly InputAction m_GroundMovement_Sprint;
+    private readonly InputAction m_GroundMovement_MouseX;
+    private readonly InputAction m_GroundMovement_MouseY;
+    public struct GroundMovementActions
+    {
+        private @PlayerControls m_Wrapper;
+        public GroundMovementActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @HorizontalMovement => m_Wrapper.m_GroundMovement_HorizontalMovement;
+        public InputAction @Jump => m_Wrapper.m_GroundMovement_Jump;
+        public InputAction @Sprint => m_Wrapper.m_GroundMovement_Sprint;
+        public InputAction @MouseX => m_Wrapper.m_GroundMovement_MouseX;
+        public InputAction @MouseY => m_Wrapper.m_GroundMovement_MouseY;
+        public InputActionMap Get() { return m_Wrapper.m_GroundMovement; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GroundMovementActions set) { return set.Get(); }
+        public void SetCallbacks(IGroundMovementActions instance)
+        {
+            if (m_Wrapper.m_GroundMovementActionsCallbackInterface != null)
+            {
+                @HorizontalMovement.started -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnHorizontalMovement;
+                @HorizontalMovement.performed -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnHorizontalMovement;
+                @HorizontalMovement.canceled -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnHorizontalMovement;
+                @Jump.started -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnJump;
+                @Sprint.started -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnSprint;
+                @MouseX.started -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseX;
+                @MouseX.performed -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseX;
+                @MouseX.canceled -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseX;
+                @MouseY.started -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseY;
+                @MouseY.performed -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseY;
+                @MouseY.canceled -= m_Wrapper.m_GroundMovementActionsCallbackInterface.OnMouseY;
+            }
+            m_Wrapper.m_GroundMovementActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @HorizontalMovement.started += instance.OnHorizontalMovement;
+                @HorizontalMovement.performed += instance.OnHorizontalMovement;
+                @HorizontalMovement.canceled += instance.OnHorizontalMovement;
+                @Jump.started += instance.OnJump;
+                @Jump.performed += instance.OnJump;
+                @Jump.canceled += instance.OnJump;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
+                @MouseX.started += instance.OnMouseX;
+                @MouseX.performed += instance.OnMouseX;
+                @MouseX.canceled += instance.OnMouseX;
+                @MouseY.started += instance.OnMouseY;
+                @MouseY.performed += instance.OnMouseY;
+                @MouseY.canceled += instance.OnMouseY;
+            }
+        }
+    }
+    public GroundMovementActions @GroundMovement => new GroundMovementActions(this);
+
+    // Interact
+    private readonly InputActionMap m_Interact;
+    private IInteractActions m_InteractActionsCallbackInterface;
+    private readonly InputAction m_Interact_Pickup;
+    private readonly InputAction m_Interact_Drop;
+    private readonly InputAction m_Interact_Fire1;
+    public struct InteractActions
+    {
+        private @PlayerControls m_Wrapper;
+        public InteractActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Pickup => m_Wrapper.m_Interact_Pickup;
+        public InputAction @Drop => m_Wrapper.m_Interact_Drop;
+        public InputAction @Fire1 => m_Wrapper.m_Interact_Fire1;
+        public InputActionMap Get() { return m_Wrapper.m_Interact; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(InteractActions set) { return set.Get(); }
+        public void SetCallbacks(IInteractActions instance)
+        {
+            if (m_Wrapper.m_InteractActionsCallbackInterface != null)
+            {
+                @Pickup.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
+                @Pickup.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
+                @Pickup.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
+                @Drop.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
+                @Drop.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
+                @Drop.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
+                @Fire1.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
+                @Fire1.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
+                @Fire1.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
+            }
+            m_Wrapper.m_InteractActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Pickup.started += instance.OnPickup;
+                @Pickup.performed += instance.OnPickup;
+                @Pickup.canceled += instance.OnPickup;
+                @Drop.started += instance.OnDrop;
+                @Drop.performed += instance.OnDrop;
+                @Drop.canceled += instance.OnDrop;
+                @Fire1.started += instance.OnFire1;
+                @Fire1.performed += instance.OnFire1;
+                @Fire1.canceled += instance.OnFire1;
+            }
+        }
+    }
+    public InteractActions @Interact => new InteractActions(this);
+    public interface IGroundMovementActions
+    {
+        void OnHorizontalMovement(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
+        void OnMouseX(InputAction.CallbackContext context);
+        void OnMouseY(InputAction.CallbackContext context);
+    }
+    public interface IInteractActions
+    {
+        void OnPickup(InputAction.CallbackContext context);
+        void OnDrop(InputAction.CallbackContext context);
+        void OnFire1(InputAction.CallbackContext context);
+    }
+}
