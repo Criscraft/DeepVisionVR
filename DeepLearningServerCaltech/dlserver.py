@@ -95,6 +95,7 @@ while True:
         out = F.softmax(out, 1) * 100
         out = out[0].cpu().numpy()
         indices_tmp = np.argsort(-out)
+        indices_tmp = indices_tmp[:16]
         out = out[indices_tmp]
         out_dict = {
             'class_indices' : [f'{item}' for item in indices_tmp], 

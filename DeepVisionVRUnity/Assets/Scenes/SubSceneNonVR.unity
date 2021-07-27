@@ -434,6 +434,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3098378401892960019, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002170, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_Camera
       value: 
@@ -525,14 +529,6 @@ PrefabInstance:
     - target: {fileID: 3098378402029002175, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_Name
       value: ImagePickerCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 3098378402049911959, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3098378402049911959, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
@@ -743,6 +739,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3733071972904644636, guid: 3b5dc09b1cc29684f91c31b4c9fda83a, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3733071973820750744, guid: 3b5dc09b1cc29684f91c31b4c9fda83a, type: 3}
+      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
