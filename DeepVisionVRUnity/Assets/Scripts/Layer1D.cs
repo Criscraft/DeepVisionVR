@@ -5,9 +5,8 @@ public class Layer1D : NetLayer
 {
     private int _size;
 
-    public void Prepare(GameObject layer1DParticleSystemPrefab, Vector2 pos, string name, int size)
+    public void Prepare(GameObject layer1DParticleSystemPrefab, string name, int size)
     {
-        _pos = pos;
         _name = name;
         _size = size;
         gridsize = 0.05f;

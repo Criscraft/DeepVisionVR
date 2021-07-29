@@ -379,12 +379,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2015585686}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c74824435ae38364ebeb6e679d9dff3a, type: 3}
+  m_Script: {fileID: 11500000, guid: 5825506eb7452c1e585297a0526de439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   node2DPrefab: {fileID: 5096315849597466271, guid: 5d11315be58ffc148a17008b299eea62, type: 3}
   layer1DParticleSystemPrefab: {fileID: 7338802684524934001, guid: 434c93dbf25053e4794da4d9db884498, type: 3}
-  imageFramePrefab: {fileID: 3431989500897937002, guid: 7118912ddf43ca74588536cea1e50ef6, type: 3}
+  networkImageInputFramePrefab: {fileID: 3431989500897937002, guid: 7118912ddf43ca74588536cea1e50ef6, type: 3}
   textPrefab: {fileID: 2951441993171094716, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
   bezierStaticPrefab: {fileID: 4724724728753338972, guid: a32e78be468fe49469f3215669570ffb, type: 3}
   imagePickerCanvasContent: {fileID: 191600903}
@@ -394,6 +394,7 @@ MonoBehaviour:
   leftInteractor: {fileID: 0}
   resultCanvasContent: {fileID: 5410415559064609033}
   resultCanvasContentElementPrefab: {fileID: 76961675513540834, guid: 5e5f72f95b7121b49ba5c81823d88dde, type: 3}
+  xCentering: 1
   minimalZOffset: 0.5
   FeatMap2DOffsetZMultiplier: 0.75
   FeatMap1DOffsetZMultiplier: 0
@@ -529,6 +530,14 @@ PrefabInstance:
     - target: {fileID: 3098378402029002175, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_Name
       value: ImagePickerCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378402049911959, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378402049911959, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}

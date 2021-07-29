@@ -3,7 +3,6 @@ using UnityEngine;
 
 public abstract class NetLayer : MonoBehaviour
 {
-    protected Vector2 _pos;
     protected string _name;
     protected List<GameObject> _nodes = new List<GameObject>();
     protected float gridsize;

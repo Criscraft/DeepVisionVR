@@ -5,12 +5,11 @@ public class Layer2D : NetLayer
 {
     private Vector3Int _size;
 
-    public void Prepare(GameObject node2DPrefab, Vector2 pos, string name, Vector3Int size)
+    public void Prepare(GameObject node2DPrefab, string name, Vector3Int size)
     {
-        _pos = pos;
         _name = name;
         _size = size;
-        gridsize = 0.2f;
+        gridsize = 0.2f; // I could set it to 1
         margin = 0.2f * gridsize;
         int n_grid_x = (int)Mathf.Ceil(Mathf.Sqrt(_size[0]));
         width = (float)n_grid_x * gridsize - margin;
