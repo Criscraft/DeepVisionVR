@@ -4,43 +4,80 @@ using UnityEngine;
 using TMPro;
 using Newtonsoft.Json.Linq;
 using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.UI;
 
 public class DLManager : MonoBehaviour
 {
+    // prefabs
     public GameObject node2DPrefab;
     public GameObject layer1DParticleSystemPrefab;
     public GameObject networkImageInputFramePrefab;
     public GameObject textPrefab;
     public GameObject bezierStaticPrefab;
-    public Transform imagePickerCanvasContent;
     public GameObject imageGetterButtonPrefab;
     public GameObject networkInfoScreenPrefab;
+    public GameObject resultCanvasContentElementPrefab;
+
+    // stored references
+    public Transform imagePickerCanvasContent;
+    public Transform resultCanvasContent;
     public Transform foreignResultCanvasInstance;
     private Transform ownResultCanvasInstance;
     public XRBaseInteractor rightInteractor;
     public XRBaseInteractor leftInteractor;
-    public Transform resultCanvasContent;
-    public GameObject resultCanvasContentElementPrefab;
-    public bool xCentering = true;
-    public float minElementSize = 0.75f;
-    public float minimalZOffset = 0.75f;
-    public float maximalZOffset = 10f;
-    public float xMargin = 0.75f;
-    public float minimalInfoScreenSize = 0.75f;
-    public int nPointsInBezier = 20;
-    public float edgeTextPosition = 0.7f;
+    private Transform networkImageInputFrameInstance;
+
+    // network data
     private DLClient _dlClient;
     private int lenDataset = 0;
     private JArray classNames;
     private List<JObject> architecture;
     private Transform[,] gridLayerElements; // Z , X 
-    private Dictionary<int,int[]> layerIDToGridPosition = new Dictionary<int,int[]>(); // Z size, X size
-    private Transform networkImageInputFrameInstance;
-    private int[] gridSize = {0,0}; // Z size, X size
+    private Dictionary<int, int[]> layerIDToGridPosition = new Dictionary<int, int[]>(); // Z size, X size
+
+    // layout general
+    public LayoutParams.LayoutMode layoutMode;
+    public float xMargin = 0.75f;
+    public float minElementSize = 0.75f;
+    public float minimalInfoScreenSize = 0.75f;
+    private int[] gridSize = { 0, 0 }; // the number stages and lanes in grid coordinates (Z size, X size)
+    private NetworkLayouts layouts;
+
+    // linear layout
+    public bool xCentering = true;
+    public bool xStrictGridPlacement = false;
+    public float minimalZOffset = 0.75f;
+    public float maximalZOffset = 10f;
+
+    // spiral layout
+    [SerializeField]
+    private float _spiralLayout_theta_0;
+    public float spiralLayout_theta_0
+    {
+        get {return _spiralLayout_theta_0; }
+        set 
+        {
+            _spiralLayout_theta_0 = value;
+            ApplyLayout();
+        }
+    }
+    [SerializeField]
+    private float _spiralLayout_b;
+    public float spiralLayout_b
+    {
+        get { return _spiralLayout_b; }
+        set
+        {
+            _spiralLayout_b = value;
+            ApplyLayout();
+        }
+    }
+
+    // edges
+    public int nPointsInBezier = 20;
+    public float edgeTextPosition = 0.7f;
     private List<Transform> edges = new List<Transform>();
     private List<Transform> edgeLabels = new List<Transform>();
-    private int[] numberOfXElements;
+    
 
     public void RequestNetworkArchitecture()
     {
@@ -240,246 +277,54 @@ public class DLManager : MonoBehaviour
             layerID ++;
         }
 
-        applyLayout();
-        drawNetworkEdges();
+        InitializeLayout();
+        ApplyLayout();
         Destroy(netLayer);
     }
         
 
-    private void applyLayout()
+    private LayoutParams GetLayoutParams()
     {
-        // collect data for grid size and positioning
-        // get the maximal width for each network lane
+        LayoutParams layoutParams = new LayoutParams();
+        layoutParams.layoutMode = layoutMode;
+        layoutParams.xMargin = xMargin;
+        layoutParams.minElementSize = minElementSize;
+        layoutParams.minimalInfoScreenSize = minimalInfoScreenSize;
 
-        NetLayer netLayerScript;
-        Layer2D netLayer2D;
-
-        numberOfXElements = new int[gridSize[0]];
-        for (int posZ = 0; posZ < gridSize[0]; posZ ++) 
+        if (layoutMode == LayoutParams.LayoutMode.linearLayout)
         {
-            numberOfXElements[posZ] = 0;
-            for (int posX = 0; posX < gridSize[1]; posX ++)
-            {
-                if (gridLayerElements[posZ, posX] != null) numberOfXElements[posZ] = numberOfXElements[posZ] + 1;
-            }
+            layoutParams.xCentering = xCentering;
+            layoutParams.xStrictGridPlacement = xStrictGridPlacement;
+            layoutParams.minimalZOffset = minimalZOffset;
+            layoutParams.maximalZOffset = maximalZOffset;
+        }
+        else if (layoutMode == LayoutParams.LayoutMode.spiralLayout)
+        {
+            layoutParams.theta_0 = spiralLayout_theta_0;
+            layoutParams.b = spiralLayout_b;
         }
 
-        // store for each lane the maximal width of an element plus margin. Ignore elements that are alone on one stage. Ignore text elements. Only process Layer2D elements.
-        float[] gridLaneWidths = new float[gridSize[1]];
-        for (int posX = 0; posX < gridSize[1]; posX++)
-        {
-            for (int posZ = 0; posZ < gridSize[0]; posZ++)
-            {
-                if (gridLayerElements[posZ, posX] != null && numberOfXElements[posZ] > 1)
-                {
-                    netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
-                    if (netLayer2D != null)
-                    {
-                        if (gridLaneWidths[posX] < netLayer2D.width) gridLaneWidths[posX] = netLayer2D.width;
-                    }
-                }
-            }
-            if (gridLaneWidths[posX] > 0f) gridLaneWidths[posX] = gridLaneWidths[posX] + xMargin;
-        }
-
-        // store for each stage the maximal width of an element. Ignore text elements.
-        float[] gridStageWidths = new float[gridSize[0]];
-        for (int posZ = 0; posZ < gridSize[0]; posZ++)
-        {
-            for (int posX = 0; posX < gridSize[1]; posX++)
-            {
-                
-                if (gridLayerElements[posZ, posX] != null)
-                {
-                    netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
-                    if (netLayer2D != null)
-                    {
-                        if (gridStageWidths[posZ] < netLayer2D.width) gridStageWidths[posZ] = netLayer2D.width;
-                    }
-                }
-            }
-        }
-
-        // move and scale layers in x direction to their grid positions
-        Vector3 position;
-        Transform textInstance;
-        TextMeshPro textMesh;
-        float scale = 1f;
-        float xOffset = -0.5f * gridLaneWidths[0]; // subtract center of 0th line because of alignment
-
-        for (int posX = 0; posX < gridSize[1]; posX ++) 
-        {
-            for (int posZ = 0; posZ < gridSize[0]; posZ ++)
-            {
-                if (gridLayerElements[posZ, posX] != null)
-                {
-                    // move and scale
-                    position = new Vector3(xOffset + 0.5f * gridLaneWidths[posX], 0f, 0f);
-                    scale = 1f;
-
-                    textInstance = gridLayerElements[posZ, posX].Find("TextMesh");
-                    if (textInstance != null)
-                    {
-                        // we have a text elment
-                        // add vertical offset
-                        position += new Vector3(0f, 0.5f * gridStageWidths[posZ - 1], 0f);
-                        // scale
-                        textMesh = textInstance.GetComponent<TextMeshPro>();
-                        textMesh.ForceMeshUpdate(true, true);
-                        scale = Mathf.Max(0.5f * gridStageWidths[posZ - 1], minimalInfoScreenSize) / textMesh.bounds.size.x;
-                    }
-                    
-                    netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
-                    if (netLayerScript != null)
-                    {
-                        // we have a network layer
-                        if (netLayerScript.width < minElementSize)
-                        {
-                            //scale
-                            scale = minElementSize / netLayerScript.width;
-                        }
-                    }
-
-                    gridLayerElements[posZ, posX].localPosition = position;
-                    gridLayerElements[posZ, posX].localScale = new Vector3(scale, scale, scale);
-                }
-            }
-            xOffset += gridLaneWidths[posX];
-        }
-
-        // center the layers in x direction
-        if (xCentering)
-        {
-            float totalWidth;
-            float meanWidth;
-            int counter;
-            for (int posZ = 0; posZ < gridSize[0]; posZ ++) 
-            {
-                totalWidth = 0f;
-                counter = 0;
-                for (int posX = 0; posX < gridSize[1]; posX ++)
-                {
-                    if (gridLayerElements[posZ, posX] != null)
-                    {
-                        totalWidth += gridLayerElements[posZ, posX].localPosition.x;
-                        counter ++;
-                    }
-                }
-                meanWidth = totalWidth / (float)counter;
-                for (int posX = 0; posX < gridSize[1]; posX ++)
-                {
-                    if (gridLayerElements[posZ, posX] != null)
-                    {
-                        gridLayerElements[posZ, posX].localPosition -= new Vector3(meanWidth, 0f, 0f);
-                    }
-                }
-            }
-        }
-
-        // apply the z-shift to the layers
-
-        float zOffsetStep = 0f;
-        float zOffset = 0f;
-        for (int posZ = 1; posZ < gridSize[0]; posZ ++) 
-        {
-            zOffsetStep = gridStageWidths[posZ - 1];
-            if (zOffsetStep < minimalZOffset) zOffsetStep = minimalZOffset;
-            if (zOffsetStep > maximalZOffset) zOffsetStep = maximalZOffset;
-
-            for (int posX = 0; posX < gridSize[1]; posX ++)
-            {
-                if (gridLayerElements[posZ, posX] != null)
-                {
-                    gridLayerElements[posZ, posX].localPosition -= new Vector3(0f, 0f, -zOffset - zOffsetStep);
-                }
-            }
-            zOffset += zOffsetStep;
-        }
+        layoutParams.nPointsInBezier = nPointsInBezier;
+        layoutParams.edgeTextPosition = edgeTextPosition;
+        return layoutParams;
     }
 
 
-    private void drawNetworkEdges()
+    private void InitializeLayout()
     {
-        // Draw NetworkGraphEdges
-        int layer_id = 0;
-        foreach (JObject jObject in architecture)
-        {
-            Vector2Int pos = new Vector2Int((int)jObject["pos"][0], (int)jObject["pos"][1]);
-            string layerName = (string)jObject["layer_name"];
-
-            foreach (JToken token in jObject["precursors"].Children())
-            {
-                GameObject newBezierStaticInstance = (GameObject)Instantiate(bezierStaticPrefab, Vector3.zero, transform.rotation, transform);
-                newBezierStaticInstance.name = "NetworkGraphEdge "
-                    + string.Format("{0}", (int)token[0])
-                    + string.Format("{0}", (int)token[1])
-                    + string.Format("{0}", pos[0])
-                    + string.Format("{0}", pos[1]);
-
-                edges.Add(newBezierStaticInstance.transform);
-
-                // determine edge points
-                newBezierStaticInstance.transform.localPosition = Vector3.zero;
-                var posTmp = layerIDToGridPosition[layer_id];
-                Vector3 pos_new_layer = gridLayerElements[posTmp[0], posTmp[1]].localPosition;//.localToWorldMatrix.MultiplyPoint3x4(layers[layer_id].GetComponent<NetLayer>().center_pos);
-                //pos_new_layer = transform.worldToLocalMatrix.MultiplyPoint3x4(pos_new_layer);
-                Transform precursor = gridLayerElements[(int)token[0], (int)token[1]];
-                Vector3 pos_precursor = precursor.localPosition;//.localToWorldMatrix.MultiplyPoint3x4(precursor.GetComponent<NetLayer>().center_pos);
-                //pos_precursor = transform.worldToLocalMatrix.MultiplyPoint3x4(pos_precursor);
-                // put edges on the ground
-                pos_precursor.y = transform.position.y;
-                pos_new_layer.y = transform.position.y;
-
-                // draw edges
-                BezierStaticEQ bezierCurve = newBezierStaticInstance.GetComponent<BezierStaticEQ>();
-                bezierCurve.DrawCurve(
-                    pos_precursor,
-                    pos_precursor + new Vector3(0f, 0f, 0.1f),
-                    pos_new_layer + new Vector3(0f, 0f, -1f),
-                    pos_new_layer,
-                    nPointsInBezier);
-
-                // draw text
-                GameObject textInstance = Instantiate(textPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), transform);
-                textInstance.name = "Text " + layerName;
-                TextMeshPro textMeshPro = textInstance.GetComponent<TextMeshPro>();
-                textMeshPro.text = layerName;
-                edgeLabels.Add(textInstance.transform);
-                textMeshPro.ForceMeshUpdate(true, true);
-
-                // collect positional information for text
-                Vector3[] positions = new Vector3[bezierCurve.lineRenderer.positionCount];
-                bezierCurve.lineRenderer.GetPositions(positions);
-                int idx = (int)Mathf.Floor(edgeTextPosition * (float)positions.Length) - 1;
-                Vector3 point1 = positions[idx];
-                Vector3 tangent = positions[idx + 1] - point1;
-                tangent = tangent.normalized;
-                Vector3 orthogonal = new Vector3(tangent.z, tangent.y, -tangent.x);
-                
-                //set text transform
-                if (textMeshPro.text != "")
-                {
-                    float preferredWidth = 0.75f * (positions[positions.Length - 1] - point1).magnitude;
-                    float scale = preferredWidth / textMeshPro.bounds.size.x;
-                    textInstance.transform.localScale = new Vector3(scale, scale, scale);
-                    float sign_is_right = 1f;
-                    if (point1.x <= 0)
-                    {
-                        sign_is_right = -1f;
-                    }
-                    textInstance.transform.localPosition = point1 + 1f * textMeshPro.bounds.size.y * scale * orthogonal * sign_is_right;
-                    float tangent_points_right = 1f;
-                    if (tangent.x < 0)
-                    {
-                        tangent_points_right = -1f;
-                    }
-                    Quaternion textRot = Quaternion.FromToRotation(new Vector3(tangent_points_right, 0f, 0f), tangent) * Quaternion.Euler(new Vector3(90f, 0f, 0f));
-                    textInstance.transform.localRotation = textRot;
-                }
-            }
-            layer_id = layer_id + 1;
-        }
+        LayoutParams layoutParams = GetLayoutParams();
+        layouts.InitializeLayout(gridLayerElements, gridSize, layoutParams);
     }
+
+
+    private void ApplyLayout()
+    {
+        LayoutParams layoutParams = GetLayoutParams();
+        layouts.ApplyLayout(gridLayerElements, gridSize, layoutParams);
+        layouts.DrawNetworkEdges(architecture, bezierStaticPrefab, transform, edges, edgeLabels, layerIDToGridPosition, gridLayerElements, textPrefab, layoutParams);
+    }
+
+    
 
 
     public void UpdateAllLayers()
@@ -494,6 +339,7 @@ public class DLManager : MonoBehaviour
 
     private void Start()
     {
+        layouts = new NetworkLayouts();
         _dlClient = GetComponent<DLClient>();
         _dlClient.Prepare();
         Debug.Log("Begin RequestDataOverview");

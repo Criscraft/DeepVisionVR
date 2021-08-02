@@ -1,3 +1,8 @@
+## Useful Links
+https://math.stackexchange.com/questions/126062/finding-a-point-on-archimedean-spiral-by-its-path-length
+https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
+
+
 ## TODO
 
 - [x] Edges and network on the floor

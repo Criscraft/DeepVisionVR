@@ -392,20 +392,24 @@ MonoBehaviour:
   networkImageInputFramePrefab: {fileID: 3431989500897937002, guid: 7118912ddf43ca74588536cea1e50ef6, type: 3}
   textPrefab: {fileID: 2951441993171094716, guid: 58175c3fa66f78c42ae5549dea9cc001, type: 3}
   bezierStaticPrefab: {fileID: 4724724728753338972, guid: a32e78be468fe49469f3215669570ffb, type: 3}
-  imagePickerCanvasContent: {fileID: 191600903}
   imageGetterButtonPrefab: {fileID: 3859813243151223048, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
   networkInfoScreenPrefab: {fileID: 8003825752791582063, guid: 043ba7acfd40b1f4a8eae3e6574f4901, type: 3}
+  resultCanvasContentElementPrefab: {fileID: 76961675513540834, guid: 5e5f72f95b7121b49ba5c81823d88dde, type: 3}
+  imagePickerCanvasContent: {fileID: 191600903}
+  resultCanvasContent: {fileID: 5410415559064609033}
   foreignResultCanvasInstance: {fileID: 1873818312}
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
-  resultCanvasContent: {fileID: 5410415559064609033}
-  resultCanvasContentElementPrefab: {fileID: 76961675513540834, guid: 5e5f72f95b7121b49ba5c81823d88dde, type: 3}
-  xCentering: 0
+  layoutMode: 1
+  xMargin: 0.5
   minElementSize: 0.5
+  minimalInfoScreenSize: 0.75
+  xCentering: 0
+  xStrictGridPlacement: 0
   minimalZOffset: 0.5
   maximalZOffset: 10
-  xMargin: 0.5
-  minimalInfoScreenSize: 0.75
+  _spiralLayout_theta_0: 450
+  _spiralLayout_b: 0.6
   nPointsInBezier: 20
   edgeTextPosition: 0.7
 --- !u!4 &2015585688
@@ -496,7 +500,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.34
+      value: -8.57
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalRotation.w
@@ -703,7 +707,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3733071972883595568, guid: 3b5dc09b1cc29684f91c31b4c9fda83a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.3899999
+      value: -1.8399997
       objectReference: {fileID: 0}
     - target: {fileID: 3733071972883595568, guid: 3b5dc09b1cc29684f91c31b4c9fda83a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -792,7 +796,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8245902986354961164, guid: 545a7030167b07a45b916bc9ae7c4323, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.3649
+      value: -8.394901
       objectReference: {fileID: 0}
     - target: {fileID: 8245902986354961164, guid: 545a7030167b07a45b916bc9ae7c4323, type: 3}
       propertyPath: m_LocalRotation.w

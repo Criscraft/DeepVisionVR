@@ -440,7 +440,6 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        _ = self.marker(x)
         x = self.tracker4(x)
         x = self.classifier(x)
         x = self.tracker5(x)
