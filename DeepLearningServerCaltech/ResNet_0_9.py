@@ -365,8 +365,6 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
-        TRACKERINDEX += 1
-        self.marker = TrackerModule((TRACKERINDEX, 0), "Classification Part", [(TRACKERINDEX-1, 0)], ignore_activation=True)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         TRACKERINDEX += 1
         self.tracker4 = TrackerModule((TRACKERINDEX, 0), "avgpool")

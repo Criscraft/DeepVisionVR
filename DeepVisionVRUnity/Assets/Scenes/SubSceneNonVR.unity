@@ -309,6 +309,11 @@ Camera:
   m_CorrespondingSourceObject: {fileID: 8992139983413666419, guid: f0dae0bddad39954282678a7dec46d41, type: 3}
   m_PrefabInstance: {fileID: 8992139983892155109}
   m_PrefabAsset: {fileID: 0}
+--- !u!224 &1873818312 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3733071972883595568, guid: 3b5dc09b1cc29684f91c31b4c9fda83a, type: 3}
+  m_PrefabInstance: {fileID: 8708591032692357777}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1938678140
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,20 +390,22 @@ MonoBehaviour:
   node2DPrefab: {fileID: 5096315849597466271, guid: 5d11315be58ffc148a17008b299eea62, type: 3}
   layer1DParticleSystemPrefab: {fileID: 7338802684524934001, guid: 434c93dbf25053e4794da4d9db884498, type: 3}
   networkImageInputFramePrefab: {fileID: 3431989500897937002, guid: 7118912ddf43ca74588536cea1e50ef6, type: 3}
-  textPrefab: {fileID: 2951441993171094716, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
+  textPrefab: {fileID: 2951441993171094716, guid: 58175c3fa66f78c42ae5549dea9cc001, type: 3}
   bezierStaticPrefab: {fileID: 4724724728753338972, guid: a32e78be468fe49469f3215669570ffb, type: 3}
   imagePickerCanvasContent: {fileID: 191600903}
   imageGetterButtonPrefab: {fileID: 3859813243151223048, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
   networkInfoScreenPrefab: {fileID: 8003825752791582063, guid: 043ba7acfd40b1f4a8eae3e6574f4901, type: 3}
+  foreignResultCanvasInstance: {fileID: 1873818312}
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
   resultCanvasContent: {fileID: 5410415559064609033}
   resultCanvasContentElementPrefab: {fileID: 76961675513540834, guid: 5e5f72f95b7121b49ba5c81823d88dde, type: 3}
-  xCentering: 1
+  xCentering: 0
+  minElementSize: 0.5
   minimalZOffset: 0.5
-  FeatMap2DOffsetZMultiplier: 0.75
-  FeatMap1DOffsetZMultiplier: 0
-  InfoScreenOffsetZMultiplier: 1
+  maximalZOffset: 10
+  xMargin: 0.5
+  minimalInfoScreenSize: 0.75
   nPointsInBezier: 20
   edgeTextPosition: 0.7
 --- !u!4 &2015585688

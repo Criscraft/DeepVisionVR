@@ -16,20 +16,21 @@ public class DLManager : MonoBehaviour
     public Transform imagePickerCanvasContent;
     public GameObject imageGetterButtonPrefab;
     public GameObject networkInfoScreenPrefab;
-    private GameObject classificationResultTextInstance;
+    public Transform foreignResultCanvasInstance;
+    private Transform ownResultCanvasInstance;
     public XRBaseInteractor rightInteractor;
     public XRBaseInteractor leftInteractor;
     public Transform resultCanvasContent;
     public GameObject resultCanvasContentElementPrefab;
     public bool xCentering = true;
-    public float minimalZOffset = 0.5f;
-    public float FeatMap2DOffsetZMultiplier = 0.75f;
-    public float FeatMap1DOffsetZMultiplier = 0f;
-    public float InfoScreenOffsetZMultiplier = 1f;
+    public float minElementSize = 0.75f;
+    public float minimalZOffset = 0.75f;
+    public float maximalZOffset = 10f;
+    public float xMargin = 0.75f;
+    public float minimalInfoScreenSize = 0.75f;
     public int nPointsInBezier = 20;
     public float edgeTextPosition = 0.7f;
     private DLClient _dlClient;
-    private int nClasses = 0;
     private int lenDataset = 0;
     private JArray classNames;
     private List<JObject> architecture;
@@ -79,7 +80,7 @@ public class DLManager : MonoBehaviour
     public IEnumerator AcceptDataOverview(JObject jObject)
     {
         Debug.Log("Received AcceptDataOverview");
-        nClasses = (int)jObject["n_classes"];
+        //nClasses = (int)jObject["n_classes"];
         lenDataset = (int)jObject["len"];
         classNames = JArray.Parse(jObject["class_names"].ToString());
         
@@ -154,6 +155,7 @@ public class DLManager : MonoBehaviour
         foreach (Transform child in resultCanvasContent) children.Add(child.gameObject);
         children.ForEach(child => Destroy(child));
 
+        // fill the foreign result canvas
         JArray classIndices = JArray.Parse(jObject["class_indices"].ToString());
         JArray confidenceValues = JArray.Parse(jObject["confidence_values"].ToString());
         for (int i = 0; i < classIndices.Count; i++)
@@ -165,27 +167,16 @@ public class DLManager : MonoBehaviour
             textMeshProUGIO.text = (string)classNames[(int)classIndices[i]] + " - " + string.Format("{0}%", (float)confidenceValues[i]);
         }
 
-
-        // Destroy old text instance
-        if (classificationResultTextInstance != null)
+        // Destroy old own canvas instance
+        if (ownResultCanvasInstance != null)
         {
-            Destroy(classificationResultTextInstance);
+            Destroy(ownResultCanvasInstance);
         }
-        // create text for classification result
+        // create new own canvas instance
         var pos = layerIDToGridPosition[architecture.Count - 1];
-        classificationResultTextInstance = Instantiate(textPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), gridLayerElements[pos[0], pos[1]]);
-        classificationResultTextInstance.name = "ClassificationResultText";
-        TextMeshPro textMeshPro = classificationResultTextInstance.GetComponent<TextMeshPro>();
-        textMeshPro.text = (string)classNames[(int)jObject["class_indices"][0]];
-        textMeshPro.ForceMeshUpdate(true, true);
-
-        // position and scale the text
-        Layer1D layer = gridLayerElements[pos[0], pos[1]].GetComponent<Layer1D>();
-        float layerWidth = layer.width;
-        float textWidth = textMeshPro.bounds.size.x;
-        float scale = 0.5f * layerWidth / textWidth;
-        classificationResultTextInstance.transform.localScale = new Vector3(scale, scale, scale);
-        classificationResultTextInstance.transform.localPosition = new Vector3(0f, 1.5f * textMeshPro.bounds.size.y * scale, 0f);
+        ownResultCanvasInstance = Instantiate(foreignResultCanvasInstance, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), gridLayerElements[pos[0], pos[1]]).transform;
+        ownResultCanvasInstance.name = "ClassificationResultCanvas";
+        ownResultCanvasInstance.localPosition = new Vector3(0f, 1.7f, 0f);
         yield return null;
     }
 
@@ -193,9 +184,11 @@ public class DLManager : MonoBehaviour
     public void CreateLayers()
     {
         // create image frame
-        networkImageInputFrameInstance = Instantiate(networkImageInputFramePrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), transform).transform;
+        networkImageInputFrameInstance = Instantiate(networkImageInputFramePrefab).transform;
+        networkImageInputFrameInstance.SetParent(transform);
         networkImageInputFrameInstance.localScale = new Vector3(30f, 30f, 30f);
-        networkImageInputFrameInstance.localPosition = new Vector3(0f, 0f, 0f);
+        networkImageInputFrameInstance.localPosition = new Vector3(0f, 0f, -minimalZOffset);
+        networkImageInputFrameInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
         networkImageInputFrameInstance.name = "Network Image Input Frame";
         networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this);
 
@@ -258,7 +251,9 @@ public class DLManager : MonoBehaviour
         // collect data for grid size and positioning
         // get the maximal width for each network lane
 
-        // we exclude those stages from the grid cell size computation that have only one layer 
+        NetLayer netLayerScript;
+        Layer2D netLayer2D;
+
         numberOfXElements = new int[gridSize[0]];
         for (int posZ = 0; posZ < gridSize[0]; posZ ++) 
         {
@@ -269,23 +264,37 @@ public class DLManager : MonoBehaviour
             }
         }
 
+        // store for each lane the maximal width of an element plus margin. Ignore elements that are alone on one stage. Ignore text elements. Only process Layer2D elements.
         float[] gridLaneWidths = new float[gridSize[1]];
-        for (int i = 0; i < gridLaneWidths.Length; i++)
+        for (int posX = 0; posX < gridSize[1]; posX++)
         {
-            gridLaneWidths[i] = 0f;
-        }
-        NetLayer netLayerScript;
-
-        for (int posX = 0; posX < gridSize[1]; posX ++) 
-        {
-            for (int posZ = 0; posZ < gridSize[0]; posZ ++)
+            for (int posZ = 0; posZ < gridSize[0]; posZ++)
             {
                 if (gridLayerElements[posZ, posX] != null && numberOfXElements[posZ] > 1)
                 {
-                    netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
-                    if (netLayerScript != null)
+                    netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
+                    if (netLayer2D != null)
                     {
-                        if (gridLaneWidths[posX] < netLayerScript.width) gridLaneWidths[posX] = netLayerScript.width;
+                        if (gridLaneWidths[posX] < netLayer2D.width) gridLaneWidths[posX] = netLayer2D.width;
+                    }
+                }
+            }
+            if (gridLaneWidths[posX] > 0f) gridLaneWidths[posX] = gridLaneWidths[posX] + xMargin;
+        }
+
+        // store for each stage the maximal width of an element. Ignore text elements.
+        float[] gridStageWidths = new float[gridSize[0]];
+        for (int posZ = 0; posZ < gridSize[0]; posZ++)
+        {
+            for (int posX = 0; posX < gridSize[1]; posX++)
+            {
+                
+                if (gridLayerElements[posZ, posX] != null)
+                {
+                    netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
+                    if (netLayer2D != null)
+                    {
+                        if (gridStageWidths[posZ] < netLayer2D.width) gridStageWidths[posZ] = netLayer2D.width;
                     }
                 }
             }
@@ -293,8 +302,10 @@ public class DLManager : MonoBehaviour
 
         // move and scale layers in x direction to their grid positions
         Vector3 position;
-        float scale;
-        float xOffset = 0f;
+        Transform textInstance;
+        TextMeshPro textMesh;
+        float scale = 1f;
+        float xOffset = -0.5f * gridLaneWidths[0]; // subtract center of 0th line because of alignment
 
         for (int posX = 0; posX < gridSize[1]; posX ++) 
         {
@@ -302,23 +313,35 @@ public class DLManager : MonoBehaviour
             {
                 if (gridLayerElements[posZ, posX] != null)
                 {
-                    // move
+                    // move and scale
                     position = new Vector3(xOffset + 0.5f * gridLaneWidths[posX], 0f, 0f);
-                    if (gridLayerElements[posZ, posX].Find("TextMesh") != null)
+                    scale = 1f;
+
+                    textInstance = gridLayerElements[posZ, posX].Find("TextMesh");
+                    if (textInstance != null)
                     {
-                        position += new Vector3(0f, 0.5f * gridLaneWidths[posX], 0f);
+                        // we have a text elment
+                        // add vertical offset
+                        position += new Vector3(0f, 0.5f * gridStageWidths[posZ - 1], 0f);
+                        // scale
+                        textMesh = textInstance.GetComponent<TextMeshPro>();
+                        textMesh.ForceMeshUpdate(true, true);
+                        scale = Mathf.Max(0.5f * gridStageWidths[posZ - 1], minimalInfoScreenSize) / textMesh.bounds.size.x;
                     }
-                    gridLayerElements[posZ, posX].localPosition = position;
-                    // scale
+                    
                     netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
                     if (netLayerScript != null)
                     {
-                        if (netLayerScript.width < 0.25f * gridLaneWidths[posX])
+                        // we have a network layer
+                        if (netLayerScript.width < minElementSize)
                         {
-                            scale = 0.25f * gridLaneWidths[posX] / netLayerScript.width;
-                            gridLayerElements[posZ, posX].localScale = new Vector3(scale, scale, scale);
+                            //scale
+                            scale = minElementSize / netLayerScript.width;
                         }
                     }
+
+                    gridLayerElements[posZ, posX].localPosition = position;
+                    gridLayerElements[posZ, posX].localScale = new Vector3(scale, scale, scale);
                 }
             }
             xOffset += gridLaneWidths[posX];
@@ -353,39 +376,21 @@ public class DLManager : MonoBehaviour
             }
         }
 
-        // apply the z-shift on the layers
+        // apply the z-shift to the layers
 
         float zOffsetStep = 0f;
         float zOffset = 0f;
-        for (int posZ = 0; posZ < gridSize[0]; posZ ++) 
+        for (int posZ = 1; posZ < gridSize[0]; posZ ++) 
         {
-            zOffsetStep = 0f;
+            zOffsetStep = gridStageWidths[posZ - 1];
+            if (zOffsetStep < minimalZOffset) zOffsetStep = minimalZOffset;
+            if (zOffsetStep > maximalZOffset) zOffsetStep = maximalZOffset;
+
             for (int posX = 0; posX < gridSize[1]; posX ++)
             {
                 if (gridLayerElements[posZ, posX] != null)
                 {
-                    netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
-                    if (netLayerScript != null)
-                    {
-                        if (zOffsetStep < netLayerScript.width * gridLayerElements[posZ, posX].localScale.x)
-                        {
-                            zOffsetStep = netLayerScript.width * gridLayerElements[posZ, posX].localScale.x;
-                        } 
-                    }
-                    else
-                    {
-                        if (zOffsetStep < 0.5f)
-                        {
-                            zOffsetStep = 0.5f;
-                        }
-                    }
-                }
-            }
-            for (int posX = 0; posX < gridSize[1]; posX ++)
-            {
-                if (gridLayerElements[posZ, posX] != null)
-                {
-                    gridLayerElements[posZ, posX].localPosition -= new Vector3(0f, 0f, -zOffset);
+                    gridLayerElements[posZ, posX].localPosition -= new Vector3(0f, 0f, -zOffset - zOffsetStep);
                 }
             }
             zOffset += zOffsetStep;
@@ -454,7 +459,7 @@ public class DLManager : MonoBehaviour
                 //set text transform
                 if (textMeshPro.text != "")
                 {
-                    float preferredWidth = 1f * (positions[positions.Length - 1] - point1).magnitude;
+                    float preferredWidth = 0.75f * (positions[positions.Length - 1] - point1).magnitude;
                     float scale = preferredWidth / textMeshPro.bounds.size.x;
                     textInstance.transform.localScale = new Vector3(scale, scale, scale);
                     float sign_is_right = 1f;
