@@ -26,6 +26,7 @@ public struct LayoutParams
     // edges
     public int nPointsInBezier;
     public float edgeTextPosition;
+    public float maxEdgeLabelSize;
 }
 
 
@@ -249,6 +250,7 @@ public class NetworkLayouts
         // move and scale layers in x direction to their grid positions
         
         NetLayer netLayerScript;
+        Layer1D layer1DScript;
         Transform textInstance;
         TextMeshPro textMesh;
         float scale = 1f;
@@ -259,18 +261,20 @@ public class NetworkLayouts
         Vector3 position;
         Vector2 position2D = GetSpiral(layoutParams.b, thetaRad);
         Vector2 normal;
+        bool stageContainsLayer1D = false;
 
         for (int posZ = 0; posZ < gridSize[0]; posZ++)
         {
             for (int posX = 0; posX < gridSize[1]; posX++)
             {
-                if (gridLayerElements[posZ, posX] != null)
+                Transform gridLayerElement = gridLayerElements[posZ, posX];
+                if (gridLayerElement != null)
                 {
                     // move and scale
                     position = new Vector3(position2D.x + normalOffset.x, 0f, position2D.y + normalOffset.y);
                     scale = 1f;
 
-                    textInstance = gridLayerElements[posZ, posX].Find("TextMesh");
+                    textInstance = gridLayerElement.Find("TextMesh");
                     if (textInstance != null)
                     {
                         // we have a text elment
@@ -283,7 +287,7 @@ public class NetworkLayouts
                         scale = width / textMesh.bounds.size.x;
                     }
 
-                    netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
+                    netLayerScript = gridLayerElement.GetComponent<NetLayer>();
                     if (netLayerScript != null)
                     {
                         width = netLayerScript.width;
@@ -296,26 +300,44 @@ public class NetworkLayouts
                         }
 
                     }
-                    gridLayerElements[posZ, posX].localPosition = position;
-                    gridLayerElements[posZ, posX].localScale = new Vector3(scale, scale, scale);
+
+                    layer1DScript = gridLayerElement.GetComponent<Layer1D>();
+                    if (layer1DScript != null) 
+                    {
+                        width = 0.2f * width;
+                        stageContainsLayer1D = true;
+                    }
+                    gridLayerElement.localPosition = position;
+                    gridLayerElement.localScale = new Vector3(scale, scale, scale);
                     normal = GetSpiralNormal(layoutParams.b, thetaRad);
-                    gridLayerElements[posZ, posX].localRotation = Quaternion.LookRotation(new Vector3(normal.x, 0f, normal.y));
+                    gridLayerElement.localRotation = Quaternion.LookRotation(new Vector3(normal.x, 0f, normal.y));
                     if (thisStageLargestWidth < width) thisStageLargestWidth = width;
+                    normalOffset = normalOffset + GetSpiralNormal(layoutParams.b, thetaRad) * 0.75f * width;
                 }
-                normalOffset = normalOffset + GetSpiralNormal(layoutParams.b, thetaRad) * 0.75f * width;
+                
             }
-            
-            thetaRad += GetDeltaTheta(Mathf.Max(maxWidthOfStage[Mathf.Clamp(posZ + 1, 0, gridSize[0] - 1)], thisStageLargestWidth) + layoutParams.xMargin, position2D);
-            position2D = GetSpiral(layoutParams.b, thetaRad);
-            normalOffset.x = 0f;
-            normalOffset.y = 0f;
-            thisStageLargestWidth = 0f;
+
+            if (!stageContainsLayer1D) 
+            {
+                thetaRad += GetDeltaTheta(Mathf.Max(maxWidthOfStage[Mathf.Clamp(posZ + 1, 0, gridSize[0] - 1)], thisStageLargestWidth) + layoutParams.xMargin, position2D);
+                position2D = GetSpiral(layoutParams.b, thetaRad);
+                normalOffset.x = 0f;
+                normalOffset.y = 0f;
+                thisStageLargestWidth = 0f;
+            }
+            stageContainsLayer1D = false;
         }
     }
 
 
     public void DrawNetworkEdges(List<JObject> architecture, GameObject bezierStaticPrefab, Transform dlManagerTransform, List<Transform> edges, List<Transform> edgeLabels, Dictionary<int, int[]> layerIDToGridPosition, Transform[,] gridLayerElements, GameObject textPrefab, LayoutParams layoutParams)
     {
+        // Remove old edges and edge labels
+        var toDelete = new List<GameObject>();
+        foreach (Transform item in edges) toDelete.Add(item.gameObject);
+        foreach (Transform item in edgeLabels) toDelete.Add(item.gameObject);
+        toDelete.ForEach(item => GameObject.Destroy(item));
+
         // Draw NetworkGraphEdges
         int layer_id = 0;
         foreach (JObject jObject in architecture)
@@ -348,10 +370,13 @@ public class NetworkLayouts
 
                 // draw edges
                 BezierStaticEQ bezierCurve = newBezierStaticInstance.GetComponent<BezierStaticEQ>();
+                float startingPointHandleFactor = 0f;
+                if (layoutParams.layoutMode == LayoutParams.LayoutMode.linearLayout) startingPointHandleFactor = 0.1f;
+                if (layoutParams.layoutMode == LayoutParams.LayoutMode.spiralLayout) startingPointHandleFactor = -1f;
                 bezierCurve.DrawCurve(
                     pos_precursor,
-                    pos_precursor + new Vector3(0f, 0f, 0.1f),
-                    pos_new_layer + new Vector3(0f, 0f, -1f),
+                    pos_precursor + precursor.forward * startingPointHandleFactor,
+                    pos_new_layer + gridLayerElements[posTmp[0], posTmp[1]].forward * (-1f),
                     pos_new_layer,
                     layoutParams.nPointsInBezier);
 
@@ -375,7 +400,7 @@ public class NetworkLayouts
                 //set text transform
                 if (textMeshPro.text != "")
                 {
-                    float preferredWidth = 0.75f * (positions[positions.Length - 1] - point1).magnitude;
+                    float preferredWidth = Mathf.Min(0.75f * (positions[positions.Length - 1] - point1).magnitude, layoutParams.maxEdgeLabelSize);
                     float scale = preferredWidth / textMeshPro.bounds.size.x;
                     textInstance.transform.localScale = new Vector3(scale, scale, scale);
                     float sign_is_right = 1f;

@@ -7,8 +7,8 @@ from TransformToTensor import TransformToTensor
 from DatasetClassesFromFolders import DatasetClassesFromFolders
 
 N_IMAGES = 16
-DATAPATH = '/mnt/e/Dokumente/DeepVisVR/deeplearning/Caltech/data'
-#DATAPATH = '/nfshome/linse/NO_INB_BACKUP/Data/Caltech'
+#DATAPATH = '/mnt/e/Dokumente/DeepVisVR/deeplearning/Caltech/data'
+DATAPATH = '/nfshome/linse/NO_INB_BACKUP/Data/Caltech'
 
 class DLPerformer(object):
     

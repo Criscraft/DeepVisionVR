@@ -75,6 +75,7 @@ public class DLManager : MonoBehaviour
     // edges
     public int nPointsInBezier = 20;
     public float edgeTextPosition = 0.7f;
+    public float maxEdgeLabelSize = 1f;
     private List<Transform> edges = new List<Transform>();
     private List<Transform> edgeLabels = new List<Transform>();
     
@@ -211,9 +212,12 @@ public class DLManager : MonoBehaviour
         }
         // create new own canvas instance
         var pos = layerIDToGridPosition[architecture.Count - 1];
-        ownResultCanvasInstance = Instantiate(foreignResultCanvasInstance, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), gridLayerElements[pos[0], pos[1]]).transform;
+        Transform lastLayer = gridLayerElements[pos[0], pos[1]];
+        ownResultCanvasInstance = Instantiate(foreignResultCanvasInstance);
+        ownResultCanvasInstance.SetParent(lastLayer);
         ownResultCanvasInstance.name = "ClassificationResultCanvas";
-        ownResultCanvasInstance.localPosition = new Vector3(0f, 1.7f, 0f);
+        ownResultCanvasInstance.localPosition = new Vector3(0f, 1.3f, 0f);
+        ownResultCanvasInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
         yield return null;
     }
 
@@ -306,6 +310,7 @@ public class DLManager : MonoBehaviour
 
         layoutParams.nPointsInBezier = nPointsInBezier;
         layoutParams.edgeTextPosition = edgeTextPosition;
+        layoutParams.maxEdgeLabelSize = maxEdgeLabelSize;
         return layoutParams;
     }
 

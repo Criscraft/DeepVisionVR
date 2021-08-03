@@ -16,18 +16,19 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [x] Dynamic Spacing of layers depending on size
 - [x] UI Screen to pick image from dataset, a portable image frame is spawned
 - [x] Grap and throw away close to the VR implementation
-- [ ] VR: Pickup Object by Colision (0.2m) and then enable the interaction ray
 - [x] Farbkodierung, um negative und positive Werte zu unterscheiden, color of frame indicates correct or wrong classification
 - [x] Klassifikationsergebniss mit prozenten anzeigen, auch nahe am input
-- [ ] Skalierung des Netzwerks
+- [ ] scale size of the network
+- [ ] add interaction to change network layout
 - [x] DATAPATH in DLPerformer.py
-- [ ] zoom drücken -> Hologimage vergrößern
+- [ ] press button to increase the size of the Holoimage
 - [x] Scrollen mit scroll view nach https://gyanendushekhar.com/2019/08/11/scroll-view-dynamic-content-size-unity-tutorial/
 - [x] More flexible arrangement of layers
-- [ ] 
+- [ ] Grabable Layers, Handle? No Handle? Special tool?
+- [ ] Histograms to show weight distribution of layer
+- [ ] Histograms to show activation distribution of layer
 
-To disable VR:
-
+Steps to enable/disable VR:
 - Windows input debugger set lock input to game
 - Steamvr input manager dvanced settings auto enable vr
 - open xr settings initialize vr on startup

@@ -400,18 +400,19 @@ MonoBehaviour:
   foreignResultCanvasInstance: {fileID: 1873818312}
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
-  layoutMode: 1
+  layoutMode: 0
   xMargin: 0.5
   minElementSize: 0.5
   minimalInfoScreenSize: 0.75
-  xCentering: 0
+  xCentering: 1
   xStrictGridPlacement: 0
   minimalZOffset: 0.5
   maximalZOffset: 10
   _spiralLayout_theta_0: 450
-  _spiralLayout_b: 0.6
+  _spiralLayout_b: 0.7
   nPointsInBezier: 20
   edgeTextPosition: 0.7
+  maxEdgeLabelSize: 1
 --- !u!4 &2015585688
 Transform:
   m_ObjectHideFlags: 0
@@ -491,6 +492,18 @@ PrefabInstance:
       value: 700
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.008
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -500,7 +513,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -8.57
+      value: -7.48
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalRotation.w
@@ -524,7 +537,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 4
+      value: 3.32
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002171, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -796,7 +809,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8245902986354961164, guid: 545a7030167b07a45b916bc9ae7c4323, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -8.394901
+      value: -7.3249006
       objectReference: {fileID: 0}
     - target: {fileID: 8245902986354961164, guid: 545a7030167b07a45b916bc9ae7c4323, type: 3}
       propertyPath: m_LocalRotation.w
