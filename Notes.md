@@ -27,6 +27,9 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [ ] Grabable Layers, Handle? No Handle? Special tool?
 - [ ] Histograms to show weight distribution of layer
 - [ ] Histograms to show activation distribution of layer
+- [ ] box and axis negative z position
+- [ ] color of boxes
+- [ ] histogram overflow
 
 Steps to enable/disable VR:
 - Windows input debugger set lock input to game
