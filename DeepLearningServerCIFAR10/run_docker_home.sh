@@ -1,0 +1,1 @@
+docker run --gpus all --name $1 --rm -v $(pwd):/app  -v /mnt:/mnt --shm-size 256M -p 5570:5570 -it dl_cuda_11 python3 ${@:2}
