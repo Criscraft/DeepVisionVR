@@ -3,33 +3,42 @@ using UnityEngine;
 
 public class Layer1D : NetLayer
 {
-    private int _size;
 
-    public void Prepare(GameObject layer1DParticleSystemPrefab, string name, int size)
+    float gridsize;
+    float margin;
+    int size;
+
+
+    public override float GetWidth(bool local = false)
     {
-        _name = name;
-        _size = size;
+        return (float)size * gridsize - margin;
+    }
+
+
+    public void Prepare(GameObject layer1DParticleSystemPrefab, int _size)
+    {
+        size = _size;
         gridsize = 0.05f;
         margin = 0.2f * gridsize;
-        width = _size * gridsize - margin;
-        Vector3 centerPos = new Vector3(0.5f * width, 0f, 0f);
+        Vector3 centerPos = new Vector3(0.5f * GetWidth(), 0f, 0f);
 
         GameObject particleSystemInstance = (GameObject)Instantiate(layer1DParticleSystemPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), transform);
         particleSystemInstance.name = "layer1DParticleSystem";
         particleSystemInstance.transform.localPosition = -centerPos;
         ParticleSystem particleSystem = particleSystemInstance.GetComponent<ParticleSystem>();
         var main = particleSystem.main;
-        main.maxParticles = _size;
-        _nodes.Add(particleSystemInstance);
+        main.maxParticles = size;
+        items.Add(particleSystemInstance);
     }
 
-    public override void updateData(List<Texture2D> textureList, float scale, float zeroValue)
+
+    public override void UpdateData(List<Texture2D> textureList, float scale, float zeroValue)
     {
-        var particleSystem = _nodes[0].GetComponent<ParticleSystem>();
+        var particleSystem = items[0].GetComponent<ParticleSystem>();
         var pixels = textureList[0].GetPixelData<Color32>(0);
 
         particleSystem.Clear();
-        for (int i = 0; i < _size; i++)
+        for (int i = 0; i < size; i++)
         {
             var emitParams = new ParticleSystem.EmitParams();
             emitParams.startSize = scale * (gridsize - margin);
@@ -40,5 +49,12 @@ public class Layer1D : NetLayer
             emitParams.startColor = new Color32(pixels[i][1], colorComponent, colorComponent, pixels[i][0]);
             particleSystem.Emit(emitParams, 1);
         }
+    }
+
+
+    public override void ApplyScale(float newScale)
+    {
+        float oldScale = transform.localScale.x;
+        transform.localScale = new Vector3(newScale * oldScale, newScale * oldScale, newScale * oldScale);
     }
 }

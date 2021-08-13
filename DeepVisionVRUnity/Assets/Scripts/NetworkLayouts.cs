@@ -63,7 +63,7 @@ public class NetworkLayouts
                     netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
                     if (netLayer2D != null)
                     {
-                        if (maxWidthOfLane[posX] < netLayer2D.width) maxWidthOfLane[posX] = netLayer2D.width;
+                        if (maxWidthOfLane[posX] < netLayer2D.GetWidth()) maxWidthOfLane[posX] = netLayer2D.GetWidth();
                     }
                 }
             }
@@ -82,7 +82,7 @@ public class NetworkLayouts
                     netLayer2D = gridLayerElements[posZ, posX].GetComponent<Layer2D>();
                     if (netLayer2D != null)
                     {
-                        if (maxWidthOfStage[posZ] < netLayer2D.width) maxWidthOfStage[posZ] = netLayer2D.width;
+                        if (maxWidthOfStage[posZ] < netLayer2D.GetWidth()) maxWidthOfStage[posZ] = netLayer2D.GetWidth();
                     }
                 }
             }
@@ -102,8 +102,10 @@ public class NetworkLayouts
         // move and scale layers in x direction to their grid positions
         Vector3 position;
         NetLayer netLayerScript;
+        Layer2D layer2DScript;
         Transform textInstance;
         TextMeshPro textMesh;
+        Transform gridLayerElement;
         float scale = 1f;
         float width = 0f;
         float xOffset = 0f; // subtract center of 0th line because of alignment
@@ -112,13 +114,14 @@ public class NetworkLayouts
         {
             for (int posX = 0; posX < gridSize[1]; posX++)
             {
+                gridLayerElement = gridLayerElements[posZ, posX];
                 if (gridLayerElements[posZ, posX] != null)
                 {
                     // move and scale
                     position = new Vector3(xOffset, 0f, 0f);
                     scale = 1f;
 
-                    textInstance = gridLayerElements[posZ, posX].Find("TextMesh");
+                    textInstance = gridLayerElement.Find("TextMesh");
                     if (textInstance != null)
                     {
                         // we have a text elment
@@ -131,22 +134,22 @@ public class NetworkLayouts
                         width = 0.5f * maxWidthOfStage[posZ - 1];
                     }
 
-                    netLayerScript = gridLayerElements[posZ, posX].GetComponent<NetLayer>();
+                    netLayerScript = gridLayerElement.GetComponent<NetLayer>();
                     if (netLayerScript != null)
                     {
-                        width = netLayerScript.width;
+                        width = netLayerScript.GetWidth();
                         // we have a network layer
-                        if (netLayerScript.width < layoutParams.minElementSize)
+                        if (width < layoutParams.minElementSize)
                         {
                             //scale
-                            scale = layoutParams.minElementSize / netLayerScript.width;
+                            scale = layoutParams.minElementSize / width;
                             width = layoutParams.minElementSize;
                         }
-
                     }
 
-                    gridLayerElements[posZ, posX].localPosition = position;
-                    gridLayerElements[posZ, posX].localScale = new Vector3(scale, scale, scale);
+                    gridLayerElement.localPosition = position;
+                    if (netLayerScript == null) gridLayerElement.localScale = new Vector3(scale, scale, scale);
+                    else netLayerScript.ApplyScale(scale);
                 }
                 if (layoutParams.xStrictGridPlacement) xOffset += maxWidthOfLane[posX];
                 else xOffset += width + layoutParams.xMargin;
@@ -290,12 +293,12 @@ public class NetworkLayouts
                     netLayerScript = gridLayerElement.GetComponent<NetLayer>();
                     if (netLayerScript != null)
                     {
-                        width = netLayerScript.width;
+                        width = netLayerScript.GetWidth();
                         // we have a network layer
-                        if (netLayerScript.width < layoutParams.minElementSize)
+                        if (netLayerScript.GetWidth() < layoutParams.minElementSize)
                         {
                             //scale
-                            scale = layoutParams.minElementSize / netLayerScript.width;
+                            scale = layoutParams.minElementSize / netLayerScript.GetWidth();
                             width = layoutParams.minElementSize;
                         }
 
@@ -308,7 +311,8 @@ public class NetworkLayouts
                         stageContainsLayer1D = true;
                     }
                     gridLayerElement.localPosition = position;
-                    gridLayerElement.localScale = new Vector3(scale, scale, scale);
+                    if (netLayerScript == null) gridLayerElement.localScale = new Vector3(scale, scale, scale);
+                    else netLayerScript.ApplyScale(scale);
                     normal = GetSpiralNormal(layoutParams.b, thetaRad);
                     gridLayerElement.localRotation = Quaternion.LookRotation(new Vector3(normal.x, 0f, normal.y));
                     if (thisStageLargestWidth < width) thisStageLargestWidth = width;

@@ -24,6 +24,7 @@ public class LinePlotter : MonoBehaviour
 	public float plottingAreaMargin = 0.15f;
 	public enum DiagramType { linearPlot, histogramPlot };
     public DiagramType diagramType;
+	public Transform axisItems;
 
 
 	void Start()
@@ -34,22 +35,24 @@ public class LinePlotter : MonoBehaviour
 		titelTextMesh.gameObject.SetActive(false);
 		xLabel.gameObject.SetActive(false);
 		yLabel.gameObject.SetActive(false);
-		
+		axis = new Axis(xTickLabelPrefab, yTickLabelPrefab, this, axisItems);
+
 		// done by external script
 		AddTitle("Awesome!");
 		AddXLabel("Best x label");
 		AddYLabel("Best y label");
 		DataItem dataItem;
-		//dataItem.xData = new float[] { -1f, 0f, 1f, 2f, 3f, 4f };
-		dataItem.xData = new float[] { 0f, 1f, 2f, 3f, 4f, 5f };
-		dataItem.yData = new float[] { 2f, 6f, 2f, 5f, 1f, 0f };
+		dataItem.xData = new float[] { -1f, 0f, 1f, 2f, 3f, 4f };
+		//dataItem.xData = new float[] { 0f, 1f, 2f, 3f, 4f, 5f };
+		dataItem.yData = new float[] { 2f, 6f, 2f, 5f, 1f, 4f };
 		AddData(dataItem);
-		
+		Axis myAxis = axis;
+		myAxis.yAxisLocation = "left";
 		// draw
-		axis = new Axis(xTickLabelPrefab, yTickLabelPrefab, this);
+		
 		Draw();
 	}
-
+	
 
 	public void AddData(DataItem dataItem)
 	{
@@ -122,11 +125,11 @@ public class LinePlotter : MonoBehaviour
 
 		// plot first data item only. Overwrite xData.
 		dataItem = data[0];
-		dataItem.xData = new float[dataItem.yData.Length];
+		/*dataItem.xData = new float[dataItem.yData.Length];
 		for (int i = 0; i < dataItem.yData.Length; i++)
 		{
 			dataItem.xData[i] = (float)i + 0.5f;
-		}
+		}*/
 
 		// plot boxes
 		points = MapDataToPosition(dataItem, width, height, plottingLimits);
@@ -135,8 +138,8 @@ public class LinePlotter : MonoBehaviour
 		Vector3 position;
 		for (int i = 0; i < dataItem.yData.Length; i++)
 		{
-			boxHeight = points[i].y;
-			position = new Vector3(points[i].x, bottomYPosition, 0f);
+			boxHeight = points[i].y - bottomYPosition;
+			position = new Vector3(points[i].x, bottomYPosition, points[i].z);
 			plotItemList.Add(DrawBox(position, boxWidth, boxHeight, Color.blue));
 		}
 	}
@@ -173,7 +176,12 @@ public class LinePlotter : MonoBehaviour
 		plottingLimits.yMin = dataLimits.yMin - deltaY;
 		plottingLimits.yMax = dataLimits.yMax + deltaY;
 
-		return (dataLimits, plottingLimits);
+		if (diagramType == DiagramType.histogramPlot)
+        {
+			plottingLimits.xMax = plottingLimits.xMax + 0.5f * deltaX;
+		}
+
+			return (dataLimits, plottingLimits);
 	}
 
 	public Vector3[] MapDataToPosition(DataItem dataItem, float width, float height, Limits plottingLimits)
@@ -247,8 +255,11 @@ public class LinePlotter : MonoBehaviour
 		private GameObject xTickLabelPrefab;
 		private GameObject yTickLabelPrefab;
 		private LinePlotter linePlotter;
+		private Transform axisItems;
+		public string xAxisLocation = "auto";
+		public string yAxisLocation = "auto";
 
-		public Axis(GameObject _xTickLabelPrefab, GameObject _yTickLabelPrefab, LinePlotter _linePlotter)
+		public Axis(GameObject _xTickLabelPrefab, GameObject _yTickLabelPrefab, LinePlotter _linePlotter, Transform _axisItems)
 		{
 			xTicks = new List<Transform>();
 			yTicks = new List<Transform>();
@@ -257,6 +268,7 @@ public class LinePlotter : MonoBehaviour
 			xTickLabelPrefab = _xTickLabelPrefab;
 			yTickLabelPrefab = _yTickLabelPrefab;
 			linePlotter = _linePlotter;
+			axisItems = _axisItems;
 		}
 
 
@@ -295,22 +307,31 @@ public class LinePlotter : MonoBehaviour
 		}
 
 
-		public void AddXTickLabels(float width, float height, Limits dataLimits, Limits plottingLimits)
+		public void AddXTickLabels(float width, float height, Limits dataLimits, Limits plottingLimits, float location)
 		{
 			Vector3[] tickLabelPoints;
 			DataItem tickLabelDataItem = new DataItem();
 			Vector3[] tickPoints = new Vector3[2];
+			Transform tick;
+
 			tickLabelDataItem.xData = getTickPositions(dataLimits.xMin, dataLimits.xMax);
 			tickLabelDataItem.yData = new float[tickLabelDataItem.xData.Length];
+
+			for (int i = 0; i < tickLabelDataItem.yData.Length; i++)
+			{
+				tickLabelDataItem.yData[i] = location;
+			}
+
 			tickLabelPoints = linePlotter.MapDataToPosition(tickLabelDataItem, width, height, plottingLimits);
 			float deltaTick = 0.01f * width;
+
 			for (int i = 0; i < tickLabelPoints.Length; i++)
 			{
 				// add label
 				Vector3 pos = tickLabelPoints[i];
 				Transform tickInstance = ((GameObject)Instantiate(xTickLabelPrefab)).transform;
-				tickInstance.name = "x tick";
-				tickInstance.SetParent(linePlotter.plottingArea);
+				tickInstance.name = "x tick label";
+				tickInstance.SetParent(axisItems);
 				tickInstance.localPosition = new Vector3(pos[0], pos[1], pos[2]);
 				tickInstance.localRotation = Quaternion.identity;
 				tickInstance.localScale = Vector3.one;
@@ -320,27 +341,38 @@ public class LinePlotter : MonoBehaviour
 				// add ticks
 				tickPoints[0] = new Vector3(pos[0], pos[1] - deltaTick, pos[2]);
 				tickPoints[1] = new Vector3(pos[0], pos[1] + deltaTick, pos[2]);
-				xTicks.Add(linePlotter.drawLine(tickPoints, Color.white));
+				tick = linePlotter.drawLine(tickPoints, Color.white);
+				tick.SetParent(axisItems);
+				xTicks.Add(tick);
 			}
 		}
 
 
-		public void AddYTickLabels(float width, float height, Limits dataLimits, Limits plottingLimits)
+		public void AddYTickLabels(float width, float height, Limits dataLimits, Limits plottingLimits, float location)
 		{
 			Vector3[] tickLabelPoints;
 			DataItem tickLabelDataItem = new DataItem();
 			Vector3[] tickPoints = new Vector3[2];
+			Transform tick;
+
 			tickLabelDataItem.yData = getTickPositions(dataLimits.yMin, dataLimits.yMax);
 			tickLabelDataItem.xData = new float[tickLabelDataItem.yData.Length];
+
+			for (int i = 0; i < tickLabelDataItem.xData.Length; i++)
+			{
+				tickLabelDataItem.xData[i] = location;
+			}
+
 			tickLabelPoints = linePlotter.MapDataToPosition(tickLabelDataItem, width, height, plottingLimits);
 			float deltaTick = 0.01f * width;
+
 			for (int i = 0; i < tickLabelPoints.Length; i++)
 			{
 				// add label
 				Vector3 pos = tickLabelPoints[i];
 				Transform tickInstance = ((GameObject)Instantiate(yTickLabelPrefab)).transform;
-				tickInstance.name = "y tick";
-				tickInstance.SetParent(linePlotter.plottingArea);
+				tickInstance.name = "y tick label";
+				tickInstance.SetParent(axisItems);
 				tickInstance.localPosition = new Vector3(pos[0], pos[1], pos[2]);
 				tickInstance.localRotation = Quaternion.identity;
 				tickInstance.localScale = Vector3.one;
@@ -350,7 +382,9 @@ public class LinePlotter : MonoBehaviour
 				// add ticks
 				tickPoints[0] = new Vector3(pos[0] - deltaTick, pos[1], pos[2]);
 				tickPoints[1] = new Vector3(pos[0] + deltaTick, pos[1], pos[2]);
-				yTicks.Add(linePlotter.drawLine(tickPoints, Color.white));
+				tick = linePlotter.drawLine(tickPoints, Color.white);
+				tick.SetParent(axisItems);
+				yTicks.Add(tick);
 			}
 		}
 
@@ -361,19 +395,27 @@ public class LinePlotter : MonoBehaviour
 			DataItem axisDataItem = new DataItem();
 
 			// draw x axis
+			float xAxisPosition;
+			if ( !(dataLimits.yMin <= 0f && dataLimits.yMax >= 0f) || xAxisLocation == "left") xAxisPosition = plottingLimits.yMin;
+			else xAxisPosition = 0f;
 			axisDataItem.xData = new float[] { plottingLimits.xMin, plottingLimits.xMax };
-			axisDataItem.yData = new float[] { 0f, 0f };
+			axisDataItem.yData = new float[] { xAxisPosition, xAxisPosition };
 			points = linePlotter.MapDataToPosition(axisDataItem, width, height, plottingLimits);
 			xAxis = linePlotter.drawLine(points, Color.white);
+			xAxis.SetParent(axisItems);
 			// draw y axis
-			axisDataItem.xData = new float[] { 0f, 0f };
+			float yAxisPosition;
+			if (!(dataLimits.xMin <= 0f && dataLimits.xMax >= 0f) || yAxisLocation == "left") yAxisPosition = plottingLimits.xMin;
+			else yAxisPosition = 0f;
+			axisDataItem.xData = new float[] { yAxisPosition, yAxisPosition };
 			axisDataItem.yData = new float[] { plottingLimits.yMin, plottingLimits.yMax };
 			points = linePlotter.MapDataToPosition(axisDataItem, width, height, plottingLimits);
-			xAxis = linePlotter.drawLine(points, Color.white);
+			yAxis = linePlotter.drawLine(points, Color.white);
+			yAxis.SetParent(axisItems);
 
 			// draw ticklabels
-			AddXTickLabels(width, height, dataLimits, plottingLimits);
-			AddYTickLabels(width, height, dataLimits, plottingLimits);
+			AddXTickLabels(width, height, dataLimits, plottingLimits, xAxisPosition);
+			AddYTickLabels(width, height, dataLimits, plottingLimits, yAxisPosition);
 		}
 
 

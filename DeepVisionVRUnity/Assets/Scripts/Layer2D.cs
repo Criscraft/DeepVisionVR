@@ -1,40 +1,67 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Layer2D : NetLayer
 {
-    private Vector3Int _size;
+    public RectTransform featureMaps;
+    public GameObject channel2DPrefab;
+    public Transform horizontalShift;
+    public Material material;
 
-    public void Prepare(GameObject node2DPrefab, string name, Vector3Int size)
+    public void Prepare(Vector3Int size, Camera mainCamera)
     {
-        _name = name;
-        _size = size;
-        gridsize = 0.2f; // I could set it to 1
-        margin = 0.2f * gridsize;
-        int n_grid_x = (int)Mathf.Ceil(Mathf.Sqrt(_size[0]));
-        width = (float)n_grid_x * gridsize - margin;
-        Vector3 center_pos = new Vector3(0.5f * width, 0f, 0f);
-
-        for (int i = 0; i < _size[0]; i++)
+        transform.GetComponent<Canvas>().worldCamera = mainCamera;
+        for (int i = 0; i < size[0]; i++)
         {
-            int grid_y = i / n_grid_x;
-            int grid_x = i % n_grid_x;
-            
-            GameObject newnetPlaneInstance = (GameObject)Instantiate(node2DPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f), transform);
-            newnetPlaneInstance.name = "netPlane " + string.Format("{0}", i);
-            newnetPlaneInstance.transform.localPosition = new Vector3(gridsize * grid_x + 0.5f * (gridsize - margin), gridsize * grid_y + 0.5f * (gridsize - margin), 0f) - center_pos;
-            newnetPlaneInstance.transform.localScale = new Vector3(gridsize - margin, gridsize - margin, gridsize - margin);
-            _nodes.Add(newnetPlaneInstance);
+            Transform newChannel2DInstance = ((GameObject)Instantiate(channel2DPrefab)).transform;
+            newChannel2DInstance.name = "channel2D " + string.Format("{0}", i);
+            newChannel2DInstance.SetParent(featureMaps);
+            newChannel2DInstance.localPosition = Vector3.zero;
+            newChannel2DInstance.localRotation = Quaternion.identity;
+            newChannel2DInstance.localScale = Vector3.one;
+            var image = newChannel2DInstance.GetComponent<RawImage>();
+            image.material = Instantiate(material);
+            items.Add(newChannel2DInstance.gameObject);
+        }
+        LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+    }
+
+
+    public override float GetWidth(bool local=false)
+    {
+        Vector3[] fourCornersArray = new Vector3[4];
+        featureMaps.GetLocalCorners(fourCornersArray);
+        float width = Mathf.Abs(fourCornersArray[0].x - fourCornersArray[3].x) * featureMaps.localScale.x;
+        if (!local) width *= transform.localScale.x;
+        return width;
+    }
+
+    public override void UpdateData(List<Texture2D>textureList, float scale, float zeroValue)
+    {
+        RawImage image;
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            image = items[i].GetComponent<RawImage>();
+            image.texture = textureList[i];
+            image.material.SetFloat("_TransitionValue", zeroValue / 255f);
+            image.material.SetTexture("_MainTex", textureList[i]);
+            //image.SetNativeSize(); // pixel perfect
         }
     }
 
-    public override void updateData(List<Texture2D>textureList, float scale, float zeroValue)
+    public override void ApplyScale(float newScale)
     {
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            Renderer m_Renderer = _nodes[i].GetComponent<Renderer>();
-            m_Renderer.material.SetTexture("_MainTex", textureList[i]);
-            m_Renderer.material.SetFloat("_TransitionValue", zeroValue / 255f);
-        }
+        float scale = featureMaps.localScale.x * newScale;
+        featureMaps.localScale = new Vector3(scale, scale, scale);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+        Center();
+    }
+
+    public void Center()
+    {
+        horizontalShift.localPosition = new Vector3(- 0.5f * GetWidth(true), 0f, 0f);
     }
 }

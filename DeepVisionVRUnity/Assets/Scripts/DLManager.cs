@@ -8,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class DLManager : MonoBehaviour
 {
     // prefabs
-    public GameObject node2DPrefab;
+    public GameObject layerCanvasPrefab;
     public GameObject layer1DParticleSystemPrefab;
     public GameObject networkImageInputFramePrefab;
     public GameObject textPrefab;
@@ -25,6 +25,7 @@ public class DLManager : MonoBehaviour
     public XRBaseInteractor rightInteractor;
     public XRBaseInteractor leftInteractor;
     private Transform networkImageInputFrameInstance;
+    public Camera mainCamera;
 
     // network data
     private DLClient _dlClient;
@@ -164,7 +165,7 @@ public class DLManager : MonoBehaviour
     {
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
         var pos = layerIDToGridPosition[layerID];
-        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().updateData(textureList, transform.localScale[0], zeroValue);
+        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], zeroValue);
         yield return null;
     }
 
@@ -208,7 +209,7 @@ public class DLManager : MonoBehaviour
         // Destroy old own canvas instance
         if (ownResultCanvasInstance != null)
         {
-            Destroy(ownResultCanvasInstance);
+            Destroy(ownResultCanvasInstance.gameObject);
         }
         // create new own canvas instance
         var pos = layerIDToGridPosition[architecture.Count - 1];
@@ -236,7 +237,6 @@ public class DLManager : MonoBehaviour
         // create network layers without positioning or scaling them
         gridLayerElements = new Transform[gridSize[0], gridSize[1]];
         
-        GameObject netLayer = new GameObject();
         GameObject newLayerInstance = null;
         int layerID = 0;
 
@@ -248,20 +248,23 @@ public class DLManager : MonoBehaviour
             if (datatype == "2D_feature_map")
             {
                 Vector3Int size = new Vector3Int((int)jObject["size"][1], (int)jObject["size"][2], (int)jObject["size"][3]);
-                newLayerInstance = (GameObject)Instantiate(netLayer, Vector3.zero, transform.rotation, transform);
+                newLayerInstance = (GameObject)Instantiate(layerCanvasPrefab);
+                newLayerInstance.transform.SetParent(transform);
+                newLayerInstance.transform.localPosition = Vector3.zero;
+                newLayerInstance.transform.localRotation = transform.localRotation;
+                newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "2D_feature_map_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.AddComponent<Layer2D>();
-                Layer2D layer2DScript = newLayerInstance.GetComponent<Layer2D>();
-                layer2DScript.Prepare(node2DPrefab, (string)jObject["layer_name"], size);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera);
             }
             else if (datatype == "1D_vector")
             {
                 int size = (int)jObject["size"][1];
-                newLayerInstance = (GameObject)Instantiate(netLayer, Vector3.zero, transform.rotation, transform);
+                newLayerInstance = new GameObject();
+                newLayerInstance.transform.SetParent(transform);
                 newLayerInstance.name = "1D_vector_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
                 newLayerInstance.AddComponent<Layer1D>();
                 Layer1D layer1DScript = newLayerInstance.GetComponent<Layer1D>();
-                layer1DScript.Prepare(layer1DParticleSystemPrefab, (string)jObject["layer_name"], size);
+                layer1DScript.Prepare(layer1DParticleSystemPrefab, size);
             }
             else if (datatype == "None") // could change to "InfoScreen"
             {
@@ -283,7 +286,6 @@ public class DLManager : MonoBehaviour
 
         InitializeLayout();
         ApplyLayout();
-        Destroy(netLayer);
     }
         
 
@@ -328,8 +330,6 @@ public class DLManager : MonoBehaviour
         layouts.ApplyLayout(gridLayerElements, gridSize, layoutParams);
         layouts.DrawNetworkEdges(architecture, bezierStaticPrefab, transform, edges, edgeLabels, layerIDToGridPosition, gridLayerElements, textPrefab, layoutParams);
     }
-
-    
 
 
     public void UpdateAllLayers()
