@@ -86,6 +86,20 @@ public class DLClient : MonoBehaviour
             JObject jObject = JObject.Parse(msgList[1]);
             UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptClassificationResult(jObject));
         }
+        else if (msgList[0] == "RequestWeightHistogram")
+        {
+            Debug.Log("handle RequestWeightHistogram");
+            JObject result = JObject.Parse(msgList[2]);
+            int layerID = int.Parse(msgList[1]);
+            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptWeightHistogram(result, layerID));
+        }
+        else if (msgList[0] == "RequestActivationHistogram")
+        {
+            Debug.Log("handle RequestActivationHistogram");
+            JObject result = JObject.Parse(msgList[2]);
+            int layerID = int.Parse(msgList[1]);
+            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptActivationHistogram(result, layerID));
+        }
     }
 
 
@@ -109,6 +123,24 @@ public class DLClient : MonoBehaviour
     {
         List<string> msg_list = new List<string>();
         msg_list.Add("RequestLayerActivation");
+        msg_list.Add(string.Format("{0}", layerID));
+        _dlNetMQ.QueueRequest(msg_list);
+    }
+
+
+    public void RequestWeightHistogram(int layerID)
+    {
+        List<string> msg_list = new List<string>();
+        msg_list.Add("RequestWeightHistogram");
+        msg_list.Add(string.Format("{0}", layerID));
+        _dlNetMQ.QueueRequest(msg_list);
+    }
+
+
+    public void RequestActivationHistogram(int layerID)
+    {
+        List<string> msg_list = new List<string>();
+        msg_list.Add("RequestActivationHistogram");
         msg_list.Add(string.Format("{0}", layerID));
         _dlNetMQ.QueueRequest(msg_list);
     }

@@ -2,16 +2,51 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class Layer2D : NetLayer
 {
-    public RectTransform featureMaps;
-    public GameObject channel2DPrefab;
-    public Transform horizontalShift;
-    public Material material;
+    [SerializeField]
+    private RectTransform featureMaps;
+    [SerializeField]
+    private GameObject channel2DPrefab;
+    [SerializeField]
+    private Transform horizontalShift;
+    [SerializeField]
+    private Material material;
+    [SerializeField]
+    private Transform info;
+    [SerializeField]
+    private RectTransform infoRectTransform;
+    [SerializeField]
+    private GameObject linePlotterPrefab;
+
+    private LinePlotter weightHistogram;
+    private GameObject weightHistogramGO;
+    private LinePlotter activationHistogram;
+    private GameObject activationHistogramGO;
+
 
     public void Prepare(Vector3Int size, Camera mainCamera)
     {
         transform.GetComponent<Canvas>().worldCamera = mainCamera;
+
+        GenerateFeatureMaps(size);
+
+        // generate plots and disable them for later use
+        GenerateWeightHistogram();
+        GenerateActivationHistogram();
+
+        // refresh layout so that the width and height of the into elements are set correctly
+        LayoutRebuilder.ForceRebuildLayoutImmediate(infoRectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(infoRectTransform);
+        // disable the info elements until they are needed
+        weightHistogramGO.SetActive(false);
+        activationHistogramGO.SetActive(false);
+    }
+
+
+    private void GenerateFeatureMaps(Vector3Int size)
+    {
         for (int i = 0; i < size[0]; i++)
         {
             Transform newChannel2DInstance = ((GameObject)Instantiate(channel2DPrefab)).transform;
@@ -24,8 +59,45 @@ public class Layer2D : NetLayer
             image.material = Instantiate(material);
             items.Add(newChannel2DInstance.gameObject);
         }
+        // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+    }
+
+
+    private void GenerateWeightHistogram()
+    {
+        RectTransform linePlotterInstance = ((GameObject)Instantiate(linePlotterPrefab)).GetComponent<RectTransform>();
+        linePlotterInstance.name = "Weight Histogram";
+        linePlotterInstance.SetParent(info);
+        linePlotterInstance.localScale = Vector3.one;
+        linePlotterInstance.sizeDelta = new Vector2(800, 600);
+        weightHistogram = linePlotterInstance.GetComponentInChildren<LinePlotter>();
+        weightHistogram.diagramType = LinePlotter.DiagramType.histogramPlot;
+        weightHistogram.Prepare();
+        weightHistogram.AddTitle("Weight Distribution");
+        weightHistogram.AddXLabel("Value");
+        weightHistogram.AddYLabel("Count");
+        weightHistogram.axis.yAxisLocation = "left";
+        weightHistogramGO = linePlotterInstance.gameObject;
+    }
+
+
+    private void GenerateActivationHistogram()
+    {
+        RectTransform linePlotterInstance = ((GameObject)Instantiate(linePlotterPrefab)).GetComponent<RectTransform>();
+        linePlotterInstance.name = "Activation Histogram";
+        linePlotterInstance.SetParent(info);
+        linePlotterInstance.localScale = Vector3.one;
+        linePlotterInstance.sizeDelta = new Vector2(800, 600);
+        activationHistogram = linePlotterInstance.GetComponentInChildren<LinePlotter>();
+        activationHistogram.diagramType = LinePlotter.DiagramType.histogramPlot;
+        activationHistogram.Prepare();
+        activationHistogram.AddTitle("Activation Distribution");
+        activationHistogram.AddXLabel("Value");
+        activationHistogram.AddYLabel("Count");
+        activationHistogram.axis.yAxisLocation = "left";
+        activationHistogramGO = linePlotterInstance.gameObject;
     }
 
 
@@ -38,7 +110,8 @@ public class Layer2D : NetLayer
         return width;
     }
 
-    public override void UpdateData(List<Texture2D>textureList, float scale, float zeroValue)
+
+    public override void UpdateData(List<Texture2D> textureList, float scale, float zeroValue)
     {
         RawImage image;
 
@@ -52,6 +125,32 @@ public class Layer2D : NetLayer
         }
     }
 
+
+    public void SetWeightHistogramData(float[] weightCounts, float[] weightBins)
+    {
+        weightHistogramGO.gameObject.SetActive(true);
+        weightHistogram.ClearData();
+        LinePlotter.DataItem dataItem;
+        dataItem.xData = weightBins;
+        dataItem.yData = weightCounts;
+        weightHistogram.AddData(dataItem);
+        weightHistogram.Draw();
+    }
+
+
+    public void SetActivationHistogramData(float[] weightCounts, float[] weightBins)
+    {
+        
+        activationHistogramGO.gameObject.SetActive(true);
+        activationHistogram.ClearData();
+        LinePlotter.DataItem dataItem;
+        dataItem.xData = weightBins;
+        dataItem.yData = weightCounts;
+        activationHistogram.AddData(dataItem);
+        activationHistogram.Draw();
+    }
+
+
     public override void ApplyScale(float newScale)
     {
         float scale = featureMaps.localScale.x * newScale;
@@ -59,6 +158,7 @@ public class Layer2D : NetLayer
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
         Center();
     }
+
 
     public void Center()
     {

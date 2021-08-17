@@ -2,61 +2,64 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 
 public class LinePlotter : MonoBehaviour
 {
-	public RectTransform plottingArea;
-	public GameObject lineRendererPrefab;
-	public GameObject boxPrefab;
+	[SerializeField]
+	private RectTransform plottingArea;
+	[SerializeField]
+	private GameObject lineRendererPrefab;
+	[SerializeField]
+	private GameObject boxPrefab;
 	private List<Transform> plotItemList;
 	private List<DataItem> data;
-	public Transform titelTextMesh;
-	public Transform xLabel;
-	public Transform yLabel;
-	public GameObject xTickLabelPrefab;
-	public GameObject yTickLabelPrefab;
-	private Axis axis;
+	[SerializeField]
+	private Transform titelTextMesh;
+	[SerializeField]
+	private Transform xLabel;
+	[SerializeField]
+	private Transform yLabel;
+	[SerializeField]
+	private GameObject xTickLabelPrefab;
+	[SerializeField]
+	private GameObject yTickLabelPrefab;
+	public Axis axis;
 	private Color[] colors = { Color.blue, Color.red, Color.green };
-	public float plottingAreaMargin = 0.15f;
+	[SerializeField]
+	private float plottingAreaMargin = 0.15f;
 	public enum DiagramType { linearPlot, histogramPlot };
     public DiagramType diagramType;
-	public Transform axisItems;
+	[SerializeField]
+	private Transform axisItems;
+	[SerializeField]
+	private TextMeshProUGUI xAxisModifier;
+	[SerializeField]
+	private TextMeshProUGUI yAxisModifier;
 
 
-	void Start()
+	public void Prepare()
 	{
-		// prepare
 		data = new List<DataItem>();
 		plotItemList = new List<Transform>();
 		titelTextMesh.gameObject.SetActive(false);
 		xLabel.gameObject.SetActive(false);
 		yLabel.gameObject.SetActive(false);
-		axis = new Axis(xTickLabelPrefab, yTickLabelPrefab, this, axisItems);
-
-		// done by external script
-		AddTitle("Awesome!");
-		AddXLabel("Best x label");
-		AddYLabel("Best y label");
-		DataItem dataItem;
-		dataItem.xData = new float[] { -1f, 0f, 1f, 2f, 3f, 4f };
-		//dataItem.xData = new float[] { 0f, 1f, 2f, 3f, 4f, 5f };
-		dataItem.yData = new float[] { 2f, 6f, 2f, 5f, 1f, 4f };
-		AddData(dataItem);
-		Axis myAxis = axis;
-		myAxis.yAxisLocation = "left";
-		// draw
-		
-		Draw();
+		axis = new Axis(xTickLabelPrefab, yTickLabelPrefab, this, axisItems, xAxisModifier, yAxisModifier);
 	}
 	
 
 	public void AddData(DataItem dataItem)
 	{
 		data.Add(dataItem);
+	}
+
+
+	public void ClearData()
+    {
+		data.Clear();
 	}
 
 
@@ -84,7 +87,7 @@ public class LinePlotter : MonoBehaviour
 	public void Draw()
 	{
 		ClearGraph();
-		
+
 		// find plotting area
 		plottingArea.ForceUpdateRectTransforms();
 		Rect rect = plottingArea.rect;
@@ -140,7 +143,7 @@ public class LinePlotter : MonoBehaviour
 		{
 			boxHeight = points[i].y - bottomYPosition;
 			position = new Vector3(points[i].x, bottomYPosition, points[i].z);
-			plotItemList.Add(DrawBox(position, boxWidth, boxHeight, Color.blue));
+			plotItemList.Add(DrawBox(position, boxWidth, boxHeight, new Color(1f, 227f / 255f, 227f / 255f, 1f)));
 		}
 	}
 
@@ -149,10 +152,10 @@ public class LinePlotter : MonoBehaviour
 	{
 		// find minimal and maximal limits
 		Limits dataLimits = new Limits();
-		dataLimits.xMin = 0f;
-		dataLimits.xMax = 0f;
-		dataLimits.yMin = 0f;
-		dataLimits.yMax = 0f;
+		dataLimits.xMin = data[0].xData[0];
+		dataLimits.xMax = data[0].xData[0];
+		dataLimits.yMin = data[0].yData[0];
+		dataLimits.yMax = data[0].yData[0];
 		foreach (DataItem dataItem in data)
         {
 			foreach (float x in dataItem.xData)
@@ -224,8 +227,10 @@ public class LinePlotter : MonoBehaviour
 		boxInstance.localScale = Vector3.one;
 		RectTransform rectTransform = boxInstance.GetComponent<RectTransform>();
 		rectTransform.sizeDelta = new Vector2(boxWidth, boxHeight);
-		CanvasRenderer renderer = boxInstance.GetComponent<CanvasRenderer>();
-		renderer.SetColor(color);
+		//CanvasRenderer renderer = boxInstance.GetComponent<CanvasRenderer>();
+		//renderer.SetColor(color);
+		Image image = boxInstance.GetComponent<Image>();
+		image.color = color;
 		return boxInstance;
 	}
 
@@ -256,10 +261,13 @@ public class LinePlotter : MonoBehaviour
 		private GameObject yTickLabelPrefab;
 		private LinePlotter linePlotter;
 		private Transform axisItems;
+		private TextMeshProUGUI xAxisModifier;
+		private TextMeshProUGUI yAxisModifier;
+
 		public string xAxisLocation = "auto";
 		public string yAxisLocation = "auto";
 
-		public Axis(GameObject _xTickLabelPrefab, GameObject _yTickLabelPrefab, LinePlotter _linePlotter, Transform _axisItems)
+		public Axis(GameObject _xTickLabelPrefab, GameObject _yTickLabelPrefab, LinePlotter _linePlotter, Transform _axisItems, TextMeshProUGUI _xAxisModifier, TextMeshProUGUI _yAxisModifier)
 		{
 			xTicks = new List<Transform>();
 			yTicks = new List<Transform>();
@@ -269,27 +277,33 @@ public class LinePlotter : MonoBehaviour
 			yTickLabelPrefab = _yTickLabelPrefab;
 			linePlotter = _linePlotter;
 			axisItems = _axisItems;
+			xAxisModifier = _xAxisModifier;
+			yAxisModifier = _yAxisModifier;
 		}
 
 
-		public float[] getTickPositions(float a, float b) 
+		public (float[], float, float, float) getTickPositions(float a, float b) 
 		{
 			// find step size
 			float d = b - a;
-			// we want to have about n = 6 ticks
-			float n = 6;
+			// we want to have about n = 5 ticks
+			float n = 5;
 			// compute approximate tick distance
 			float l = d / n;
 			float p = Mathf.Round(Mathf.Log10(l));
 			float[] stepCandidates = {
+				5f * Mathf.Pow(10, p - 1),
 				1f * Mathf.Pow(10, p),
 				2f * Mathf.Pow(10, p),
-				5f * Mathf.Pow(10, p)
+				5f * Mathf.Pow(10, p),
+				1f * Mathf.Pow(10, p + 1)
 			};
 			float[] distances = {
 				Mathf.Abs(stepCandidates[0] - l), 
 				Mathf.Abs(stepCandidates[1] - l),
-				Mathf.Abs(stepCandidates[2] - l)};
+				Mathf.Abs(stepCandidates[2] - l),
+				Mathf.Abs(stepCandidates[3] - l),
+				Mathf.Abs(stepCandidates[4] - l)};
 			float m = distances.Min();
 			int idx = Array.IndexOf(distances, m);
 			float stepSize = stepCandidates[idx];
@@ -303,7 +317,23 @@ public class LinePlotter : MonoBehaviour
 			{
 				ticks[i] = startTick + i * stepSize;
 			}
-			return ticks;
+
+			float preFactor = 1f;
+			float preFactorExponent = 0f;
+			if (d < 0.01 || d > 9999)
+			{
+				preFactorExponent = Mathf.Round(Mathf.Log10(d));
+				preFactor = Mathf.Pow(10, preFactorExponent);
+			}
+
+			float summand = 0f;
+			if (Mathf.Abs(a) / d > 1000)
+            {
+				float tmpPrefactor = Mathf.Round(Mathf.Log10(a));
+
+				summand = (float)decimal.Round((decimal)a, (int)tmpPrefactor + 1);
+			}
+			return (ticks, preFactor, preFactorExponent, summand);
 		}
 
 
@@ -314,8 +344,16 @@ public class LinePlotter : MonoBehaviour
 			Vector3[] tickPoints = new Vector3[2];
 			Transform tick;
 
-			tickLabelDataItem.xData = getTickPositions(dataLimits.xMin, dataLimits.xMax);
+			float preFactor;
+			float preFactorExponent;
+			float summand;
+			(tickLabelDataItem.xData, preFactor, preFactorExponent, summand) = getTickPositions(dataLimits.xMin, dataLimits.xMax);
 			tickLabelDataItem.yData = new float[tickLabelDataItem.xData.Length];
+
+			string axisModifierString = "";
+			if (preFactorExponent != 0f) axisModifierString += string.Format("x 1E{0}", preFactorExponent);
+			if (summand != 0f) axisModifierString += string.Format(" + {0:#.##E+0}", summand);
+			xAxisModifier.text = axisModifierString;
 
 			for (int i = 0; i < tickLabelDataItem.yData.Length; i++)
 			{
@@ -323,8 +361,10 @@ public class LinePlotter : MonoBehaviour
 			}
 
 			tickLabelPoints = linePlotter.MapDataToPosition(tickLabelDataItem, width, height, plottingLimits);
-			float deltaTick = 0.01f * width;
+			float deltaTick = 0.01f * width; // half length of a tick line
 
+			string label = "";
+			float value = 0f;
 			for (int i = 0; i < tickLabelPoints.Length; i++)
 			{
 				// add label
@@ -332,10 +372,15 @@ public class LinePlotter : MonoBehaviour
 				Transform tickInstance = ((GameObject)Instantiate(xTickLabelPrefab)).transform;
 				tickInstance.name = "x tick label";
 				tickInstance.SetParent(axisItems);
-				tickInstance.localPosition = new Vector3(pos[0], pos[1], pos[2]);
+				tickInstance.localPosition = new Vector3(pos[0], pos[1], pos[2] - 0.001f);
 				tickInstance.localRotation = Quaternion.identity;
 				tickInstance.localScale = Vector3.one;
-				tickInstance.GetComponent<TextMeshProUGUI>().text = string.Format("{0}", (float)tickLabelDataItem.xData[i]);
+				value = (float)tickLabelDataItem.xData[i];
+				value = (value - summand) / preFactor;
+				label = string.Format("{0}", value);
+				//if (label.Length > 7) label = string.Format("{0:#.##E+0}", (float)tickLabelDataItem.xData[i]);
+				if (label.Length > 5) label = string.Format("{0}", (float)decimal.Round((decimal)value, 3));
+				tickInstance.GetComponent<TextMeshProUGUI>().text = label;
 				xTickLabels.Add(tickInstance);
 
 				// add ticks
@@ -355,8 +400,16 @@ public class LinePlotter : MonoBehaviour
 			Vector3[] tickPoints = new Vector3[2];
 			Transform tick;
 
-			tickLabelDataItem.yData = getTickPositions(dataLimits.yMin, dataLimits.yMax);
+			float preFactor;
+			float preFactorExponent;
+			float summand;
+			(tickLabelDataItem.yData, preFactor, preFactorExponent, summand) = getTickPositions(dataLimits.yMin, dataLimits.yMax);
 			tickLabelDataItem.xData = new float[tickLabelDataItem.yData.Length];
+
+			string axisModifierString = "";
+			if (preFactorExponent != 0f) axisModifierString += string.Format("x 1E{0}", preFactorExponent);
+			if (summand != 0f) axisModifierString += string.Format(" + {0:#.##E+0}", summand);
+			yAxisModifier.text = axisModifierString;
 
 			for (int i = 0; i < tickLabelDataItem.xData.Length; i++)
 			{
@@ -366,6 +419,8 @@ public class LinePlotter : MonoBehaviour
 			tickLabelPoints = linePlotter.MapDataToPosition(tickLabelDataItem, width, height, plottingLimits);
 			float deltaTick = 0.01f * width;
 
+			string label = "";
+			float value = 0f;
 			for (int i = 0; i < tickLabelPoints.Length; i++)
 			{
 				// add label
@@ -373,10 +428,15 @@ public class LinePlotter : MonoBehaviour
 				Transform tickInstance = ((GameObject)Instantiate(yTickLabelPrefab)).transform;
 				tickInstance.name = "y tick label";
 				tickInstance.SetParent(axisItems);
-				tickInstance.localPosition = new Vector3(pos[0], pos[1], pos[2]);
+				tickInstance.localPosition = new Vector3(pos[0] - deltaTick, pos[1], pos[2] -0.001f);
 				tickInstance.localRotation = Quaternion.identity;
 				tickInstance.localScale = Vector3.one;
-				tickInstance.GetComponent<TextMeshProUGUI>().text = string.Format("{0}", (float)tickLabelDataItem.yData[i]);
+				value = (float)tickLabelDataItem.yData[i];
+				value = (value - summand) / preFactor;
+				label = string.Format("{0}", value);
+				//if (label.Length > 7) label = string.Format("{0:#.##E+0}", (float)tickLabelDataItem.xData[i]);
+				if (label.Length > 5) label = string.Format("{0}", (float)decimal.Round((decimal)value, 3));
+				tickInstance.GetComponent<TextMeshProUGUI>().text = label;
 				yTickLabels.Add(tickInstance);
 
 				// add ticks
@@ -428,6 +488,8 @@ public class LinePlotter : MonoBehaviour
 			foreach (Transform item in yTickLabels) toDelete.Add(item.gameObject);
 			if (xAxis != null) toDelete.Add(xAxis.gameObject);
 			if (yAxis != null) toDelete.Add(yAxis.gameObject);
+			xAxisModifier.text = "";
+			yAxisModifier.text = "";
 			toDelete.ForEach(item => GameObject.Destroy(item));
 		}
 	}

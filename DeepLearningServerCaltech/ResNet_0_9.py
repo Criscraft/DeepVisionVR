@@ -192,14 +192,14 @@ class BasicBlock(nn.Module):
         # Create tracker modules
         global TRACKERINDEX
         TRACKERINDEX += 1
-        self.marker = TrackerModule((TRACKERINDEX, 0), "BasicBlock", [(TRACKERINDEX-1, 0)], ignore_activation=True)
+        self.marker = TrackerModule((TRACKERINDEX, 0), "BasicBlock", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         TRACKERINDEX += 1
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "BasicBlock Conv1", [(TRACKERINDEX-1, 0)])
+        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "BasicBlock Conv1", tracked_module=self.conv1, precursors=[(TRACKERINDEX-1, 0)])
         TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "BasicBlock Conv2", [(TRACKERINDEX-1, 0)])
-        self.tracker3 = TrackerModule((TRACKERINDEX, 1), "Skip", [(TRACKERINDEX-2, 0)])
+        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "BasicBlock Conv2", tracked_module=self.conv2, precursors=[(TRACKERINDEX-1, 0)])
+        self.tracker3 = TrackerModule((TRACKERINDEX, 1), "Skip", tracked_module=self.downsample, precursors=[(TRACKERINDEX-2, 0)])
         TRACKERINDEX += 1
-        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "Sum", [(TRACKERINDEX-1, 0), (TRACKERINDEX-1, 1)])
+        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "Sum", precursors=[(TRACKERINDEX-1, 0), (TRACKERINDEX-1, 1)])
 
     def forward(self, x: Tensor) -> Tensor:
         identity = x
@@ -264,16 +264,16 @@ class Bottleneck(nn.Module):
 
         global TRACKERINDEX
         TRACKERINDEX += 1
-        self.marker = TrackerModule((TRACKERINDEX, 0), "Bottleneck", [(TRACKERINDEX-1, 0)], ignore_activation=True)
+        self.marker = TrackerModule((TRACKERINDEX, 0), "Bottleneck", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         TRACKERINDEX += 1
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv1", [(TRACKERINDEX-1, 0)])
+        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv1", tracked_module=self.conv1, precursors=[(TRACKERINDEX-1, 0)])
         TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv2", [(TRACKERINDEX-1, 0)])
+        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv2", tracked_module=self.conv2, precursors=[(TRACKERINDEX-1, 0)])
         TRACKERINDEX += 1
-        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv3", [(TRACKERINDEX-1, 0)])
-        self.tracker4 = TrackerModule((TRACKERINDEX, 1), "Skip", [(TRACKERINDEX-3, 0)])
+        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "Bottleneck Conv3", tracked_module=self.conv3, precursors=[(TRACKERINDEX-1, 0)])
+        self.tracker4 = TrackerModule((TRACKERINDEX, 1), "Skip", tracked_module=self.downsample, precursors=[(TRACKERINDEX-3, 0)])
         TRACKERINDEX += 1
-        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "Sum", [(TRACKERINDEX-1, 0), (TRACKERINDEX-1, 1)])
+        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "Sum", precursors=[(TRACKERINDEX-1, 0), (TRACKERINDEX-1, 1)])
 
     def forward(self, x: Tensor) -> Tensor:
         identity = x
@@ -350,14 +350,14 @@ class ResNet(nn.Module):
         self.conv1.ID = self.ID + '_first_layer'
         
         global TRACKERINDEX
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "input", [])
+        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "input", precursors=[])
         self.bn1 = norm_layer(self.inplanes)
         self.relu = self._activation_layer(inplace=False)
         TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "conv1", [(TRACKERINDEX-1, 0)])
+        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "conv1", tracked_module=self.conv1, precursors=[(TRACKERINDEX-1, 0)])
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         TRACKERINDEX += 1
-        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "maxpool", [(TRACKERINDEX-1, 0)])
+        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "maxpool", precursors=[(TRACKERINDEX-1, 0)])
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])

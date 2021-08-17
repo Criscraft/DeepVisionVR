@@ -25,11 +25,16 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [x] Scrollen mit scroll view nach https://gyanendushekhar.com/2019/08/11/scroll-view-dynamic-content-size-unity-tutorial/
 - [x] More flexible arrangement of layers
 - [ ] Grabable Layers, Handle? No Handle? Special tool?
-- [ ] Histograms to show weight distribution of layer
-- [ ] Histograms to show activation distribution of layer
-- [ ] box and axis negative z position
-- [ ] color of boxes
-- [ ] histogram overflow
+- [x] Histograms to show weight distribution of layer
+- [x] Histograms to show activation distribution of layer
+- [x] box and axis negative z position
+- [x] color of boxes
+- [x] histogram overflow
+- [ ] tick labels smaller, or choose other format
+- [x] activation histogram wrong axis at startup
+- [x] do not update weight histogram when the input changes - only when network changes
+- [ ] button to enable or disable histograms
+
 
 Steps to enable/disable VR:
 - Windows input debugger set lock input to game

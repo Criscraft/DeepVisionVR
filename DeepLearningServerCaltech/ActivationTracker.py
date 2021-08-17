@@ -4,9 +4,9 @@ from collections import defaultdict
 
 class TrackerModule(nn.Identity):
 
-    def __init__(self, pos, layer_name, precursors=[], ignore_activation=False):
+    def __init__(self, pos, layer_name, tracked_module=None, precursors=[], ignore_activation=False):
         super().__init__()
-        self.meta = {'pos' : pos, 'layer_name' : layer_name, 'precursors' : precursors, 'ignore_activation' : ignore_activation}
+        self.meta = {'pos' : pos, 'layer_name' : layer_name, 'tracked_module' : tracked_module, 'precursors' : precursors, 'ignore_activation' : ignore_activation}
 
 
 class LayerInfo():
@@ -53,7 +53,7 @@ class ActivationTracker():
             #one info_list can have multiple entries, for example if one relu module is applied several times in a network
             for info_item in info_list:
                 item_dict = module.meta
-                item_dict['module_name'] = info_item.module_name
+                #item_dict['module_name'] = info_item.module_name
                 if not item_dict['ignore_activation']:
                     item_dict['activation'] = info_item.in_data[0]
                 activations.append(item_dict)

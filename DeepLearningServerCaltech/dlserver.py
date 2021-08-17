@@ -103,5 +103,34 @@ while True:
         }
         socket.send_multipart([b'RequestClassificationResult', json.dumps(out_dict, indent=1).encode('utf-8')])
         print("send RequestClassificationResult")
+    
+    elif message[0]==b'RequestWeightHistogram':
+        layer_id = int(message[1])
+        weights = dl_performer.get_weights(layer_id)
+        has_weights = weights is not None
+        if has_weights:
+            hist, bins = np.histogram(weights.detach().cpu().numpy(), 16)
+            bins = 0.5 * (bins[1:] + bins[:-1])
+        else:
+            hist, bins = [], []
+        out_dict = {
+            'has_weights' : str(has_weights),
+            'counts' : [f'{item}' for item in hist], 
+            'bins' : [f'{item}' for item in bins],
+        }
+        socket.send_multipart([b'RequestWeightHistogram', str(layer_id).encode('utf-8'), json.dumps(out_dict, indent=1).encode('utf-8')])
+        print("send RequestWeightHistogram")
+
+    elif message[0]==b'RequestActivationHistogram':
+        layer_id = int(message[1])
+        hist, bins = np.histogram(dl_performer.get_activation(layer_id).cpu().numpy(), 16)
+        bins = 0.5 * (bins[1:] + bins[:-1])
+        out_dict = {
+            'counts' : [f'{item}' for item in hist], 
+            'bins' : [f'{item}' for item in bins],
+        }
+        socket.send_multipart([b'RequestActivationHistogram', str(layer_id).encode('utf-8'), json.dumps(out_dict, indent=1).encode('utf-8')])
+        print("send RequestActivationHistogram")
+
     else:
         raise ValueError("Could not process the message.")

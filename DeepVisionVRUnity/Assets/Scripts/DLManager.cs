@@ -8,24 +8,38 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class DLManager : MonoBehaviour
 {
     // prefabs
-    public GameObject layerCanvasPrefab;
-    public GameObject layer1DParticleSystemPrefab;
-    public GameObject networkImageInputFramePrefab;
-    public GameObject textPrefab;
-    public GameObject bezierStaticPrefab;
-    public GameObject imageGetterButtonPrefab;
-    public GameObject networkInfoScreenPrefab;
-    public GameObject resultCanvasContentElementPrefab;
+    [SerializeField]
+    private GameObject layerCanvasPrefab;
+    [SerializeField]
+    private GameObject layer1DParticleSystemPrefab;
+    [SerializeField]
+    private GameObject networkImageInputFramePrefab;
+    [SerializeField]
+    private GameObject textPrefab;
+    [SerializeField]
+    private GameObject bezierStaticPrefab;
+    [SerializeField]
+    private GameObject imageGetterButtonPrefab;
+    [SerializeField]
+    private GameObject networkInfoScreenPrefab;
+    [SerializeField]
+    private GameObject resultCanvasContentElementPrefab;
 
     // stored references
-    public Transform imagePickerCanvasContent;
-    public Transform resultCanvasContent;
-    public Transform foreignResultCanvasInstance;
+    [SerializeField]
+    private Transform imagePickerCanvasContent;
+    [SerializeField]
+    private Transform resultCanvasContent;
+    [SerializeField]
+    private Transform foreignResultCanvasInstance;
     private Transform ownResultCanvasInstance;
-    public XRBaseInteractor rightInteractor;
-    public XRBaseInteractor leftInteractor;
+    [SerializeField]
+    private XRBaseInteractor rightInteractor;
+    [SerializeField]
+    private XRBaseInteractor leftInteractor;
     private Transform networkImageInputFrameInstance;
-    public Camera mainCamera;
+    [SerializeField]
+    private Camera mainCamera;
 
     // network data
     private DLClient _dlClient;
@@ -34,25 +48,38 @@ public class DLManager : MonoBehaviour
     private List<JObject> architecture;
     private Transform[,] gridLayerElements; // Z , X 
     private Dictionary<int, int[]> layerIDToGridPosition = new Dictionary<int, int[]>(); // Z size, X size
+    [SerializeField]
+    private bool showWeightHistograms = true;
+    [SerializeField]
+    private bool showActivationHistograms = true;
 
     // layout general
-    public LayoutParams.LayoutMode layoutMode;
-    public float xMargin = 0.75f;
-    public float minElementSize = 0.75f;
-    public float minimalInfoScreenSize = 0.75f;
+    [SerializeField]
+    private LayoutParams.LayoutMode layoutMode;
+    [SerializeField]
+    private float xMargin = 0.75f;
+    [SerializeField]
+    private float minElementSize = 0.75f;
+    [SerializeField]
+    private float minimalInfoScreenSize = 0.75f;
     private int[] gridSize = { 0, 0 }; // the number stages and lanes in grid coordinates (Z size, X size)
     private NetworkLayouts layouts;
 
     // linear layout
-    public bool xCentering = true;
-    public bool xStrictGridPlacement = false;
-    public float minimalZOffset = 0.75f;
-    public float maximalZOffset = 10f;
+    [SerializeField]
+    private bool xCentering = true;
+    [SerializeField]
+    private bool xStrictGridPlacement = false;
+    [SerializeField]
+    private float minimalZOffset = 0.75f;
+    [SerializeField]
+    private float maximalZOffset = 10f;
 
     // spiral layout
     [SerializeField]
     private float _spiralLayout_theta_0;
-    public float spiralLayout_theta_0
+    [SerializeField]
+    private float spiralLayout_theta_0
     {
         get {return _spiralLayout_theta_0; }
         set 
@@ -63,7 +90,8 @@ public class DLManager : MonoBehaviour
     }
     [SerializeField]
     private float _spiralLayout_b;
-    public float spiralLayout_b
+    [SerializeField]
+    private float spiralLayout_b
     {
         get { return _spiralLayout_b; }
         set
@@ -74,9 +102,12 @@ public class DLManager : MonoBehaviour
     }
 
     // edges
-    public int nPointsInBezier = 20;
-    public float edgeTextPosition = 0.7f;
-    public float maxEdgeLabelSize = 1f;
+    [SerializeField]
+    private int nPointsInBezier = 20;
+    [SerializeField]
+    private float edgeTextPosition = 0.7f;
+    [SerializeField]
+    private float maxEdgeLabelSize = 1f;
     private List<Transform> edges = new List<Transform>();
     private List<Transform> edgeLabels = new List<Transform>();
     
@@ -85,6 +116,7 @@ public class DLManager : MonoBehaviour
     {
         _dlClient.RequestNetworkArchitecture();
     }
+
 
     public IEnumerator AcceptNetworkArchitecture(List<JObject> jObjectList)
     {
@@ -106,6 +138,13 @@ public class DLManager : MonoBehaviour
         Debug.Log("Create Layers");
         CreateLayers();
         UpdateAllLayers();
+        if (showWeightHistograms)
+        {
+            for (int i = 0; i < architecture.Count; i++)
+            {
+                RequestWeightHistogram(i);
+            }
+        }
         yield return null;
     }
 
@@ -166,6 +205,55 @@ public class DLManager : MonoBehaviour
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
         var pos = layerIDToGridPosition[layerID];
         gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], zeroValue);
+        yield return null;
+    }
+
+
+    public void RequestWeightHistogram(int layerID)
+    {
+        string datatype = (string)architecture[layerID]["data_type"];
+        if (datatype == "2D_feature_map")
+        {
+            _dlClient.RequestWeightHistogram(layerID);
+        }
+    }
+
+    public IEnumerator AcceptWeightHistogram(JObject jObject, int layerID)
+    {
+        Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
+        float[] counts;
+        float[] bins;
+        Debug.Log(jObject);
+        if ((string)jObject["has_weights"] == "True")
+        {
+            counts = jObject["counts"].ToObject<float[]>();
+            bins = jObject["bins"].ToObject<float[]>();
+            var pos = layerIDToGridPosition[layerID];
+            gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetWeightHistogramData(counts, bins);
+        }
+        yield return null;
+    }
+
+
+    public void RequestActivationHistogram(int layerID)
+    {
+        string datatype = (string)architecture[layerID]["data_type"];
+        if (datatype == "2D_feature_map")
+        {
+            _dlClient.RequestActivationHistogram(layerID);
+        }
+    }
+
+    public IEnumerator AcceptActivationHistogram(JObject jObject, int layerID)
+    {
+        Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
+        float[] counts;
+        float[] bins;
+        Debug.Log(jObject);
+        counts = jObject["counts"].ToObject<float[]>();
+        bins = jObject["bins"].ToObject<float[]>();
+        var pos = layerIDToGridPosition[layerID];
+        gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetActivationHistogramData(counts, bins);
         yield return null;
     }
 
@@ -334,11 +422,20 @@ public class DLManager : MonoBehaviour
 
     public void UpdateAllLayers()
     {
+        // update network activations and activation histograms
         for (int i = 0; i < architecture.Count; i++)
         {
             RequestLayerActivation(i);
         }
         RequestClassificationResult();
+
+        if (showActivationHistograms)
+        {
+            for (int i = 0; i < architecture.Count; i++)
+            {
+                RequestActivationHistogram(i);
+            }
+        }
     }
 
 

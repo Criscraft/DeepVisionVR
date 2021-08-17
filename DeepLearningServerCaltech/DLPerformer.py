@@ -72,9 +72,10 @@ class DLPerformer(object):
                 else:
                     data_type = 'None'
                     size = [0]
-                features.append({'pos' : item['pos'], 'layer_name' : item['layer_name'], 'module_name' : item['module_name'], 'data_type' : data_type, 'size' : size, 'activation' : item.get('activation'), 'precursors' : item['precursors']})
+                features.append({'pos' : item['pos'], 'layer_name' : item['layer_name'], 'tracked_module' : item['tracked_module'], 'data_type' : data_type, 'size' : size, 'activation' : item.get('activation'), 'precursors' : item['precursors']})
             self.features = features
             self.active_data_idx = idx
+
 
 
     def get_architecture(self):
@@ -88,6 +89,14 @@ class DLPerformer(object):
         if self.features is None:
             raise ValueError("did not prepare for input yet")
         return self.features[layer_id]['activation']
+
+
+    def get_weights(self, layer_id):
+        module = self.features[layer_id]["tracked_module"]
+        if module is not None and hasattr(module, "weight"):
+            return module.weight
+        else:
+            return None
 
 
     def pos_to_key(self, pos):
