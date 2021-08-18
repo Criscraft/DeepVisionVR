@@ -112,11 +112,11 @@ class ResNet_0_9(nn.Module):
             return self.embedded_model(batch)
 
 
-    def forward_features(self, batch):
+    def forward_features(self, batch, module=None):
         track_modules = ActivationTracker()
 
         if isinstance(batch, dict) and 'data' in batch:
-            logits, activation_dict = track_modules.collect_stats(self.embedded_model, batch['data'])
+            logits, activation_dict = track_modules.collect_stats(self.embedded_model, batch['data'], module)
             out = {'logits' : logits, 'activations' : activation_dict}
             return out
         else:

@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from contextlib import contextmanager
 from collections import defaultdict
@@ -29,6 +30,17 @@ class ActivationTracker():
 
         return module.register_forward_hook(store_data)
 
+
+    def register_forward_hook_finish(self, module, name):
+
+        def store_data(module, in_data, out_data):
+            layer = LayerInfo(name, in_data)
+            self._layer_info_dict[module].append(layer)
+            return torch.zero((0,0,0,0), device = out_data.device)
+
+        return module.register_forward_hook(store_data)
+
+
     @contextmanager
     def record_activations(self, model):
         self._layer_info_dict = defaultdict(list)
@@ -43,9 +55,25 @@ class ActivationTracker():
             handle.remove()
 
 
-    def collect_stats(self, model, batch):
-        with self.record_activations(model):
-            output = model(batch)
+    @contextmanager
+    def record_activation_of_specific_module(self, module):
+        self._layer_info_dict = defaultdict(list)
+        # Important to pass in empty lists instead of initializing
+        # them in the function as it needs to be reset each time.
+        handles = []
+        handles.append(self.register_forward_hook_finish(module, 'tracked_module'))
+        yield
+        for handle in handles:
+            handle.remove()
+
+
+    def collect_stats(self, model, batch, module=None):
+        if module is not None:
+            with self.record_activation_of_specific_module(module):
+                output = model(batch)
+        else:
+            with self.record_activations(model):
+                output = model(batch)
         
         #value is a list with one element which is the LayerInfo
         activations = []

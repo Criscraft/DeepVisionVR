@@ -5,10 +5,14 @@ from ResNet_0_9 import ResNet_0_9
 from TransformTest import TransformTest
 from TransformToTensor import TransformToTensor
 from DatasetClassesFromFolders import DatasetClassesFromFolders
+from FeatureVisualizer import FeatureVisualizer
 
 N_IMAGES = 16
 DATAPATH = '/mnt/e/Dokumente/DeepVisVR/deeplearning/Caltech/data'
 #DATAPATH = '/nfshome/linse/NO_INB_BACKUP/Data/Caltech'
+IMAGE_SHAPE = (150, 175)
+NORM_MEAN = [0.5487017, 0.5312975, 0.50504637]
+NORM_STD = [0.1878664, 0.18194826, 0.19830684]
 
 class DLPerformer(object):
     
@@ -16,9 +20,9 @@ class DLPerformer(object):
         super().__init__()
         self.no_cuda = no_cuda
 
-        transform_test = TransformTest(img_shape=(150, 175), 
-            norm_mean=[0.5487017, 0.5312975, 0.50504637], 
-            norm_std=[0.1878664, 0.18194826, 0.19830684])
+        transform_test = TransformTest(img_shape=IMAGE_SHAPE, 
+            norm_mean=NORM_MEAN, 
+            norm_std=NORM_STD)
         transform_to_tensor = TransformToTensor()
         self.dataset = DatasetClassesFromFolders(transform='transform_test', datapath=DATAPATH, copy_data_to='')
         self.dataset.prepare({'transform_test' : transform_test})
@@ -33,10 +37,14 @@ class DLPerformer(object):
         
         self.model = ResNet_0_9(variant='resnet018', n_classes=102, statedict='resnet018_finetuning.pt')
         self.model = self.model.to(self.device)
+        for param in self.model.parameters():
+            param.requires_grad = False
         self.model.eval()
 
         self.features = None
         self.active_data_idx = None
+
+        self.feature_visualizer = FeatureVisualizer()
 
     
     def get_data_overview(self):
@@ -106,3 +114,13 @@ class DLPerformer(object):
     def key_to_pos(self, key):
         key = key.split(",")
         return (int(key[0]), int(key[1]))
+
+
+    def get_feature_visualization(self, layer_id):
+        if self.features is None:
+            self.prepare_for_input(-1)
+        if self.features[layer_id]["data_type"] != '2D_feature_map':
+            return
+
+        module = self.features[layer_id]["tracked_module"]
+        self.feature_visualizer.visualize(self.model, module)
