@@ -1,7 +1,7 @@
 from torchvision import transforms
 
 
-class TransformTest(object):
+class TransformCIFARTest(object):
 
     def __init__(self,
         norm_mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],

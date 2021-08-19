@@ -120,7 +120,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &6169735619824728509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,7 +155,8 @@ MonoBehaviour:
   featureMaps: {fileID: 6169735621492119198}
   channel2DPrefab: {fileID: 943831065482936889, guid: b552b11d0bd205540aa3ca60e6cb70c5, type: 3}
   horizontalShift: {fileID: 1955236348027649544}
-  material: {fileID: 2100000, guid: 83cc1b3d6edb86f4c8c989770fcfcc8a, type: 2}
+  colormapMaterial: {fileID: 2100000, guid: 83cc1b3d6edb86f4c8c989770fcfcc8a, type: 2}
+  rgbMaterial: {fileID: 2100000, guid: b70055543c2f6a04e99f0b6dafe02573, type: 2}
   info: {fileID: 6169735621203360462}
   infoRectTransform: {fileID: 6169735621203360462}
   linePlotterPrefab: {fileID: 5967306378005990965, guid: 1cfd73bde2bf876c59bcb8992fdeeadd, type: 3}

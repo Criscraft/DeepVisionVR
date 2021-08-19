@@ -611,8 +611,8 @@ MonoBehaviour:
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
   mainCamera: {fileID: 0}
-  showWeightHistograms: 1
-  showActivationHistograms: 1
+  showWeightHistograms: 0
+  showActivationHistograms: 0
   layoutMode: 0
   xMargin: 0.5
   minElementSize: 0.5
@@ -626,6 +626,8 @@ MonoBehaviour:
   nPointsInBezier: 20
   edgeTextPosition: 0.7
   maxEdgeLabelSize: 1
+  manualUpdate: 0
+  manualUpdateVisualizationLayerID: 8
 --- !u!4 &2015585688
 Transform:
   m_ObjectHideFlags: 0

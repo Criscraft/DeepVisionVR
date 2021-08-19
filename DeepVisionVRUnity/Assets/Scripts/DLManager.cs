@@ -112,6 +112,22 @@ public class DLManager : MonoBehaviour
     private List<Transform> edgeLabels = new List<Transform>();
     
 
+    [SerializeField]
+    private bool manualUpdate = false;
+    [SerializeField]
+    private int manualUpdateVisualizationLayerID = 1;
+
+
+    private void Update()
+    {
+        if (manualUpdate)
+        {
+            RequestLayerFeatureVisualization(manualUpdateVisualizationLayerID);
+            manualUpdate = false;
+        }
+    }
+
+
     public void RequestNetworkArchitecture()
     {
         _dlClient.RequestNetworkArchitecture();
@@ -204,7 +220,25 @@ public class DLManager : MonoBehaviour
     {
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
         var pos = layerIDToGridPosition[layerID];
-        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], zeroValue);
+        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], false, zeroValue);
+        yield return null;
+    }
+
+
+    public void RequestLayerFeatureVisualization(int layerID)
+    {
+        string datatype = (string)architecture[layerID]["data_type"];
+        if (datatype == "2D_feature_map")
+        {
+            _dlClient.RequestLayerFeatureVisualization(layerID);
+        }
+    }
+
+    public IEnumerator AcceptLayerFeatureVisualization(List<Texture2D> textureList, int layerID)
+    {
+        Debug.Log("Received AcceptLayerFeatureVisualization for layer " + string.Format("{0}", layerID));
+        var pos = layerIDToGridPosition[layerID];
+        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], true);
         yield return null;
     }
 
@@ -223,7 +257,6 @@ public class DLManager : MonoBehaviour
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
-        Debug.Log(jObject);
         if ((string)jObject["has_weights"] == "True")
         {
             counts = jObject["counts"].ToObject<float[]>();
@@ -249,7 +282,6 @@ public class DLManager : MonoBehaviour
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
-        Debug.Log(jObject);
         counts = jObject["counts"].ToObject<float[]>();
         bins = jObject["bins"].ToObject<float[]>();
         var pos = layerIDToGridPosition[layerID];

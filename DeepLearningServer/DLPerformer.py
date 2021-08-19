@@ -1,57 +1,35 @@
-import torch 
-import numpy as np
-from typing import Tuple
-from ResNet_0_9_CIFAR import ResNet_0_9_CIFAR
-from TransformTest import TransformTest
-from TransformToTensor import TransformToTensor
-from CIFAR10 import CIFAR10
+import torch
+from FeatureVisualizer import FeatureVisualizer
 
-N_IMAGES = 16
-#DATAPATH = '/mnt/e/Dokumente/DeepVisVR/deeplearning/CIFAR10/data'
-DATAPATH = '/data/tmp_data'
-NCLASSES = 10
-
-STATEDICT = 'baseline.pt'
-#STATEDICT = 'labels_shuffled.pt'
-#STATEDICT = 'labels_shuffled_finetuned_on_original.pt'
-#STATEDICT = ''
 
 class DLPerformer(object):
     
-    def __init__(self, no_cuda = False):
+    def __init__(self, dataset, dataset_to_tensor, data_indices, n_classes, model, norm_mean=(0.,0.,0.), norm_std=(1.,1.,1.), no_cuda=False):
         super().__init__()
+        self.dataset = dataset
+        self.dataset_to_tensor = dataset_to_tensor
+        self.data_indices = data_indices
+        self.n_classes = n_classes
+        self.norm_mean = norm_mean
+        self.norm_std = norm_std
         self.no_cuda = no_cuda
-        global N_IMAGES
-        global DATAPATH
-        global STATEDICT
-        global NCLASSES
-
-        transform_test = TransformTest(
-            norm_mean=[x / 255.0 for x in [125.3, 123.0, 113.9]], 
-            norm_std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-        transform_to_tensor = TransformToTensor()
-        self.dataset = CIFAR10(b_train=False, transform='transform_test', root=DATAPATH, download=True, tags={})
-        self.dataset.prepare({'transform_test' : transform_test})
-        self.dataset_to_tensor = CIFAR10(b_train=False, transform='transform_to_tensor', root=DATAPATH, download=True, tags={})
-        self.dataset_to_tensor.prepare({'transform_to_tensor' : transform_to_tensor})
-        #self.data_indices = np.random.randint(len(self.dataset), size=N_IMAGES)
-        self.data_indices = [8, 27, 563, 34, 166, 3, 67, 247, 74, 72, 89, 43, 82, 169, 317, 375]
-
+        
         use_cuda = not no_cuda and torch.cuda.is_available()
-        cuda_args = {'num_workers': 0, 'pin_memory': True} if use_cuda else {}
         self.device = torch.device("cuda") if use_cuda else torch.device("cpu")
         
-        self.model = ResNet_0_9_CIFAR(variant='resnet018', n_classes=NCLASSES, statedict=STATEDICT)
-        self.model = self.model.to(self.device)
+        self.model = model.to(self.device)
+        for param in self.model.parameters():
+            param.requires_grad = False
         self.model.eval()
+
+        self.feature_visualizer = FeatureVisualizer(norm_mean=self.norm_mean, norm_std=self.norm_std)
 
         self.features = None
         self.active_data_idx = None
 
     
     def get_data_overview(self):
-        max_images = N_IMAGES
-        return {'len' : min(max_images, len(self.dataset)), 'n_classes' : NCLASSES, 'type' : 'rgb', 'class_names' : self.dataset.class_names}
+        return {'len' : len(self.data_indices), 'n_classes' : self.n_classes, 'type' : 'rgb', 'class_names' : self.dataset.class_names}
 
     
     def get_data_item(self, idx: int):
@@ -82,9 +60,10 @@ class DLPerformer(object):
                 else:
                     data_type = 'None'
                     size = [0]
-                features.append({'pos' : item['pos'], 'layer_name' : item['layer_name'], 'module_name' : item['module_name'], 'data_type' : data_type, 'size' : size, 'activation' : item.get('activation'), 'precursors' : item['precursors']})
+                features.append({'pos' : item['pos'], 'layer_name' : item['layer_name'], 'tracked_module' : item['tracked_module'], 'module' : item['module'], 'data_type' : data_type, 'size' : size, 'activation' : item.get('activation'), 'precursors' : item['precursors']})
             self.features = features
             self.active_data_idx = idx
+
 
 
     def get_architecture(self):
@@ -100,6 +79,14 @@ class DLPerformer(object):
         return self.features[layer_id]['activation']
 
 
+    def get_weights(self, layer_id):
+        module = self.features[layer_id]["tracked_module"]
+        if module is not None and hasattr(module, "weight"):
+            return module.weight
+        else:
+            return None
+
+
     def pos_to_key(self, pos):
         return f"{pos[0]:02},{pos[1]:02}"
 
@@ -107,3 +94,13 @@ class DLPerformer(object):
     def key_to_pos(self, key):
         key = key.split(",")
         return (int(key[0]), int(key[1]))
+
+
+    def get_feature_visualization(self, layer_id):
+        if self.features is None:
+            self.prepare_for_input(0)
+        
+        module = self.features[layer_id]["module"]
+        n_channels = self.features[layer_id]["size"][1]
+        visualizations = self.feature_visualizer.visualize(self.model, module, self.device, n_channels)
+        return visualizations

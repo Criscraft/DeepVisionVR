@@ -1,1 +1,0 @@
-bash run_docker_inb.sh dl_0 dlserver.py

@@ -12,7 +12,9 @@ public class Layer2D : NetLayer
     [SerializeField]
     private Transform horizontalShift;
     [SerializeField]
-    private Material material;
+    private Material colormapMaterial;
+    [SerializeField]
+    private Material rgbMaterial;
     [SerializeField]
     private Transform info;
     [SerializeField]
@@ -24,6 +26,7 @@ public class Layer2D : NetLayer
     private GameObject weightHistogramGO;
     private LinePlotter activationHistogram;
     private GameObject activationHistogramGO;
+    private bool rgb = false;
 
 
     public void Prepare(Vector3Int size, Camera mainCamera)
@@ -56,12 +59,13 @@ public class Layer2D : NetLayer
             newChannel2DInstance.localRotation = Quaternion.identity;
             newChannel2DInstance.localScale = Vector3.one;
             var image = newChannel2DInstance.GetComponent<RawImage>();
-            image.material = Instantiate(material);
+            image.material = Instantiate(colormapMaterial);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+        rgb = false;
     }
 
 
@@ -111,7 +115,7 @@ public class Layer2D : NetLayer
     }
 
 
-    public override void UpdateData(List<Texture2D> textureList, float scale, float zeroValue)
+    public override void UpdateData(List<Texture2D> textureList, float scale, bool isRGB, float zeroValue=0f)
     {
         RawImage image;
 
@@ -119,10 +123,19 @@ public class Layer2D : NetLayer
         {
             image = items[i].GetComponent<RawImage>();
             image.texture = textureList[i];
-            image.material.SetFloat("_TransitionValue", zeroValue / 255f);
+            if (! isRGB ) 
+            {
+                if (rgb == true) image.material = Instantiate(colormapMaterial);
+                image.material.SetFloat("_TransitionValue", zeroValue / 255f);
+            }
+            else 
+            {
+                if (rgb == false) image.material = Instantiate(rgbMaterial);
+            }
             image.material.SetTexture("_MainTex", textureList[i]);
             //image.SetNativeSize(); // pixel perfect
         }
+        rgb = isRGB;
     }
 
 

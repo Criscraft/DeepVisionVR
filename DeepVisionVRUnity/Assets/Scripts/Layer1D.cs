@@ -32,7 +32,7 @@ public class Layer1D : NetLayer
     }
 
 
-    public override void UpdateData(List<Texture2D> textureList, float scale, float zeroValue)
+    public override void UpdateData(List<Texture2D> textureList, float scale, bool isRGB, float zeroValue=0f)
     {
         var particleSystem = items[0].GetComponent<ParticleSystem>();
         var pixels = textureList[0].GetPixelData<Color32>(0);

@@ -20,6 +20,7 @@ public class DLClient : MonoBehaviour
             JObject result = JObject.Parse(msgList[1]);
             UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptDataOverview(result));
         }
+
         else if (msgList[0] == "RequestNetworkArchitecture")
         {
             Debug.Log("handle RequestNetworkArchitecture");
@@ -31,6 +32,7 @@ public class DLClient : MonoBehaviour
             }
             UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptNetworkArchitecture(result));
         }
+
         else if (msgList[0] == "RequestLayerActivation")
         {
             Debug.Log("handle RequestLayerActivation");
@@ -57,11 +59,37 @@ public class DLClient : MonoBehaviour
             }
             UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerActivation(result, layerID, zeroValue));
         }
+
+        else if (msgList[0] == "RequestLayerFeatureVisualization")
+        {
+            Debug.Log("handle RequestLayerFeatureVisualization");
+
+            List<Texture2D> result = new List<Texture2D>();
+            int layerID = int.Parse(msgList[1]);
+            msgList.RemoveAt(0);
+            msgList.RemoveAt(0);
+            foreach (string item in msgList)
+            {
+                byte[] b64_bytes = System.Convert.FromBase64String(item);
+                Texture2D tex = new Texture2D(1, 1);
+                if (ImageConversion.LoadImage(tex, b64_bytes))
+                {
+                    result.Add(tex);
+                }
+                else
+                {
+                    Debug.Log("Texture could not be loaded");
+                }
+            }
+            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerFeatureVisualization(result, layerID));
+        }
+
         else if (msgList[0] == "RequestPrepareForInput")
         {
             Debug.Log("handle RequestPrepareForInput");
             UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptPrepareForInput());
         }
+
         else if (msgList[0] == "RequestDatasetImage")
         {
             Debug.Log("handle RequestDatasetImage");
@@ -70,11 +98,7 @@ public class DLClient : MonoBehaviour
             int label = int.Parse(msgList[3]);
             byte[] b64_bytes = System.Convert.FromBase64String(msgList[2]);
             Texture2D tex = new Texture2D(1, 1);
-            if (ImageConversion.LoadImage(tex, b64_bytes))
-            {
-                tex.filterMode = FilterMode.Point;
-            }
-            else
+            if (! ImageConversion.LoadImage(tex, b64_bytes))
             {
                 Debug.Log("Texture could not be loaded");
             }
@@ -123,6 +147,15 @@ public class DLClient : MonoBehaviour
     {
         List<string> msg_list = new List<string>();
         msg_list.Add("RequestLayerActivation");
+        msg_list.Add(string.Format("{0}", layerID));
+        _dlNetMQ.QueueRequest(msg_list);
+    }
+
+
+    public void RequestLayerFeatureVisualization(int layerID)
+    {
+        List<string> msg_list = new List<string>();
+        msg_list.Add("RequestLayerFeatureVisualization");
         msg_list.Add(string.Format("{0}", layerID));
         _dlNetMQ.QueueRequest(msg_list);
     }
