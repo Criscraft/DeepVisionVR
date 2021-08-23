@@ -96,11 +96,13 @@ class DLPerformer(object):
         return (int(key[0]), int(key[1]))
 
 
-    def get_feature_visualization(self, layer_id):
+    def get_feature_visualization(self, layer_id, debug=False):
         if self.features is None:
             self.prepare_for_input(0)
         
         module = self.features[layer_id]["module"]
         n_channels = self.features[layer_id]["size"][1]
-        visualizations = self.feature_visualizer.visualize(self.model, module, self.device, n_channels)
-        return visualizations
+        if not debug:
+            return self.feature_visualizer.visualize(self.model, module, self.device, n_channels)
+        else:
+            return self.feature_visualizer, self.model, module, self.device, n_channels

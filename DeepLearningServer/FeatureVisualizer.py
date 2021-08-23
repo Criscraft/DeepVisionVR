@@ -9,9 +9,9 @@ class FeatureVisualizer(object):
     
     def __init__(self, 
         lr=0.1,
-        max_factor = 10000,
+        max_factor = 1,
         #l2_reg=0.,
-        tv_reg=10.,
+        tv_reg=0.005,
         export = False,
         export_interval=10,
         init_img_shape=(80, 80),
@@ -45,14 +45,12 @@ class FeatureVisualizer(object):
                 created_image = regularize_transformation(created_image)
                 if epoch in self.scaleup_schedule:
                     created_image = F.interpolate(created_image, size=self.scaleup_schedule[epoch], mode='bilinear')
-                created_image.requires_grad = True # need to set again because of interpolate
             
-            optimizer = torch.optim.SGD([created_image], lr=self.lr, momentum=0., weight_decay=0)
-            optimizer.zero_grad()
+            created_image = created_image.detach()
+            created_image.requires_grad = True
             out_dict = model.forward_features({'data' : created_image}, module)
             output = out_dict['activations'][0]['activation']
-            norm_factor = 1. / (output.shape[2] * output.shape[3])
-            loss_max = norm_factor * torch.stack([output[i, i].mean() for i in range(n_channels)]).sum()
+            loss_max = torch.stack([output[i, i].mean() for i in range(n_channels)]).sum()
             #loss_l2_reg = torch.norm(created_image, p=2) / (torch.tensor(np.sqrt(created_image.shape[1] * created_image.shape[2] * created_image.shape[3]), device=device))
             #loss_l2_reg = (created_image**2).mean()
             loss_tv_re = self.total_variation_loss(created_image)
@@ -60,14 +58,15 @@ class FeatureVisualizer(object):
             loss = self.max_factor * loss_max + self.tv_reg * loss_tv_re
             
             loss.backward()
-            optimizer.step()
+            gradients = created_image.grad / (torch.sqrt((created_image.grad**2).mean()) + 1e-6)
+            created_image = created_image - gradients * self.lr
 
             #print(epoch, loss_max.item(), loss_l2_reg.item(), loss_tv_re.item())
             print(epoch, loss_max.item(), loss_tv_re.item())
 
             if self.export and epoch % self.export_interval == 0:
                 with torch.no_grad():
-                    export_image = export_transformation(created_image.detach().cpu()[0])
+                    export_image = export_transformation(created_image.detach().cpu())[0]
                 path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
                 cv2.imwrite(path, export_image.transpose((1,2,0)))
 
@@ -112,5 +111,7 @@ class Regularizer(object):
     def __call__(self, x):
         mean = x.mean((1,2,3), keepdims=True)
         std = x.std((1,2,3), keepdims=True)
-        x = (x - mean) / std
-        return x
+        x_reg = ((x - mean) / std)
+        p = 0.05
+        x_new = ((1. - p) * x) +  p * x_reg
+        return x_new
