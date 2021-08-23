@@ -122,6 +122,7 @@ public class DLManager : MonoBehaviour
     {
         if (manualUpdate)
         {
+            Debug.Log("Aye");
             RequestLayerFeatureVisualization(manualUpdateVisualizationLayerID);
             manualUpdate = false;
         }

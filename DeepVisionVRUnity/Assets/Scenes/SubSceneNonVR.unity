@@ -627,7 +627,7 @@ MonoBehaviour:
   edgeTextPosition: 0.7
   maxEdgeLabelSize: 1
   manualUpdate: 0
-  manualUpdateVisualizationLayerID: 8
+  manualUpdateVisualizationLayerID: 7
 --- !u!4 &2015585688
 Transform:
   m_ObjectHideFlags: 0
