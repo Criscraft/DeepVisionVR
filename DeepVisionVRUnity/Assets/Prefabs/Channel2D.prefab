@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7102084875267051880}
   - component: {fileID: 1071894735769779834}
   - component: {fileID: 6728361916132312977}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Channel2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}

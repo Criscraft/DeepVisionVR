@@ -12,7 +12,8 @@ public class ImageGetterButton : MonoBehaviour
 	//public Button button;
 	private XRBaseInteractor rightInteractor;
 	private XRBaseInteractor leftInteractor;
-	private Texture2D tex;
+	[SerializeField]
+	private RawImage image;
 
 	/*void Start()
 	{
@@ -20,18 +21,22 @@ public class ImageGetterButton : MonoBehaviour
 		btn.onClick.AddListener(TaskOnClick);
 	}*/
 
-
-	public void Prepare(XRBaseInteractor _rightInteractor, XRBaseInteractor _leftInteractor, int _imageIdx, int _label, string _className, Texture2D _tex)
-    {
+	public void Prepare(XRBaseInteractor _rightInteractor, XRBaseInteractor _leftInteractor)
+	{
 		rightInteractor = _rightInteractor;
 		leftInteractor = _leftInteractor;
+		image.material = Instantiate(image.material); // Prevent that all images use the same material (and image)
+	}
+
+
+	public void LoadImage(int _imageIdx, int _label, string _className, Texture2D _tex)
+    {
 		imageIdx = _imageIdx;
 		label = _label;
 		className = _className;
-		tex = _tex;
-		Sprite mySprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-		GetComponent<Button>().image.sprite = mySprite;
+		image.material.SetTexture("_MainTex", _tex);
 	}
+
 
 	public void TaskOnClick()
 	{
@@ -49,6 +54,7 @@ public class ImageGetterButton : MonoBehaviour
 		}
 	}
 
+
 	private void TransferImage(XRBaseInteractable selectTarget)
     {
 		if (selectTarget == null)
@@ -59,7 +65,7 @@ public class ImageGetterButton : MonoBehaviour
 			InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
 		if (interactionGun != null)
 		{
-			interactionGun.LoadImage(imageIdx, tex, label, className);
+			interactionGun.LoadImage(imageIdx, (Texture2D)image.texture, label, className);
 		}
 	}
 }

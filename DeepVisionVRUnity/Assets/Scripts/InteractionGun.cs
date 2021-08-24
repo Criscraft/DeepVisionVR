@@ -1,18 +1,26 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.UI;
 
 public class InteractionGun : MonoBehaviour
 {
-    public XRGrabInteractable xrInteractable;
-    public Transform raycastTransform;
-    public float range = 10f;
-    public LayerMask layerMask;
+    [SerializeField]
+    private XRGrabInteractable xrInteractable;
+    [SerializeField]
+    private Transform raycastTransform;
+    [SerializeField]
+    private float range = 10f;
+    [SerializeField]
+    private LayerMask layerMask;
 
     private bool hasLoadedItem = false;
-    public GameObject holoImage;
-    public Renderer holoRenderer;
-    public TextMeshPro textMeshPro;
+    [SerializeField]
+    private GameObject holoImage;
+    [SerializeField]
+    private Renderer holoRenderer;
+    [SerializeField]
+    private TextMeshPro textMeshPro;
     
     private int imageId = -1;
     private Texture2D tex = null;
@@ -30,10 +38,13 @@ public class InteractionGun : MonoBehaviour
 
     public void Interact()
     {
-        if (hasLoadedItem)
+        
+        RaycastHit raycastHit;
+        if (Physics.Raycast(raycastTransform.transform.position, raycastTransform.transform.forward, out raycastHit, range, layerMask))
         {
-            RaycastHit raycastHit;
-            if (Physics.Raycast(raycastTransform.transform.position, raycastTransform.transform.forward, out raycastHit, range, layerMask))
+            Debug.Log(raycastHit.transform.name);
+            
+            if (hasLoadedItem)
             {
                 NetworkImageInputFrame imageFrame = raycastHit.transform.GetComponent<NetworkImageInputFrame>();
                 if (imageFrame != null)
@@ -41,7 +52,14 @@ public class InteractionGun : MonoBehaviour
                     imageFrame.PlaceImage(imageId, tex, className);
                     hasLoadedItem = false;
                     holoImage.SetActive(false);
+                    return;
                 }
+            }
+            
+            RawImage rawImage = raycastHit.transform.GetComponentInChildren<RawImage>();
+            if (rawImage != null)
+            {
+                LoadImage(-1, (Texture2D)rawImage.texture, -1, "");
             }
         }
     }

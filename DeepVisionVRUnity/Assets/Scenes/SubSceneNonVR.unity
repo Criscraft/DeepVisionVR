@@ -611,8 +611,8 @@ MonoBehaviour:
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
   mainCamera: {fileID: 0}
-  showWeightHistograms: 0
-  showActivationHistograms: 0
+  showWeightHistograms: 1
+  showActivationHistograms: 1
   layoutMode: 0
   xMargin: 0.5
   minElementSize: 0.5
@@ -665,6 +665,10 @@ PrefabInstance:
     - target: {fileID: 3098378401892960019, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098378401892960019, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.01
       objectReference: {fileID: 0}
     - target: {fileID: 3098378402029002148, guid: 953ea5eed10267b43a66dbd08753b140, type: 3}
       propertyPath: m_CheckFor2DOcclusion

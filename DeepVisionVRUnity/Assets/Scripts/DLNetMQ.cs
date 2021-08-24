@@ -45,11 +45,14 @@ public class DLNetMQ
             socket.Options.ReceiveHighWatermark = 500;
             socket.Connect(tcpip);
             Debug.Log("socket initialized");
+            int sleepTime = 0;
 
             while (!_workerCancelled)
             {
                 List<string> msg_list = new List<string>();
-                System.Threading.Thread.Sleep(100);
+                sleepTime = 200;
+                if (_requestQueue.Count>1) sleepTime = 30;
+                System.Threading.Thread.Sleep(sleepTime);
 
                 // send
                 if (_requestQueue.TryDequeue(out msg_list))
@@ -67,7 +70,7 @@ public class DLNetMQ
                     // receive
                     while (!_workerCancelled)
                     {
-                        System.Threading.Thread.Sleep(100);
+                        System.Threading.Thread.Sleep(30);
                         if (socket.TryReceiveMultipartStrings(ref msg_list)) break;
                     }
                     msg_received_count++;

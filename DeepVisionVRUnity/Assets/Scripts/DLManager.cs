@@ -196,10 +196,12 @@ public class DLManager : MonoBehaviour
 
     public IEnumerator AcceptDatasetImage(Texture2D tex, int label, int imgIndex)
     {
-        GameObject newImageGetterButton = (GameObject)Instantiate(imageGetterButtonPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f));
+        GameObject newImageGetterButton = (GameObject)Instantiate(imageGetterButtonPrefab, Vector3.zero, Quaternion.identity);
         newImageGetterButton.name = "ImageGetterButton " + string.Format("{0}", imgIndex);
         newImageGetterButton.transform.SetParent(imagePickerCanvasContent, false);
-        newImageGetterButton.GetComponent<ImageGetterButton>().Prepare(rightInteractor, leftInteractor, imgIndex, label, (string)classNames[label], tex);
+        var imageGetterButtonScript = newImageGetterButton.GetComponent<ImageGetterButton>();
+        imageGetterButtonScript.Prepare(rightInteractor, leftInteractor);
+        imageGetterButtonScript.LoadImage(imgIndex, label, (string)classNames[label], tex);
 
         Transform textMesh = newImageGetterButton.transform.GetChild(0);
         TextMeshProUGUI textMeshPro = textMesh.GetComponent<TextMeshProUGUI>();
@@ -320,7 +322,7 @@ public class DLManager : MonoBehaviour
         JArray confidenceValues = JArray.Parse(jObject["confidence_values"].ToString());
         for (int i = 0; i < classIndices.Count; i++)
         {
-            GameObject newResultCanvasContentElement = (GameObject)Instantiate(resultCanvasContentElementPrefab, Vector3.zero, Quaternion.Euler(0f, 0f, 0f));
+            GameObject newResultCanvasContentElement = (GameObject)Instantiate(resultCanvasContentElementPrefab, Vector3.zero, Quaternion.identity);
             newResultCanvasContentElement.name = "ResultField " + (string)classNames[(int)classIndices[i]];
             newResultCanvasContentElement.transform.SetParent(resultCanvasContent, false);
             TextMeshProUGUI textMeshProUGIO = newResultCanvasContentElement.GetComponentInChildren<TextMeshProUGUI>();
