@@ -1,32 +1,29 @@
 ﻿using UnityEngine;
 using TMPro;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class NetworkImageInputFrame : MonoBehaviour
 {
     private DLManager _dlManager;
     //private bool hasLoadedItem = false;
-    public GameObject holoImage;
-    public Renderer holoRenderer;
-    public TextMeshPro textMeshPro;
+    [SerializeField]
+    private ImageGetterButton imageGetterButton;
+    [SerializeField]
+    private Canvas canvas;
 
 
-    private void Start()
-    {
-        holoImage.SetActive(false);
-        textMeshPro.text = "";
-    }
-
-    public void Prepare(DLManager dlManager)
+    public void Prepare(DLManager dlManager, Camera camera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
     {
         _dlManager = dlManager;
+        canvas.worldCamera = camera;
+        imageGetterButton.Prepare(rightInteractor, leftInteractor);
     }
 
-    public void PlaceImage(int imageId, Texture2D tex, string className)
+
+    public void PlaceImage(int imageId, Texture tex, string className)
     {
+        imageGetterButton.LoadImage(imageId, className, tex);
         //hasLoadedItem = true;
-        textMeshPro.text = className;
-        holoImage.SetActive(true);
-        holoRenderer.material.SetTexture("_MainTex", tex);
         _dlManager.RequestPrepareForInput(imageId);
     }
 }

@@ -23,10 +23,11 @@ public class InteractionGun : MonoBehaviour
     private TextMeshPro textMeshPro;
     
     private int imageId = -1;
-    private Texture2D tex = null;
+    private Texture tex = null;
     private string className = "";
 
-    public void LoadImage(int _imageId, Texture2D _tex, int _label, string _className) {
+
+    public void LoadImage(int _imageId, Texture _tex, string _className) {
         hasLoadedItem = true;
         textMeshPro.text = _className;
         holoRenderer.material.SetTexture("_MainTex", _tex);
@@ -36,9 +37,10 @@ public class InteractionGun : MonoBehaviour
         className = _className;
     }
 
+
     public void Interact()
     {
-        
+        /*
         RaycastHit raycastHit;
         if (Physics.Raycast(raycastTransform.transform.position, raycastTransform.transform.forward, out raycastHit, range, layerMask))
         {
@@ -59,9 +61,16 @@ public class InteractionGun : MonoBehaviour
             RawImage rawImage = raycastHit.transform.GetComponentInChildren<RawImage>();
             if (rawImage != null)
             {
-                LoadImage(-1, (Texture2D)rawImage.texture, -1, "");
+                LoadImage(-1, rawImage.texture, "");
             }
         }
+        */
+    }
+
+
+    public (int _imageId, string _className, Texture _tex) GetImage()
+    {
+        return (imageId, className, tex);
     }
 
 

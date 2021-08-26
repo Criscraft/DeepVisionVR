@@ -34,6 +34,8 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [x] activation histogram wrong axis at startup
 - [x] do not update weight histogram when the input changes - only when network changes
 - [ ] button to enable or disable histograms
+- [ ] fix loading the image input frame
+- [ ] all feature maps are imagegetterbuttons
 
 
 Steps to enable/disable VR:

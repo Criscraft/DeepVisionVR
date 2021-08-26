@@ -2,18 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class ImageGetterButton : MonoBehaviour
 {
 	private int imageIdx = -1;
-	private int label;
 	private string className;
 	//public Button button;
 	private XRBaseInteractor rightInteractor;
 	private XRBaseInteractor leftInteractor;
 	[SerializeField]
 	private RawImage image;
+	[SerializeField]
+	private TextMeshProUGUI textMeshPro;
+	[SerializeField]
+	private bool canReturnImage = true;
+	[SerializeField]
+	private bool canAcceptImage = false;
 
 	/*void Start()
 	{
@@ -29,33 +35,29 @@ public class ImageGetterButton : MonoBehaviour
 	}
 
 
-	public void LoadImage(int _imageIdx, int _label, string _className, Texture2D _tex)
+	public void LoadImage(int _imageIdx, string _className, Texture _tex)
     {
 		imageIdx = _imageIdx;
-		label = _label;
 		className = _className;
+		textMeshPro.text = className;
 		image.material.SetTexture("_MainTex", _tex);
+		//image.texture = _tex; // has no effect
 	}
 
 
 	public void TaskOnClick()
 	{
-		XRBaseInteractable selectTarget;
-		if (rightInteractor != null)
-		{
-			selectTarget = rightInteractor.selectTarget;
-			TransferImage(selectTarget);
-		}
-
-		if (leftInteractor != null)
-		{
-			selectTarget = leftInteractor.selectTarget;
-			TransferImage(selectTarget);
-		}
+		// Potential issue if both hands have an interaction gun
+		XRBaseInteractable selectTarget = null;
+		if (rightInteractor != null) selectTarget = rightInteractor.selectTarget;
+		else if (leftInteractor != null) selectTarget = leftInteractor.selectTarget;
+		
+		if (canReturnImage) ReturnImage(selectTarget);
+		if (canAcceptImage) AcceptImage(selectTarget);
 	}
 
 
-	private void TransferImage(XRBaseInteractable selectTarget)
+	private void ReturnImage(XRBaseInteractable selectTarget)
     {
 		if (selectTarget == null)
         {
@@ -65,7 +67,36 @@ public class ImageGetterButton : MonoBehaviour
 			InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
 		if (interactionGun != null)
 		{
-			interactionGun.LoadImage(imageIdx, (Texture2D)image.texture, label, className);
+			//Texture2D tex = TextureToTexture2D(image.texture);
+			interactionGun.LoadImage(imageIdx, image.material.GetTexture("_MainTex"), className);
 		}
 	}
+
+
+	private void AcceptImage(XRBaseInteractable selectTarget)
+    {
+		if (selectTarget == null)
+        {
+			return;
+        }
+
+			InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
+		if (interactionGun != null)
+		{
+			(int _imageId, string _className, Texture _tex) = interactionGun.GetImage();
+			LoadImage(_imageId, _className, _tex);
+		}
+	}
+
+
+/*
+	private Texture2D TextureToTexture2D(Texture texture) 
+	{
+		Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false);
+		RenderTexture.active = rTex;
+		texture2D.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
+		texture2D.Apply();
+		return texture2D;
+	}
+*/
 }

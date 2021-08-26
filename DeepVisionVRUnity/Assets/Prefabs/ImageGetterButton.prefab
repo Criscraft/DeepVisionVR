@@ -144,6 +144,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 1528547877444410096}
+  textMeshPro: {fileID: 3859813243902066314}
+  canReturnImage: 1
+  canAcceptImage: 0
 --- !u!1 &3859813243902066312
 GameObject:
   m_ObjectHideFlags: 0

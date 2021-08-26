@@ -201,11 +201,7 @@ public class DLManager : MonoBehaviour
         newImageGetterButton.transform.SetParent(imagePickerCanvasContent, false);
         var imageGetterButtonScript = newImageGetterButton.GetComponent<ImageGetterButton>();
         imageGetterButtonScript.Prepare(rightInteractor, leftInteractor);
-        imageGetterButtonScript.LoadImage(imgIndex, label, (string)classNames[label], tex);
-
-        Transform textMesh = newImageGetterButton.transform.GetChild(0);
-        TextMeshProUGUI textMeshPro = textMesh.GetComponent<TextMeshProUGUI>();
-        textMeshPro.text = (string)classNames[label];
+        imageGetterButtonScript.LoadImage(imgIndex, (string)classNames[label], tex);
         yield return null;
     }
 
@@ -351,11 +347,11 @@ public class DLManager : MonoBehaviour
         // create image frame
         networkImageInputFrameInstance = Instantiate(networkImageInputFramePrefab).transform;
         networkImageInputFrameInstance.SetParent(transform);
-        networkImageInputFrameInstance.localScale = new Vector3(30f, 30f, 30f);
+        networkImageInputFrameInstance.localScale = new Vector3(3f, 3f, 3f);
         networkImageInputFrameInstance.localPosition = new Vector3(0f, 0f, -minimalZOffset);
         networkImageInputFrameInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
         networkImageInputFrameInstance.name = "Network Image Input Frame";
-        networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this);
+        networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this, mainCamera, rightInteractor, leftInteractor);
 
         // create network layers without positioning or scaling them
         gridLayerElements = new Transform[gridSize[0], gridSize[1]];
