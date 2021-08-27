@@ -30,14 +30,15 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [x] box and axis negative z position
 - [x] color of boxes
 - [x] histogram overflow
-- [ ] tick labels smaller, or choose other format
+- [x] tick labels smaller, or choose other format
 - [x] activation histogram wrong axis at startup
 - [x] do not update weight histogram when the input changes - only when network changes
 - [ ] button to enable or disable histograms
-- [ ] fix loading the image input frame
-- [ ] all feature maps are imagegetterbuttons
+- [x] fix loading the image input frame
+- [x] all feature maps are imagegetterbuttons
 
 
+## Notes
 Steps to enable/disable VR:
 - Windows input debugger set lock input to game
 - Steamvr input manager dvanced settings auto enable vr

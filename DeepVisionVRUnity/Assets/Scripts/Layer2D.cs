@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit;
 
 
 public class Layer2D : NetLayer
@@ -22,6 +23,7 @@ public class Layer2D : NetLayer
     [SerializeField]
     private GameObject linePlotterPrefab;
 
+
     private LinePlotter weightHistogram;
     private GameObject weightHistogramGO;
     private LinePlotter activationHistogram;
@@ -29,11 +31,11 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, Camera mainCamera)
+    public void Prepare(Vector3Int size, Camera mainCamera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
     {
         transform.GetComponent<Canvas>().worldCamera = mainCamera;
 
-        GenerateFeatureMaps(size);
+        GenerateFeatureMaps(size, rightInteractor, leftInteractor);
 
         // generate plots and disable them for later use
         GenerateWeightHistogram();
@@ -48,8 +50,9 @@ public class Layer2D : NetLayer
     }
 
 
-    private void GenerateFeatureMaps(Vector3Int size)
+    private void GenerateFeatureMaps(Vector3Int size, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
     {
+        Material material = Instantiate(colormapMaterial);
         for (int i = 0; i < size[0]; i++)
         {
             Transform newChannel2DInstance = ((GameObject)Instantiate(channel2DPrefab)).transform;
@@ -58,8 +61,9 @@ public class Layer2D : NetLayer
             newChannel2DInstance.localPosition = Vector3.zero;
             newChannel2DInstance.localRotation = Quaternion.identity;
             newChannel2DInstance.localScale = Vector3.one;
-            var image = newChannel2DInstance.GetComponent<RawImage>();
-            image.material = Instantiate(colormapMaterial);
+            ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
+            imageGetterButton.Prepare(rightInteractor, leftInteractor);
+            imageGetterButton.LoadImage(-1, "", null, material);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
@@ -117,22 +121,26 @@ public class Layer2D : NetLayer
 
     public override void UpdateData(List<Texture2D> textureList, float scale, bool isRGB, float zeroValue=0f)
     {
-        RawImage image;
+        //RawImage image;
+        Material material = null;
+
+        if (!isRGB)
+        {
+            material = Instantiate(colormapMaterial);
+            material.SetFloat("_TransitionValue", zeroValue / 255f);
+        }
+        else
+        {
+            if (rgb == false) material = Instantiate(rgbMaterial);
+        }
 
         for (int i = 0; i < items.Count; i++)
         {
-            image = items[i].GetComponent<RawImage>();
-            image.texture = textureList[i];
-            if (! isRGB ) 
-            {
-                if (rgb == true) image.material = Instantiate(colormapMaterial);
-                image.material.SetFloat("_TransitionValue", zeroValue / 255f);
-            }
-            else 
-            {
-                if (rgb == false) image.material = Instantiate(rgbMaterial);
-            }
-            image.material.SetTexture("_MainTex", textureList[i]);
+            //image = items[i].GetComponent<RawImage>();
+            //image.material = material;
+            //image.material.SetTexture("_MainTex", textureList[i]);
+            items[i].GetComponent<ImageGetterButton>().LoadImage(-1, "", textureList[i], material);
+            //image.texture = textureList[i];
             //image.SetNativeSize(); // pixel perfect
         }
         rgb = isRGB;

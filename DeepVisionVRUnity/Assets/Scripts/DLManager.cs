@@ -373,7 +373,7 @@ public class DLManager : MonoBehaviour
                 newLayerInstance.transform.localRotation = transform.localRotation;
                 newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "2D_feature_map_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera, rightInteractor, leftInteractor);
             }
             else if (datatype == "1D_vector")
             {

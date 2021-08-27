@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   featureMaps: {fileID: 6169735621492119198}
-  channel2DPrefab: {fileID: 943831065482936889, guid: b552b11d0bd205540aa3ca60e6cb70c5, type: 3}
+  channel2DPrefab: {fileID: 3859813243151223048, guid: 8c1e62942456adc4d8a392e187f59ec5, type: 3}
   horizontalShift: {fileID: 1955236348027649544}
   colormapMaterial: {fileID: 2100000, guid: 83cc1b3d6edb86f4c8c989770fcfcc8a, type: 2}
   rgbMaterial: {fileID: 2100000, guid: b70055543c2f6a04e99f0b6dafe02573, type: 2}

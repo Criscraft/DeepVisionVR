@@ -19,11 +19,9 @@ public class NetworkImageInputFrame : MonoBehaviour
         imageGetterButton.Prepare(rightInteractor, leftInteractor);
     }
 
-
-    public void PlaceImage(int imageId, Texture tex, string className)
+    public void LoadImageFromImageGetterButton()
     {
-        imageGetterButton.LoadImage(imageId, className, tex);
-        //hasLoadedItem = true;
+        (int imageId, string className, Texture tex) = imageGetterButton.GetImage();
         _dlManager.RequestPrepareForInput(imageId);
     }
 }

@@ -326,6 +326,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 2156658640767512749}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: LoadImageFromImageGetterButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: NetworkImageInputFrame, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243151223050, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_Pivot.y
       value: 0.5

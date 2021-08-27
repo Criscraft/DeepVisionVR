@@ -31,17 +31,18 @@ public class ImageGetterButton : MonoBehaviour
 	{
 		rightInteractor = _rightInteractor;
 		leftInteractor = _leftInteractor;
-		image.material = Instantiate(image.material); // Prevent that all images use the same material (and image)
+		//image.material = Instantiate(image.material);
 	}
 
 
-	public void LoadImage(int _imageIdx, string _className, Texture _tex)
+	public void LoadImage(int _imageIdx, string _className, Texture _tex, Material material = null)
     {
 		imageIdx = _imageIdx;
 		className = _className;
-		textMeshPro.text = className;
-		image.material.SetTexture("_MainTex", _tex);
-		//image.texture = _tex; // has no effect
+		if (textMeshPro != null) textMeshPro.text = className;
+		//image.material.SetTexture("_MainTex", _tex);
+		if (material != null) image.material = material;
+		image.texture = (Texture2D)_tex;
 	}
 
 
@@ -52,24 +53,30 @@ public class ImageGetterButton : MonoBehaviour
 		if (rightInteractor != null) selectTarget = rightInteractor.selectTarget;
 		else if (leftInteractor != null) selectTarget = leftInteractor.selectTarget;
 		
-		if (canReturnImage) ReturnImage(selectTarget);
+		if (canReturnImage) ReturnImageToInteractor(selectTarget);
 		if (canAcceptImage) AcceptImage(selectTarget);
 	}
 
 
-	private void ReturnImage(XRBaseInteractable selectTarget)
-    {
+	private void ReturnImageToInteractor(XRBaseInteractable selectTarget)
+	{
 		if (selectTarget == null)
-        {
+		{
 			return;
-        }
+		}
 
-			InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
+		InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
 		if (interactionGun != null)
 		{
 			//Texture2D tex = TextureToTexture2D(image.texture);
-			interactionGun.LoadImage(imageIdx, image.material.GetTexture("_MainTex"), className);
+			interactionGun.LoadImage(imageIdx, className, image.texture);
 		}
+	}
+
+
+	public (int imageId, string className, Texture tex) GetImage()
+	{
+		return (imageIdx, className, image.texture);
 	}
 
 
@@ -87,16 +94,4 @@ public class ImageGetterButton : MonoBehaviour
 			LoadImage(_imageId, _className, _tex);
 		}
 	}
-
-
-/*
-	private Texture2D TextureToTexture2D(Texture texture) 
-	{
-		Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false);
-		RenderTexture.active = rTex;
-		texture2D.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
-		texture2D.Apply();
-		return texture2D;
-	}
-*/
 }

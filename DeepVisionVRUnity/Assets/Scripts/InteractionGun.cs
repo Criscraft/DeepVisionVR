@@ -27,7 +27,7 @@ public class InteractionGun : MonoBehaviour
     private string className = "";
 
 
-    public void LoadImage(int _imageId, Texture _tex, string _className) {
+    public void LoadImage(int _imageId, string _className, Texture _tex) {
         hasLoadedItem = true;
         textMeshPro.text = _className;
         holoRenderer.material.SetTexture("_MainTex", _tex);
