@@ -7,8 +7,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class ImageGetterButton : MonoBehaviour
 {
-	private int imageIdx = -1;
-	private string className;
 	//public Button button;
 	private XRBaseInteractor rightInteractor;
 	private XRBaseInteractor leftInteractor;
@@ -21,6 +19,33 @@ public class ImageGetterButton : MonoBehaviour
 	[SerializeField]
 	private bool canAcceptImage = false;
 
+	private ActivationImage activationImageUsed;
+	public ActivationImage ActivationImageUsed
+	{
+		get
+		{
+			return this.activationImageUsed;
+		}
+		set
+		{
+			this.activationImageUsed = value;
+			if (textMeshPro != null) textMeshPro.text = value.className;
+			image.texture = (Texture2D)value.tex;
+		}
+	}
+
+	public Material MaterialUsed
+	{
+		get
+		{
+			return this.image.material;
+		}
+		set
+		{
+			this.image.material = value;
+		}
+	}
+
 	/*void Start()
 	{
 		Button btn = button.GetComponent<Button>();
@@ -31,18 +56,6 @@ public class ImageGetterButton : MonoBehaviour
 	{
 		rightInteractor = _rightInteractor;
 		leftInteractor = _leftInteractor;
-		//image.material = Instantiate(image.material);
-	}
-
-
-	public void LoadImage(int _imageIdx, string _className, Texture _tex, Material material = null)
-    {
-		imageIdx = _imageIdx;
-		className = _className;
-		if (textMeshPro != null) textMeshPro.text = className;
-		//image.material.SetTexture("_MainTex", _tex);
-		if (material != null) image.material = material;
-		image.texture = (Texture2D)_tex;
 	}
 
 
@@ -69,14 +82,8 @@ public class ImageGetterButton : MonoBehaviour
 		if (interactionGun != null)
 		{
 			//Texture2D tex = TextureToTexture2D(image.texture);
-			interactionGun.LoadImage(imageIdx, className, image.texture);
+			interactionGun.ActivationImageUsed = ActivationImageUsed;
 		}
-	}
-
-
-	public (int imageId, string className, Texture tex) GetImage()
-	{
-		return (imageIdx, className, image.texture);
 	}
 
 
@@ -90,8 +97,7 @@ public class ImageGetterButton : MonoBehaviour
 			InteractionGun interactionGun = selectTarget.gameObject.GetComponent<InteractionGun>();
 		if (interactionGun != null)
 		{
-			(int _imageId, string _className, Texture _tex) = interactionGun.GetImage();
-			LoadImage(_imageId, _className, _tex);
+			ActivationImageUsed = interactionGun.ActivationImageUsed;
 		}
 	}
 }

@@ -16,25 +16,27 @@ public class InteractionGun : MonoBehaviour
 
     private bool hasLoadedItem = false;
     [SerializeField]
-    private GameObject holoImage;
+    private GameObject holoImageGo;
     [SerializeField]
-    private Renderer holoRenderer;
+    private Renderer holoImageRenderer;
     [SerializeField]
     private TextMeshPro textMeshPro;
-    
-    private int imageId = -1;
-    private Texture tex = null;
-    private string className = "";
 
-
-    public void LoadImage(int _imageId, string _className, Texture _tex) {
-        hasLoadedItem = true;
-        textMeshPro.text = _className;
-        holoRenderer.material.SetTexture("_MainTex", _tex);
-        holoImage.SetActive(true);
-        tex = _tex;
-        imageId = _imageId;
-        className = _className;
+    private ActivationImage activationImageUsed;
+    public ActivationImage ActivationImageUsed
+    {
+        get
+        {
+            return this.activationImageUsed;
+        }
+        set
+        {
+            this.activationImageUsed = value;
+            hasLoadedItem = true;
+            textMeshPro.text = value.className;
+            holoImageRenderer.material.SetTexture("_MainTex", value.tex);
+            holoImageGo.SetActive(true);
+        }
     }
 
 
@@ -65,12 +67,6 @@ public class InteractionGun : MonoBehaviour
             }
         }
         */
-    }
-
-
-    public (int _imageId, string _className, Texture _tex) GetImage()
-    {
-        return (imageId, className, tex);
     }
 
 

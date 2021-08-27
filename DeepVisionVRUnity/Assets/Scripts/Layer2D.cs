@@ -63,7 +63,7 @@ public class Layer2D : NetLayer
             newChannel2DInstance.localScale = Vector3.one;
             ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
             imageGetterButton.Prepare(rightInteractor, leftInteractor);
-            imageGetterButton.LoadImage(-1, "", null, material);
+            imageGetterButton.MaterialUsed = material;
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
@@ -119,10 +119,12 @@ public class Layer2D : NetLayer
     }
 
 
-    public override void UpdateData(List<Texture2D> textureList, float scale, bool isRGB, float zeroValue=0f)
+    public override void UpdateData(List<ActivationImage> activationImageList, float scale)
     {
         //RawImage image;
         Material material = null;
+        bool isRGB = activationImageList[0].isRGB;
+        float zeroValue = activationImageList[0].zeroValue;
 
         if (!isRGB)
         {
@@ -134,14 +136,12 @@ public class Layer2D : NetLayer
             if (rgb == false) material = Instantiate(rgbMaterial);
         }
 
+        ImageGetterButton imageGetterButton;
         for (int i = 0; i < items.Count; i++)
         {
-            //image = items[i].GetComponent<RawImage>();
-            //image.material = material;
-            //image.material.SetTexture("_MainTex", textureList[i]);
-            items[i].GetComponent<ImageGetterButton>().LoadImage(-1, "", textureList[i], material);
-            //image.texture = textureList[i];
-            //image.SetNativeSize(); // pixel perfect
+            imageGetterButton = items[i].GetComponent<ImageGetterButton>();
+            imageGetterButton.ActivationImageUsed = activationImageList[i];
+            imageGetterButton.MaterialUsed = material;
         }
         rgb = isRGB;
     }

@@ -212,8 +212,8 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 256
-  holoImage: {fileID: 1877395962012196108}
-  holoRenderer: {fileID: 7357866878942617571}
+  holoImageGo: {fileID: 1877395962012196108}
+  holoImageRenderer: {fileID: 7357866878942617571}
   textMeshPro: {fileID: 445287746983009183}
 --- !u!54 &7208055271573024007
 Rigidbody:

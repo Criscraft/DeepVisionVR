@@ -21,7 +21,7 @@ public class NetworkImageInputFrame : MonoBehaviour
 
     public void LoadImageFromImageGetterButton()
     {
-        (int imageId, string className, Texture tex) = imageGetterButton.GetImage();
-        _dlManager.RequestPrepareForInput(imageId);
+        ActivationImage activationImage  = imageGetterButton.ActivationImageUsed;
+        _dlManager.RequestPrepareForInput(activationImage.imageID);
     }
 }

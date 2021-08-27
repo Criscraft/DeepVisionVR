@@ -57,7 +57,7 @@ public class DLClient : MonoBehaviour
                     Debug.Log("Texture could not be loaded");
                 }
             }
-            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerActivation(result, layerID, zeroValue));
+            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerActivation(result, layerID, ActivationImage.Mode.Activation, zeroValue));
         }
 
         else if (msgList[0] == "RequestLayerFeatureVisualization")
@@ -81,7 +81,7 @@ public class DLClient : MonoBehaviour
                     Debug.Log("Texture could not be loaded");
                 }
             }
-            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerFeatureVisualization(result, layerID));
+            UnityMainThreadDispatcher.Instance().Enqueue(_dlManager.AcceptLayerActivation(result, layerID, ActivationImage.Mode.FeatureVisualization));
         }
 
         else if (msgList[0] == "RequestPrepareForInput")

@@ -196,12 +196,20 @@ public class DLManager : MonoBehaviour
 
     public IEnumerator AcceptDatasetImage(Texture2D tex, int label, int imgIndex)
     {
+        ActivationImage activationImage = new ActivationImage();
+        activationImage.imageID = imgIndex;
+        activationImage.isRGB = true;
+        activationImage.mode = ActivationImage.Mode.DatasetImage;
+        activationImage.className = (string)classNames[label];
+        activationImage.tex = tex;
+        activationImage.nDim = 2;
+
         GameObject newImageGetterButton = (GameObject)Instantiate(imageGetterButtonPrefab, Vector3.zero, Quaternion.identity);
         newImageGetterButton.name = "ImageGetterButton " + string.Format("{0}", imgIndex);
         newImageGetterButton.transform.SetParent(imagePickerCanvasContent, false);
         var imageGetterButtonScript = newImageGetterButton.GetComponent<ImageGetterButton>();
         imageGetterButtonScript.Prepare(rightInteractor, leftInteractor);
-        imageGetterButtonScript.LoadImage(imgIndex, (string)classNames[label], tex);
+        imageGetterButtonScript.ActivationImageUsed = activationImage;
         yield return null;
     }
 
@@ -215,11 +223,33 @@ public class DLManager : MonoBehaviour
         }
     }
 
-    public IEnumerator AcceptLayerActivation(List<Texture2D> textureList, int layerID, float zeroValue)
+    public IEnumerator AcceptLayerActivation(List<Texture2D> textureList, int layerID, ActivationImage.Mode mode, float zeroValue = -1f)
     {
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
+
+        bool isRGB = false;
+        if (mode == ActivationImage.Mode.Activation) isRGB = false;
+        else if (mode == ActivationImage.Mode.FeatureVisualization) isRGB = true;
+
+        ActivationImage activationImage;
+        List <ActivationImage> activationImageList = new List<ActivationImage>();
+        int i = 0;
+
+        foreach (Texture2D tex in textureList)
+        {
+            activationImage = new ActivationImage();
+            activationImage.layerID = layerID;
+            activationImage.isRGB = isRGB;
+            activationImage.mode = mode;
+            activationImage.tex = tex;
+            activationImage.zeroValue = zeroValue;
+
+            activationImageList.Add(activationImage);
+            i++;
+        }
+
         var pos = layerIDToGridPosition[layerID];
-        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], false, zeroValue);
+        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(activationImageList, transform.localScale[0]);
         yield return null;
     }
 
@@ -231,14 +261,6 @@ public class DLManager : MonoBehaviour
         {
             _dlClient.RequestLayerFeatureVisualization(layerID);
         }
-    }
-
-    public IEnumerator AcceptLayerFeatureVisualization(List<Texture2D> textureList, int layerID)
-    {
-        Debug.Log("Received AcceptLayerFeatureVisualization for layer " + string.Format("{0}", layerID));
-        var pos = layerIDToGridPosition[layerID];
-        gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(textureList, transform.localScale[0], true);
-        yield return null;
     }
 
 
