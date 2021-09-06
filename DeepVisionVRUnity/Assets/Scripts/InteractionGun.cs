@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class InteractionGun : MonoBehaviour
 {
     [SerializeField]
+    private InputManager inputManager;
+    [SerializeField]
     private XRGrabInteractable xrInteractable;
     [SerializeField]
     private Transform raycastTransform;
@@ -21,6 +23,12 @@ public class InteractionGun : MonoBehaviour
     private Renderer holoImageRenderer;
     [SerializeField]
     private TextMeshPro textMeshPro;
+    [SerializeField]
+    private RawImage screenOverlay;
+    [SerializeField]
+    private Material colormapMaterial;
+    [SerializeField]
+    private Material rgbMaterial;
 
     private ActivationImage activationImageUsed;
     public ActivationImage ActivationImageUsed
@@ -32,10 +40,32 @@ public class InteractionGun : MonoBehaviour
         set
         {
             this.activationImageUsed = value;
-            hasLoadedItem = true;
-            textMeshPro.text = value.className;
-            holoImageRenderer.material.SetTexture("_MainTex", value.tex);
-            holoImageGo.SetActive(true);
+            
+            if (value.tex != null)
+            {
+                holoImageGo.SetActive(true);
+                hasLoadedItem = true;
+
+                textMeshPro.text = value.className;
+                Material material = null;
+                if (value.isRGB)
+                {
+                    material = Instantiate(rgbMaterial);
+                }
+                else
+                {
+                    material = Instantiate(colormapMaterial);
+                    material.SetFloat("_TransitionValue", value.zeroValue / 255f);
+                }
+                material.SetTexture("_MainTex", value.tex);
+                holoImageRenderer.material = material;
+            }
+            
+            else
+            {
+                holoImageGo.SetActive(false);
+                hasLoadedItem = false;
+            }
         }
     }
 
@@ -70,14 +100,36 @@ public class InteractionGun : MonoBehaviour
     }
 
 
+    public void LayHoloImageOverScreen()
+    {
+        if (hasLoadedItem)
+        {
+            screenOverlay.enabled = true;
+            screenOverlay.texture = holoImageRenderer.material.GetTexture("_MainTex");
+            screenOverlay.material = holoImageRenderer.material;
+            screenOverlay.material.CopyPropertiesFromMaterial(holoImageRenderer.material);
+        }
+    }
+
+
+    public void QuitLayHoloImageOverScreen()
+    {
+        if (hasLoadedItem)
+        {
+            screenOverlay.enabled = false;
+        }
+    }
+
+
     public void OnSelect()
     {
-        
+        inputManager.RegisterInteractionGun(this);
+
     }
 
 
     public void OnDeselect()
     {
-        
+        inputManager.UnRegisterInteractionGun(this);
     }
 }

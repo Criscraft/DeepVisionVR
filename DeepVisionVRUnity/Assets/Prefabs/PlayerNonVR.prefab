@@ -730,6 +730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movement: {fileID: 8992139984299397358}
   mouseLook: {fileID: 8992139984299397359}
+  screenshotPath: .
 --- !u!114 &8992139984299397358
 MonoBehaviour:
   m_ObjectHideFlags: 0
