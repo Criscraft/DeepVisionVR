@@ -206,6 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9354679763a58d0458d6fef71ac922fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputManager: {fileID: 0}
   xrInteractable: {fileID: 8913456731860089351}
   raycastTransform: {fileID: 5460456502737216977}
   range: 10
@@ -215,6 +216,9 @@ MonoBehaviour:
   holoImageGo: {fileID: 1877395962012196108}
   holoImageRenderer: {fileID: 7357866878942617571}
   textMeshPro: {fileID: 445287746983009183}
+  screenOverlay: {fileID: 0}
+  colormapMaterial: {fileID: 2100000, guid: 83cc1b3d6edb86f4c8c989770fcfcc8a, type: 2}
+  rgbMaterial: {fileID: 2100000, guid: b70055543c2f6a04e99f0b6dafe02573, type: 2}
 --- !u!54 &7208055271573024007
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -263,10 +267,34 @@ MonoBehaviour:
       m_Calls: []
   m_SelectEntered:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7208055271573024000}
+        m_TargetAssemblyTypeName: InteractionGun, Assembly-CSharp
+        m_MethodName: OnSelect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_SelectExited:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7208055271573024000}
+        m_TargetAssemblyTypeName: InteractionGun, Assembly-CSharp
+        m_MethodName: OnDeselect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_Activated:
     m_PersistentCalls:
       m_Calls:
@@ -312,7 +340,7 @@ MonoBehaviour:
   m_OnDeactivate:
     m_PersistentCalls:
       m_Calls: []
-  m_AttachTransform: {fileID: 0}
+  m_AttachTransform: {fileID: 863533650}
   m_AttachEaseInTime: 0.15
   m_MovementType: 2
   m_VelocityDamping: 1

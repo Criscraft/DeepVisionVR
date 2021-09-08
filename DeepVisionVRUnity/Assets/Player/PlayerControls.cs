@@ -188,6 +188,22 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Fire2"",
+                    ""type"": ""Button"",
+                    ""id"": ""4f8da3ab-cb7b-424e-812a-bf51adf63c6d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Screenshot"",
+                    ""type"": ""Button"",
+                    ""id"": ""d5886b15-14e9-4a21-9eaa-86ae7fccdaab"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -223,6 +239,28 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""action"": ""Fire1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1919767f-1aac-4072-9258-3fab687b1aed"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ae702b1b-542c-4e6b-a79d-99753e3eee9a"",
+                    ""path"": ""<Keyboard>/#(C)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Screenshot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -241,6 +279,8 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_Interact_Pickup = m_Interact.FindAction("Pickup", throwIfNotFound: true);
         m_Interact_Drop = m_Interact.FindAction("Drop", throwIfNotFound: true);
         m_Interact_Fire1 = m_Interact.FindAction("Fire1", throwIfNotFound: true);
+        m_Interact_Fire2 = m_Interact.FindAction("Fire2", throwIfNotFound: true);
+        m_Interact_Screenshot = m_Interact.FindAction("Screenshot", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -358,6 +398,8 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     private readonly InputAction m_Interact_Pickup;
     private readonly InputAction m_Interact_Drop;
     private readonly InputAction m_Interact_Fire1;
+    private readonly InputAction m_Interact_Fire2;
+    private readonly InputAction m_Interact_Screenshot;
     public struct InteractActions
     {
         private @PlayerControls m_Wrapper;
@@ -365,6 +407,8 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         public InputAction @Pickup => m_Wrapper.m_Interact_Pickup;
         public InputAction @Drop => m_Wrapper.m_Interact_Drop;
         public InputAction @Fire1 => m_Wrapper.m_Interact_Fire1;
+        public InputAction @Fire2 => m_Wrapper.m_Interact_Fire2;
+        public InputAction @Screenshot => m_Wrapper.m_Interact_Screenshot;
         public InputActionMap Get() { return m_Wrapper.m_Interact; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -383,6 +427,12 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Fire1.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
                 @Fire1.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
                 @Fire1.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
+                @Fire2.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire2;
+                @Fire2.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire2;
+                @Fire2.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire2;
+                @Screenshot.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnScreenshot;
+                @Screenshot.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnScreenshot;
+                @Screenshot.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnScreenshot;
             }
             m_Wrapper.m_InteractActionsCallbackInterface = instance;
             if (instance != null)
@@ -396,6 +446,12 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Fire1.started += instance.OnFire1;
                 @Fire1.performed += instance.OnFire1;
                 @Fire1.canceled += instance.OnFire1;
+                @Fire2.started += instance.OnFire2;
+                @Fire2.performed += instance.OnFire2;
+                @Fire2.canceled += instance.OnFire2;
+                @Screenshot.started += instance.OnScreenshot;
+                @Screenshot.performed += instance.OnScreenshot;
+                @Screenshot.canceled += instance.OnScreenshot;
             }
         }
     }
@@ -413,5 +469,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         void OnPickup(InputAction.CallbackContext context);
         void OnDrop(InputAction.CallbackContext context);
         void OnFire1(InputAction.CallbackContext context);
+        void OnFire2(InputAction.CallbackContext context);
+        void OnScreenshot(InputAction.CallbackContext context);
     }
 }

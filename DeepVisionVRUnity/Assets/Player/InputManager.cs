@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public Movement movement;
-    public MouseLook mouseLook;
+
+    [SerializeField]
+    private Movement movement;
+    [SerializeField]
+    private MouseLook mouseLook;
 
     private PlayerControls controls;
     private PlayerControls.GroundMovementActions groundMovement;
@@ -11,6 +14,10 @@ public class InputManager : MonoBehaviour
 
     private Vector2 horizontalInput;
     private Vector2 mouseInput;
+
+    [SerializeField]
+    private string screenshotPath = "Screenshots";
+    private int screenshotCounter = 1;
 
 
     private void Awake()
@@ -25,6 +32,21 @@ public class InputManager : MonoBehaviour
         groundMovement.MouseY.performed += ctx => mouseInput.y = ctx.ReadValue<float>();
 
         interaction = controls.Interact;
+        interaction.Screenshot.performed += _ => ScreenShot();
+    }
+
+
+    public void RegisterInteractionGun(InteractionGun interactionGun)
+    {
+        interaction.Fire2.started += _ => interactionGun.LayHoloImageOverScreen();
+        interaction.Fire2.canceled += _ => interactionGun.QuitLayHoloImageOverScreen();
+    }
+
+
+    public void UnRegisterInteractionGun(InteractionGun interactionGun)
+    {
+        interaction.Fire2.started -= _ => interactionGun.LayHoloImageOverScreen();
+        interaction.Fire2.canceled -= _ => interactionGun.QuitLayHoloImageOverScreen();
     }
 
 
@@ -44,5 +66,11 @@ public class InputManager : MonoBehaviour
     {
         movement.ReceiveHorizontalInput(horizontalInput);
         mouseLook.ReceiveInput(mouseInput);
+    }
+
+    private void ScreenShot()
+    {
+        ScreenCapture.CaptureScreenshot(screenshotPath + "\\screenshot" + string.Format("{0}.jpg", screenshotCounter));
+        screenshotCounter++;
     }
 }

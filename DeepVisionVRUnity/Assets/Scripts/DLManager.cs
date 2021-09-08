@@ -122,7 +122,6 @@ public class DLManager : MonoBehaviour
     {
         if (manualUpdate)
         {
-            Debug.Log("Aye");
             RequestLayerFeatureVisualization(manualUpdateVisualizationLayerID);
             manualUpdate = false;
         }
@@ -311,9 +310,9 @@ public class DLManager : MonoBehaviour
     }
 
 
-    public void RequestPrepareForInput(int imgIndex)
+    public void RequestPrepareForInput(ActivationImage activationImage)
     {
-        _dlClient.RequestPrepareForInput(imgIndex);
+        _dlClient.RequestPrepareForInput(activationImage);
     }
 
     public IEnumerator AcceptPrepareForInput()

@@ -21,10 +21,10 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [ ] scale size of the network
 - [ ] add interaction to change network layout
 - [x] DATAPATH in DLPerformer.py
-- [ ] press button to increase the size of the Holoimage
+- [x] press right mouse button to increase the size of the Holoimage
+- [x] press c button to save the texture to disk
 - [x] Scrollen mit scroll view nach https://gyanendushekhar.com/2019/08/11/scroll-view-dynamic-content-size-unity-tutorial/
 - [x] More flexible arrangement of layers
-- [ ] Grabable Layers, Handle? No Handle? Special tool?
 - [x] Histograms to show weight distribution of layer
 - [x] Histograms to show activation distribution of layer
 - [x] box and axis negative z position
