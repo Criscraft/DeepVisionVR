@@ -7,7 +7,8 @@ public struct ActivationImage
         Unknown,
         DatasetImage,
         Activation,
-        FeatureVisualization
+        FeatureVisualization,
+        NoiseImage,
     }
 
     public ActivationImage(

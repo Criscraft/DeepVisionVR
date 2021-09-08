@@ -8,7 +8,9 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class ImageGetterButton : MonoBehaviour
 {
 	//public Button button;
+	[SerializeField]
 	private XRBaseInteractor rightInteractor;
+	[SerializeField]
 	private XRBaseInteractor leftInteractor;
 	[SerializeField]
 	private RawImage image;

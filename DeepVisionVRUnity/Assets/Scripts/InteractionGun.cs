@@ -40,7 +40,7 @@ public class InteractionGun : MonoBehaviour
         set
         {
             this.activationImageUsed = value;
-            
+
             if (value.tex != null)
             {
                 holoImageGo.SetActive(true);
