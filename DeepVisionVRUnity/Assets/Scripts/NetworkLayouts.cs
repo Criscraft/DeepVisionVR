@@ -334,7 +334,7 @@ public class NetworkLayouts
     }
 
 
-    public void DrawNetworkEdges(List<JObject> architecture, GameObject bezierStaticPrefab, Transform dlManagerTransform, List<Transform> edges, List<Transform> edgeLabels, Dictionary<int, int[]> layerIDToGridPosition, Transform[,] gridLayerElements, GameObject textPrefab, LayoutParams layoutParams)
+    public void DrawNetworkEdges(JArray architecture, GameObject bezierStaticPrefab, Transform dlManagerTransform, List<Transform> edges, List<Transform> edgeLabels, Dictionary<int, int[]> layerIDToGridPosition, Transform[,] gridLayerElements, GameObject textPrefab, LayoutParams layoutParams)
     {
         // Remove old edges and edge labels
         var toDelete = new List<GameObject>();
@@ -344,7 +344,7 @@ public class NetworkLayouts
 
         // Draw NetworkGraphEdges
         int layer_id = 0;
-        foreach (JObject jObject in architecture)
+        foreach (JToken jObject in architecture)
         {
             Vector2Int pos = new Vector2Int((int)jObject["pos"][0], (int)jObject["pos"][1]);
             string layerName = (string)jObject["layer_name"];

@@ -47,6 +47,7 @@ public class DLNetMQ
             socket.Options.Linger = new System.TimeSpan(0, 0, 0);
             socket.Options.DisableTimeWait = true;
             socket.Options.MulticastRecoveryInterval = new System.TimeSpan(0, 2, 0);
+            socket.Options.ReconnectIntervalMax = new System.TimeSpan(0, 2, 0);
 
             socket.Connect(tcpip);
             

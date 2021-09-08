@@ -42,10 +42,11 @@ public class DLManager : MonoBehaviour
     private Camera mainCamera;
 
     // network data
-    private DLClient _dlClient;
+    [SerializeField]
+    private DLWebClient _dlClient;
     private int lenDataset = 0;
     private JArray classNames;
-    private List<JObject> architecture;
+    private JArray architecture;
     private Transform[,] gridLayerElements; // Z , X 
     private Dictionary<int, int[]> layerIDToGridPosition = new Dictionary<int, int[]>(); // Z size, X size
     [SerializeField]
@@ -134,25 +135,27 @@ public class DLManager : MonoBehaviour
     }
 
 
-    public IEnumerator AcceptNetworkArchitecture(List<JObject> jObjectList)
+    public void AcceptNetworkArchitecture(JObject jObject)
     {
         Debug.Log("Received AcceptNetworkArchitecture");
-        architecture = jObjectList;
+        architecture = (JArray)jObject["architecture"];
 
         // find grid size
         int posX = 0;
         int posZ = 0;
-        foreach (JObject jObject in architecture)
+        foreach (JToken token in architecture)
         {
-            posZ = (int)jObject["pos"][0];
+            posZ = (int)token["pos"][0];
             if (gridSize[0] < posZ) gridSize[0] = posZ; 
-            posX = (int)jObject["pos"][1];
+            posX = (int)token["pos"][1];
             if (gridSize[1] < posX) gridSize[1] = posX; 
         }
         gridSize[0] = gridSize[0] + 1;
         gridSize[1] = gridSize[1] + 1;
+        
         Debug.Log("Create Layers");
         CreateLayers();
+        /*
         UpdateAllLayers();
         if (showWeightHistograms)
         {
@@ -161,7 +164,7 @@ public class DLManager : MonoBehaviour
                 RequestWeightHistogram(i);
             }
         }
-        yield return null;
+        */
     }
 
 
@@ -380,7 +383,7 @@ public class DLManager : MonoBehaviour
         GameObject newLayerInstance = null;
         int layerID = 0;
 
-        foreach (JObject jObject in architecture)
+        foreach (JToken jObject in architecture)
         {
             int[] gridPos = new int[2] {(int)jObject["pos"][0], (int)jObject["pos"][1]};
             string datatype = (string)jObject["data_type"];
@@ -494,8 +497,6 @@ public class DLManager : MonoBehaviour
     private void Start()
     {
         layouts = new NetworkLayouts();
-        _dlClient = GetComponent<DLClient>();
-        _dlClient.Prepare();
         Debug.Log("Begin RequestDataOverview");
         RequestDataOverview();
         Debug.Log("Begin RequestNetworkArchitecture");
