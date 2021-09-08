@@ -4,6 +4,7 @@ import base64
 import cv2
 import torch.nn.functional as F 
 import numpy as np
+from ActivationImage import ActivationImage
 
 
 class Transform(object):
@@ -64,7 +65,19 @@ class DLServer(object):
                 print("send RequestDatasetImage")
             
             elif message[0]==b'RequestPrepareForInput':
-                self.dl_performer.prepare_for_input(int(message[1]))
+                mode_string = message[4]
+                if mode_string == b'DatasetImage': mode = ActivationImage.Mode.DatasetImage
+                elif mode_string == b'FeatureVisualization': mode = ActivationImage.Mode.FeatureVisualization
+                elif mode_string == b'NoiseImage': mode = ActivationImage.Mode.NoiseImage
+                else: mode = ActivationImage.Mode.Unknown
+                
+                activation_image = ActivationImage(
+                    image_ID = int(message[1]),
+                    layer_ID = int(message[2]),
+                    channel_ID = int(message[3]),
+                    mode = mode)
+
+                self.dl_performer.prepare_for_input(activation_image)
                 self.socket.send_multipart([b'RequestPrepareForInput'])
                 print("send RequestPrepareForInput")
 
@@ -92,6 +105,24 @@ class DLServer(object):
                     out_cv2.append(buffer)
                 self.socket.send_multipart([b'RequestLayerActivation', str(layer_id).encode('utf-8'), str(zero_value).encode('utf-8')] + [base64.b64encode(item) for item in out_cv2])
                 print("send RequestLayerActivation")
+
+            elif message[0]==b'RequestLayerFeatureVisualization':
+                layer_id = int(message[1])
+                out = self.dl_performer.get_feature_visualization(layer_id)
+                out = out[:,np.array([2, 1, 0])] # for sorting color channels
+                out = out.transpose([0, 2, 3, 1]) # put channel dimension to last
+                print(out.shape)
+                print(out.__class__)
+                print(out.min())
+                print(out.max())
+                out_cv2 = []
+                for item in out:
+                    #_, buffer = cv2.imencode('.bmp', item) # does not work anymore!?
+                    _, buffer = cv2.imencode('.png', item)
+                    out_cv2.append(buffer)
+                message_tracker = self.socket.send_multipart([b'RequestLayerFeatureVisualization', str(layer_id).encode('utf-8')] + [base64.b64encode(item) for item in out_cv2])
+                print("send RequestLayerFeatureVisualization")
+
 
             elif message[0]==b'RequestClassificationResult':
                 out = self.dl_performer.get_activation(len(self.dl_performer.features) - 1)
@@ -134,19 +165,19 @@ class DLServer(object):
                 }
                 self.socket.send_multipart([b'RequestActivationHistogram', str(layer_id).encode('utf-8'), json.dumps(out_dict, indent=1).encode('utf-8')])
                 print("send RequestActivationHistogram")
+            
 
-            elif message[0]==b'RequestLayerFeatureVisualization':
-                layer_id = int(message[1])
-                out = self.dl_performer.get_feature_visualization(layer_id)
-                out = out[:,np.array([2, 1, 0])] # for sorting color channels
-                out = out.transpose([0, 2, 3, 1]) # put channel dimension to last
-                out_cv2 = []
-                for item in out:
-                    #_, buffer = cv2.imencode('.bmp', item) # does not work anymore!?
-                    _, buffer = cv2.imencode('.png', item)
-                    out_cv2.append(buffer)
-                self.socket.send_multipart([b'RequestLayerFeatureVisualization', str(layer_id).encode('utf-8')] + [base64.b64encode(item) for item in out_cv2])
-                print("send RequestLayerFeatureVisualization")
+            elif message[0]==b'RequestNoiseImage':
+                out = self.dl_performer.generate_noise_image()
+                image = out.numpy()
+                image = image * 255
+                image = image.astype("uint8")
+                image = image[np.array([2,1,0])] # for sorting color channels
+                image = image.transpose([1,2,0]) # put channel dimension to last
+                _, buffer = cv2.imencode('.png', image)
+                image_enc = base64.b64encode(buffer)
+                self.socket.send_multipart([b'RequestNoiseImage', image_enc])
+                print("send RequestNoiseImage")
 
             else:
                 raise ValueError("Could not process the message.")

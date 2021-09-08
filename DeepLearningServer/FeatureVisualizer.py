@@ -17,7 +17,7 @@ class FeatureVisualizer(object):
         init_img_shape=(80, 80),
         norm_mean = [0.5487017, 0.5312975, 0.50504637],
         norm_std = [0.1878664, 0.18194826, 0.19830684],
-        epochs = 300,
+        epochs = 50,
         scaleup_schedule = {}):
         
         super().__init__()
@@ -34,10 +34,14 @@ class FeatureVisualizer(object):
         self.scaleup_schedule = scaleup_schedule
 
 
-    def visualize(self, model, module, device, n_channels):
+    def generate_noise_image(self, device):
+        return torch.randn((3, self.init_img_shape[0], self.init_img_shape[1]), device=device)
+
+
+    def visualize(self, model, module, device, n_channels, init_image):
         regularize_transformation = Regularizer()
         export_transformation = ToImage(target_mean=self.norm_mean, target_std=self.norm_std)
-        created_image = torch.randn((n_channels, 3, self.init_img_shape[0], self.init_img_shape[1]), device=device)
+        created_image = init_image.repeat(n_channels, 1, 1, 1)
         created_image.requires_grad = True
 
         for epoch in range(self.epochs):
@@ -78,7 +82,7 @@ class FeatureVisualizer(object):
             path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
             cv2.imwrite(path, export_image[0].transpose((1,2,0)))
 
-        return export_image
+        return export_image, created_image
 
 
     def total_variation_loss(self, x):

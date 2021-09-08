@@ -1,5 +1,6 @@
 import torch
 from FeatureVisualizer import FeatureVisualizer
+from ActivationImage import ActivationImage
 
 
 class DLPerformer(object):
@@ -25,7 +26,14 @@ class DLPerformer(object):
         self.feature_visualizer = FeatureVisualizer(norm_mean=self.norm_mean, norm_std=self.norm_std)
 
         self.features = None
-        self.active_data_idx = None
+        self.active_data_item = ActivationImage()
+        self.active_noise_image = None
+        self.feature_visualizations = {}
+        
+
+    def generate_noise_image(self):
+        self.active_noise_image = self.feature_visualizer.generate_noise_image(self.device)
+        return self.active_noise_image
 
     
     def get_data_overview(self):
@@ -37,12 +45,21 @@ class DLPerformer(object):
         return {k:item[k] for k in ('data','label')}
 
 
-    def prepare_for_input(self, idx: int):
+    def prepare_for_input(self, activation_image : ActivationImage):
         with torch.no_grad():
-            if idx >= 0:
-                image = self.dataset[self.data_indices[idx]]['data']
+            if activation_image.mode == ActivationImage.Mode.DatasetImage and activation_image.image_ID >= 0:
+                image = self.dataset[self.data_indices[activation_image.image_ID]]['data']
+            elif activation_image.mode == ActivationImage.Mode.FeatureVisualization:
+                image = self.feature_visualizations[activation_image.layer_ID][activation_image.channel_ID]
+            elif activation_image.mode == ActivationImage.Mode.NoiseImage:
+                if self.active_noise_image is None:
+                    self.generate_noise_image()
+                image = self.active_noise_image
             else:
                 image = torch.zeros(self.dataset[0]['data'].shape)
+            activation_image.data = image
+            self.active_data_item = activation_image
+            
             image = image.to(self.device)
             image = image.unsqueeze(0)
             out_dict = self.model.forward_features({'data' : image})
@@ -62,13 +79,13 @@ class DLPerformer(object):
                     size = [0]
                 features.append({'pos' : item['pos'], 'layer_name' : item['layer_name'], 'tracked_module' : item['tracked_module'], 'module' : item['module'], 'data_type' : data_type, 'size' : size, 'activation' : item.get('activation'), 'precursors' : item['precursors']})
             self.features = features
-            self.active_data_idx = idx
 
 
 
     def get_architecture(self):
         if self.features is None:
-            self.prepare_for_input(-1)
+            activation_image = ActivationImage(mode = ActivationImage.Mode.DatasetImage)
+            self.prepare_for_input(activation_image)
         layerdict_list = [{key:value[key] for key in ('pos', 'layer_name', 'data_type', 'size', 'precursors')} for value in self.features]
         return layerdict_list
 
@@ -102,7 +119,12 @@ class DLPerformer(object):
         
         module = self.features[layer_id]["module"]
         n_channels = self.features[layer_id]["size"][1]
+        
         if not debug:
-            return self.feature_visualizer.visualize(self.model, module, self.device, n_channels)
+            export_images, created_images = self.feature_visualizer.visualize(self.model, module, self.device, n_channels, self.active_data_item.data)
         else:
-            return self.feature_visualizer, self.model, module, self.device, n_channels
+            return self.feature_visualizer, self.model, module, self.device, n_channels, self.active_data_item.data
+        
+        self.feature_visualizations[layer_id] = created_images
+        
+        return export_images
