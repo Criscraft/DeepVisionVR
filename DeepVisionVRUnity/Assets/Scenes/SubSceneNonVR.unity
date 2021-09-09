@@ -857,7 +857,8 @@ MonoBehaviour:
   foreignResultCanvasInstance: {fileID: 1873818312}
   rightInteractor: {fileID: 85602908}
   leftInteractor: {fileID: 0}
-  mainCamera: {fileID: 0}
+  mainCamera: {fileID: 1871702166}
+  _dlClient: {fileID: 2015585689}
   showWeightHistograms: 0
   showActivationHistograms: 0
   layoutMode: 0
@@ -898,12 +899,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2015585686}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 674f61ccd603dcb468579f966b81f02f, type: 3}
+  m_Script: {fileID: 11500000, guid: 5852c158452ab6a4c94adfbbced12a72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tcpip: tcp://localhost:5570
-  _dlManager: {fileID: 2015585687}
-  noiseGenerateButton: {fileID: 1326843713}
+  url: http://127.0.0.1:5570/
+  dlManager: {fileID: 2015585687}
 --- !u!1001 &3098378401815797268
 PrefabInstance:
   m_ObjectHideFlags: 0

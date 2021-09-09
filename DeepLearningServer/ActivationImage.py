@@ -3,11 +3,11 @@ from enum import Enum, auto
 class ActivationImage(object):
     
     class Mode(Enum):
-        Unknown = auto()
-        DatasetImage = auto()
-        Activation = auto()
-        FeatureVisualization = auto()
-        NoiseImage = auto()
+        Unknown = 0
+        DatasetImage = 1
+        Activation = 2
+        FeatureVisualization = 3
+        NoiseImage = 4
         
     def __init__(self, 
         image_ID = -1,

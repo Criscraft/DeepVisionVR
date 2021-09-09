@@ -1,6 +1,34 @@
 import torch
+import numpy as np
+import base64
+import cv2
 from FeatureVisualizer import FeatureVisualizer
 from ActivationImage import ActivationImage
+
+
+class TransformToUint(object):
+
+    def __init__(self):
+        self.v_max = 0
+        self.v_min = 0
+
+    def __call__(self, data, fitting):
+        if isinstance(data, torch.Tensor):
+            data = data.cpu().numpy()
+        if fitting:
+            self.v_max = data.max()
+            self.v_min = data.min()
+            #self.v_max = np.percentile(out, 98)
+            #self.v_min = np.percentile(out, 2)
+
+        # boost dark regions
+        stretch_constant = 10
+        data = (data - self.v_min) / (self.v_max - self.v_min + 1e-6) * stretch_constant
+        data = np.log(data + 1) / np.log(stretch_constant + 1) * 255
+        
+        data = data.clip(0, 255)
+        data = data.astype("uint8")
+        return data
 
 
 class DLPerformer(object):
@@ -24,12 +52,28 @@ class DLPerformer(object):
         self.model.eval()
 
         self.feature_visualizer = FeatureVisualizer(norm_mean=self.norm_mean, norm_std=self.norm_std)
-
         self.features = None
         self.active_data_item = ActivationImage()
         self.active_noise_image = None
         self.feature_visualizations = {}
+
+        self.tensor_to_uint_transform = TransformToUint()
         
+
+    def tensor_to_string(self, tensor):
+        image = tensor.cpu().numpy()
+        image = image * 255
+        image = image.astype("uint8")
+        image = image[np.array([2,1,0])] # for sorting color channels
+        image = image.transpose([1,2,0]) # put channel dimension to last
+        image_enc = self.encode_image(image)
+        return image_enc
+
+
+    def encode_image(self, data):
+        _, buffer = cv2.imencode('.png', data)
+        return base64.b64encode(buffer).decode('utf-8')
+
 
     def generate_noise_image(self):
         self.active_noise_image = self.feature_visualizer.generate_noise_image(self.device)
@@ -37,12 +81,12 @@ class DLPerformer(object):
 
     
     def get_data_overview(self):
-        return {'len' : len(self.data_indices), 'n_classes' : self.n_classes, 'type' : 'rgb', 'class_names' : self.dataset.class_names}
+        return {'len' : len(self.data_indices), 'class_names' : self.dataset.class_names}
 
     
     def get_data_item(self, idx: int):
         item = self.dataset_to_tensor[self.data_indices[idx]]
-        return {k:item[k] for k in ('data','label')}
+        return item['data'], item['label']
 
 
     def prepare_for_input(self, activation_image : ActivationImage):
@@ -87,7 +131,7 @@ class DLPerformer(object):
             activation_image = ActivationImage(mode = ActivationImage.Mode.DatasetImage)
             self.prepare_for_input(activation_image)
         layerdict_list = [{key:value[key] for key in ('pos', 'layer_name', 'data_type', 'size', 'precursors')} for value in self.features]
-        return layerdict_list
+        return { 'architecture' : layerdict_list }
 
 
     def get_activation(self, layer_id):

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -155,7 +156,7 @@ public class DLManager : MonoBehaviour
         
         Debug.Log("Create Layers");
         CreateLayers();
-        /*
+        
         UpdateAllLayers();
         if (showWeightHistograms)
         {
@@ -164,45 +165,52 @@ public class DLManager : MonoBehaviour
                 RequestWeightHistogram(i);
             }
         }
-        */
     }
 
 
-    public void RequestDataOverview()
+    private Texture2D StringToTex(string textureString) 
     {
-        _dlClient.RequestDataOverview();
+         byte[] b64_bytes = System.Convert.FromBase64String(textureString);
+        Texture2D tex = new Texture2D(1, 1);
+        if (ImageConversion.LoadImage(tex, b64_bytes))
+        {
+            tex.filterMode = FilterMode.Point;
+            return tex;
+        }
+        else
+        {
+            Debug.Log("Texture could not be loaded");
+            return null;
+        }
     }
 
 
-    public IEnumerator AcceptDataOverview(JObject jObject)
+    public void AcceptDatasetImages(JObject jObject)
     {
-        Debug.Log("Received AcceptDataOverview");
+        Debug.Log("Received AcceptDatasetImages");
         //nClasses = (int)jObject["n_classes"];
         lenDataset = (int)jObject["len"];
-        classNames = JArray.Parse(jObject["class_names"].ToString());
-        
-        Debug.Log("Begin RequestDatasetImage");
+        classNames = (JArray)jObject["class_names"];
         for (int i = 0; i < lenDataset; i++)
         {
-            RequestDatasetImage(i);
+            CreateDatasetImage(StringToTex((string)jObject["tensors"][i]), (string)classNames[i], i);
         }
-        yield return null;
     }
 
 
-    public void RequestDatasetImage(int imgIndex)
+    public void RequestDatasetImages()
     {
-        _dlClient.RequestDatasetImage(imgIndex);
+        _dlClient.RequestDatasetImages();
     }
 
 
-    public IEnumerator AcceptDatasetImage(Texture2D tex, int label, int imgIndex)
+    private void CreateDatasetImage(Texture2D tex, string className, int imgIndex)
     {
         ActivationImage activationImage = new ActivationImage();
         activationImage.imageID = imgIndex;
         activationImage.isRGB = true;
         activationImage.mode = ActivationImage.Mode.DatasetImage;
-        activationImage.className = (string)classNames[label];
+        activationImage.className = className;
         activationImage.tex = tex;
         activationImage.nDim = 2;
 
@@ -212,7 +220,6 @@ public class DLManager : MonoBehaviour
         var imageGetterButtonScript = newImageGetterButton.GetComponent<ImageGetterButton>();
         imageGetterButtonScript.Prepare(rightInteractor, leftInteractor);
         imageGetterButtonScript.ActivationImageUsed = activationImage;
-        yield return null;
     }
 
 
@@ -225,8 +232,12 @@ public class DLManager : MonoBehaviour
         }
     }
 
-    public IEnumerator AcceptLayerActivation(List<Texture2D> textureList, int layerID, ActivationImage.Mode mode, float zeroValue = -1f)
+    public void AcceptLayerActivation(JObject jObject)
     {
+        int layerID = (int)jObject["layerID"];
+        ActivationImage.Mode mode = (ActivationImage.Mode) Enum.Parse(typeof(ActivationImage.Mode), (string)jObject["mode"]);
+        float zeroValue = (float)jObject["zeroValue"];
+
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
 
         bool isRGB = false;
@@ -235,24 +246,22 @@ public class DLManager : MonoBehaviour
 
         ActivationImage activationImage;
         List <ActivationImage> activationImageList = new List<ActivationImage>();
-        int i = 0;
-
-        foreach (Texture2D tex in textureList)
+        
+        JArray texArray = (JArray)jObject["tensors"];
+        for (int i=0; i<texArray.Count; i++) 
         {
             activationImage = new ActivationImage();
             activationImage.layerID = layerID;
+            activationImage.channelID = i;
             activationImage.isRGB = isRGB;
             activationImage.mode = mode;
-            activationImage.tex = tex;
+            activationImage.tex = StringToTex((string)texArray[i]);
             activationImage.zeroValue = zeroValue;
-
             activationImageList.Add(activationImage);
-            i++;
         }
 
         var pos = layerIDToGridPosition[layerID];
         gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(activationImageList, transform.localScale[0]);
-        yield return null;
     }
 
 
@@ -275,7 +284,7 @@ public class DLManager : MonoBehaviour
         }
     }
 
-    public IEnumerator AcceptWeightHistogram(JObject jObject, int layerID)
+    public void AcceptWeightHistogram(JObject jObject, int layerID)
     {
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
@@ -287,7 +296,6 @@ public class DLManager : MonoBehaviour
             var pos = layerIDToGridPosition[layerID];
             gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetWeightHistogramData(counts, bins);
         }
-        yield return null;
     }
 
 
@@ -300,7 +308,7 @@ public class DLManager : MonoBehaviour
         }
     }
 
-    public IEnumerator AcceptActivationHistogram(JObject jObject, int layerID)
+    public void AcceptActivationHistogram(JObject jObject, int layerID)
     {
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
@@ -309,7 +317,6 @@ public class DLManager : MonoBehaviour
         bins = jObject["bins"].ToObject<float[]>();
         var pos = layerIDToGridPosition[layerID];
         gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetActivationHistogramData(counts, bins);
-        yield return null;
     }
 
 
@@ -318,10 +325,9 @@ public class DLManager : MonoBehaviour
         _dlClient.RequestPrepareForInput(activationImage);
     }
 
-    public IEnumerator AcceptPrepareForInput()
+    public void AcceptPrepareForInput()
     {
         UpdateAllLayers();
-        yield return null;
     }
 
 
@@ -330,7 +336,8 @@ public class DLManager : MonoBehaviour
         _dlClient.RequestClassificationResult();
     }
 
-    public IEnumerator AcceptClassificationResult(JObject jObject)
+
+    public void AcceptClassificationResult(JObject jObject)
     {
         // Remove old classification Results
         var children = new List<GameObject>();
@@ -362,7 +369,6 @@ public class DLManager : MonoBehaviour
         ownResultCanvasInstance.name = "ClassificationResultCanvas";
         ownResultCanvasInstance.localPosition = new Vector3(0f, 1.3f, 0f);
         ownResultCanvasInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
-        yield return null;
     }
 
 
@@ -497,8 +503,8 @@ public class DLManager : MonoBehaviour
     private void Start()
     {
         layouts = new NetworkLayouts();
-        Debug.Log("Begin RequestDataOverview");
-        RequestDataOverview();
+        Debug.Log("Begin RequestDatasetImages");
+        RequestDatasetImages();
         Debug.Log("Begin RequestNetworkArchitecture");
         RequestNetworkArchitecture();
     }

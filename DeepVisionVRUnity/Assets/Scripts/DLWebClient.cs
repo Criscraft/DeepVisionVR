@@ -14,6 +14,7 @@ public class DLWebClient : MonoBehaviour
     [SerializeField]
     private DLManager dlManager;
     private delegate IEnumerator HandleJSONDelegate(JObject jObject);
+    private delegate IEnumerator HandleUploadDelegate();
 
 
     private IEnumerator GetJSON(string resource, HandleJSONDelegate handleJSONDelegate)
@@ -24,16 +25,19 @@ public class DLWebClient : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
+            Debug.Log(url + resource);
         }
         else
         {
+            Debug.Log("Received");
+            Debug.Log(url + resource);
             JObject jObject = JObject.Parse(www.downloadHandler.text);
             UnityMainThreadDispatcher.Instance().Enqueue(handleJSONDelegate(jObject));
         }
     }
 
 
-    private IEnumerator Upload(string resource, string dataString)
+    private IEnumerator Upload(string resource, string dataString, HandleUploadDelegate HandleUploadDelegate)
     {
         byte[] data = Encoding.UTF8.GetBytes(dataString);
         UnityWebRequest www = UnityWebRequest.Put(url + resource, data);
@@ -47,6 +51,8 @@ public class DLWebClient : MonoBehaviour
         {
             // Show results as text
             Debug.Log("Upload Complete!");
+            Debug.Log(url + resource);
+            UnityMainThreadDispatcher.Instance().Enqueue(HandleUploadDelegate());
         }
     }
 
@@ -54,7 +60,6 @@ public class DLWebClient : MonoBehaviour
     public IEnumerator AcceptNetworkArchitecture(JObject jObject)
     {
         dlManager.AcceptNetworkArchitecture(jObject);
-        Debug.Log(jObject);
         yield return null;
     }
 
@@ -71,34 +76,50 @@ public class DLWebClient : MonoBehaviour
     }
 
 
+    public IEnumerator AcceptLayerActivation(JObject jObject)
+    {
+        dlManager.AcceptLayerActivation(jObject);
+        yield return null;
+    }
+
+
     public void RequestLayerActivation(int layerID)
     {
-        StartCoroutine(GetJSON(string.Format("network/activation?layerid={0}", layerID), DoNothing));
+        StartCoroutine(GetJSON(string.Format("network/activation/layerid/{0}", layerID), AcceptLayerActivation));
     }
 
 
     public void RequestLayerFeatureVisualization(int layerID)
     {
-        StartCoroutine(GetJSON(string.Format("network/featurevisualization?layerid={0}", layerID), DoNothing));
+        StartCoroutine(GetJSON(string.Format("network/featurevisualization/layerid/{0}", layerID), AcceptLayerActivation));
     }
 
 
     public void RequestWeightHistogram(int layerID)
     {
-        StartCoroutine(GetJSON(string.Format("network/weighthistogram?layerid={0}", layerID), DoNothing));
+        StartCoroutine(GetJSON(string.Format("network/weighthistogram/layerid/{0}", layerID), DoNothing));
     }
 
 
     public void RequestActivationHistogram(int layerID)
     {
-        StartCoroutine(GetJSON(string.Format("network/activationhistogram?layerid={0}", layerID), DoNothing));
+        StartCoroutine(GetJSON(string.Format("network/activationhistogram/layerid/{0}", layerID), DoNothing));
+    }
+
+
+    public IEnumerator AcceptPrepareForInput()
+    {
+        dlManager.AcceptPrepareForInput();
+        yield return null;
     }
 
 
     public void RequestPrepareForInput(ActivationImage activationImage)
     {
-        string output = JsonConvert.SerializeObject(activationImage);
-        StartCoroutine(Upload("network/prepareforinput", output));
+        ActivationImage activationImageShallowCopy = activationImage;
+        activationImageShallowCopy.tex = null;
+        string output = JsonConvert.SerializeObject(activationImageShallowCopy);
+        StartCoroutine(Upload("network/prepareforinput", output, AcceptPrepareForInput));
     }
 
 
@@ -108,20 +129,21 @@ public class DLWebClient : MonoBehaviour
     }
 
 
-    public void RequestDataOverview()
+    public IEnumerator AcceptDatasetImages(JObject jObject)
     {
-        StartCoroutine(GetJSON("data", DoNothing));
+        dlManager.AcceptDatasetImages(jObject);
+        yield return null;
     }
 
 
-    public void RequestDatasetImage(int imgIndex)
+    public void RequestDatasetImages()
     {
-        StartCoroutine(GetJSON(string.Format("data/image?imgindex={0}", imgIndex), DoNothing));
+        StartCoroutine(GetJSON("data/images", AcceptDatasetImages));
     }
 
 
     public void RequestNoiseImage()
     {
-        StartCoroutine(GetJSON("data/noise", DoNothing));
+        StartCoroutine(GetJSON("data/noiseimage", DoNothing));
     }
 }

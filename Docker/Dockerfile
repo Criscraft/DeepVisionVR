@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
+RUN addgroup --gid 250 inb
+RUN adduser --home /home/linse --shell /bin/bash --ingroup inb --uid 26268 linse
+
 # Install Python 3.8
 RUN apt-get update && apt-get install -y \
     python3.8 \
@@ -27,6 +30,11 @@ RUN pip3 install torchcontrib
 RUN pip3 install opencv-python
 RUN pip3 install pyzmq
 RUN pip3 install pygments
+RUN pip3 install falcon
+RUN pip3 install gunicorn
+RUN pip3 install httpie
+RUN pip3 install pytest
+
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     'ffmpeg' \
@@ -38,3 +46,5 @@ WORKDIR /app
 #make port 8888 available from outside, just in case the container is supposed to run jupyter notebooks
 EXPOSE 8888
 EXPOSE 5570
+
+USER linse:inb 

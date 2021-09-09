@@ -1,1 +1,1 @@
-docker build -t dl_cuda_11 .
+docker build -t dl_cuda_deep_vision_vr .

@@ -8,7 +8,7 @@ public class NoiseGenerateButton : MonoBehaviour
     [SerializeField]
     private ImageGetterButton imageGetterButton;
     [SerializeField]
-    private DLClient dlClient;
+    private DLWebClient dlClient;
 
 
     public void GenerateImage()
