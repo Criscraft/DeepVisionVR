@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F 
 import numpy as np
 import base64
 import cv2
@@ -172,3 +173,12 @@ class DLPerformer(object):
         self.feature_visualizations[layer_id] = created_images
         
         return export_images
+
+
+    def get_classification_result(self):
+        out = self.get_activation(len(self.features) - 1)
+        out = F.softmax(out, 1) * 100
+        out = out[0].cpu().numpy()
+        indices_tmp = np.argsort(-out)
+        indices_tmp = indices_tmp[:16]
+        return out[indices_tmp], indices_tmp

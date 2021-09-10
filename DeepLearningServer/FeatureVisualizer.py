@@ -17,7 +17,7 @@ class FeatureVisualizer(object):
         init_img_shape=(80, 80),
         norm_mean = [0.5487017, 0.5312975, 0.50504637],
         norm_std = [0.1878664, 0.18194826, 0.19830684],
-        epochs = 50,
+        epochs = 10,
         scaleup_schedule = {}):
         
         super().__init__()
