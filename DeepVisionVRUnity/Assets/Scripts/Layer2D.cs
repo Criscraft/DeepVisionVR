@@ -161,7 +161,6 @@ public class Layer2D : NetLayer
 
     public void SetActivationHistogramData(float[] weightCounts, float[] weightBins)
     {
-        
         activationHistogramGO.gameObject.SetActive(true);
         activationHistogram.ClearData();
         LinePlotter.DataItem dataItem;

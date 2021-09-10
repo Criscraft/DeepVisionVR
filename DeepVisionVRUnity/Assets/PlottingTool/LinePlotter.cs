@@ -242,6 +242,7 @@ public class LinePlotter : MonoBehaviour
 		var toDelete = new List<GameObject>();
 		foreach (Transform item in plotItemList) toDelete.Add(item.gameObject);
 		toDelete.ForEach(item => GameObject.Destroy(item));
+		plotItemList.Clear();
 	}
 
 
@@ -488,9 +489,14 @@ public class LinePlotter : MonoBehaviour
 			foreach (Transform item in yTickLabels) toDelete.Add(item.gameObject);
 			if (xAxis != null) toDelete.Add(xAxis.gameObject);
 			if (yAxis != null) toDelete.Add(yAxis.gameObject);
+			toDelete.ForEach(item => GameObject.Destroy(item));
+			xTicks.Clear();
+			yTicks.Clear();
+			xTickLabels.Clear();
+			yTickLabels.Clear();
+
 			xAxisModifier.text = "";
 			yAxisModifier.text = "";
-			toDelete.ForEach(item => GameObject.Destroy(item));
 		}
 	}
 

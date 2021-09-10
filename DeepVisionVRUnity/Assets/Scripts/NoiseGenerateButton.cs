@@ -1,7 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Newtonsoft.Json.Linq;
 
 public class NoiseGenerateButton : MonoBehaviour
 {
@@ -11,14 +10,10 @@ public class NoiseGenerateButton : MonoBehaviour
     private DLWebClient dlClient;
 
 
-    public void GenerateImage()
+    public IEnumerator AcceptNoiseImage(JObject jObject)
     {
-        dlClient.RequestNoiseImage();
-    }
-
-
-    public IEnumerator AcceptImage(Texture2D tex)
-    {
+        Texture2D tex = DLManager.StringToTex((string)jObject["tensor"]);
+        
         ActivationImage activationImage = new ActivationImage();
         activationImage.isRGB = true;
         activationImage.mode = ActivationImage.Mode.NoiseImage;
@@ -28,6 +23,15 @@ public class NoiseGenerateButton : MonoBehaviour
         imageGetterButton.ActivationImageUsed = activationImage;
         yield return null;
     }
+
+
+    public void RequestNoiseImage()
+    {
+        dlClient.RequestNoiseImage(AcceptNoiseImage);
+    }
+
+
+    
 
 
 }

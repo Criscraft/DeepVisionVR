@@ -132,11 +132,11 @@ public class DLManager : MonoBehaviour
 
     public void RequestNetworkArchitecture()
     {
-        _dlClient.RequestNetworkArchitecture();
+        _dlClient.RequestNetworkArchitecture(AcceptNetworkArchitecture);
     }
 
 
-    public void AcceptNetworkArchitecture(JObject jObject)
+    public IEnumerator AcceptNetworkArchitecture(JObject jObject)
     {
         Debug.Log("Received AcceptNetworkArchitecture");
         architecture = (JArray)jObject["architecture"];
@@ -165,12 +165,13 @@ public class DLManager : MonoBehaviour
                 RequestWeightHistogram(i);
             }
         }
+        yield return null;
     }
 
 
-    private Texture2D StringToTex(string textureString) 
+    public static Texture2D StringToTex(string textureString) 
     {
-         byte[] b64_bytes = System.Convert.FromBase64String(textureString);
+        byte[] b64_bytes = System.Convert.FromBase64String(textureString);
         Texture2D tex = new Texture2D(1, 1);
         if (ImageConversion.LoadImage(tex, b64_bytes))
         {
@@ -185,24 +186,26 @@ public class DLManager : MonoBehaviour
     }
 
 
-    public void AcceptDatasetImages(JObject jObject)
+    public void RequestDatasetImages()
+    {
+        _dlClient.RequestDatasetImages(AcceptDatasetImages);
+    }
+
+
+    public IEnumerator AcceptDatasetImages(JObject jObject)
     {
         Debug.Log("Received AcceptDatasetImages");
         //nClasses = (int)jObject["n_classes"];
         lenDataset = (int)jObject["len"];
         classNames = (JArray)jObject["class_names"];
+        JArray labelIDs = (JArray)jObject["label_ids"];
         for (int i = 0; i < lenDataset; i++)
         {
-            CreateDatasetImage(StringToTex((string)jObject["tensors"][i]), (string)classNames[i], i);
+            CreateDatasetImage(StringToTex((string)jObject["tensors"][i]), (string)classNames[(int)labelIDs[i]], i);
         }
+        yield return null;
     }
-
-
-    public void RequestDatasetImages()
-    {
-        _dlClient.RequestDatasetImages();
-    }
-
+   
 
     private void CreateDatasetImage(Texture2D tex, string className, int imgIndex)
     {
@@ -228,15 +231,27 @@ public class DLManager : MonoBehaviour
         string datatype = (string)architecture[layerID]["data_type"];
         if (datatype == "2D_feature_map" || datatype == "1D_vector")
         {
-            _dlClient.RequestLayerActivation(layerID);
+            _dlClient.RequestLayerActivation(AcceptLayerActivation, layerID);
         }
     }
 
-    public void AcceptLayerActivation(JObject jObject)
+
+    public void RequestLayerFeatureVisualization(int layerID)
+    {
+        string datatype = (string)architecture[layerID]["data_type"];
+        if (datatype == "2D_feature_map")
+        {
+            _dlClient.RequestLayerFeatureVisualization(AcceptLayerActivation, layerID);
+        }
+    }
+
+
+    public IEnumerator AcceptLayerActivation(JObject jObject)
     {
         int layerID = (int)jObject["layerID"];
         ActivationImage.Mode mode = (ActivationImage.Mode) Enum.Parse(typeof(ActivationImage.Mode), (string)jObject["mode"]);
-        float zeroValue = (float)jObject["zeroValue"];
+        float zeroValue = 0f;
+        if (jObject["zeroValue"] != null) zeroValue = (float)jObject["zeroValue"];
 
         Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
 
@@ -262,16 +277,7 @@ public class DLManager : MonoBehaviour
 
         var pos = layerIDToGridPosition[layerID];
         gridLayerElements[pos[0], pos[1]].GetComponent<NetLayer>().UpdateData(activationImageList, transform.localScale[0]);
-    }
-
-
-    public void RequestLayerFeatureVisualization(int layerID)
-    {
-        string datatype = (string)architecture[layerID]["data_type"];
-        if (datatype == "2D_feature_map")
-        {
-            _dlClient.RequestLayerFeatureVisualization(layerID);
-        }
+        yield return null;
     }
 
 
@@ -280,12 +286,13 @@ public class DLManager : MonoBehaviour
         string datatype = (string)architecture[layerID]["data_type"];
         if (datatype == "2D_feature_map")
         {
-            _dlClient.RequestWeightHistogram(layerID);
+            _dlClient.RequestWeightHistogram(AcceptWeightHistogram, layerID);
         }
     }
 
-    public void AcceptWeightHistogram(JObject jObject, int layerID)
+    public IEnumerator AcceptWeightHistogram(JObject jObject)
     {
+        int layerID = (int)jObject["layer_id"];
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
@@ -296,6 +303,7 @@ public class DLManager : MonoBehaviour
             var pos = layerIDToGridPosition[layerID];
             gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetWeightHistogramData(counts, bins);
         }
+        yield return null;
     }
 
 
@@ -304,12 +312,13 @@ public class DLManager : MonoBehaviour
         string datatype = (string)architecture[layerID]["data_type"];
         if (datatype == "2D_feature_map")
         {
-            _dlClient.RequestActivationHistogram(layerID);
+            _dlClient.RequestActivationHistogram(AcceptActivationHistogram, layerID);
         }
     }
 
-    public void AcceptActivationHistogram(JObject jObject, int layerID)
+    public IEnumerator AcceptActivationHistogram(JObject jObject)
     {
+        int layerID = (int)jObject["layer_id"];
         Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
@@ -317,27 +326,29 @@ public class DLManager : MonoBehaviour
         bins = jObject["bins"].ToObject<float[]>();
         var pos = layerIDToGridPosition[layerID];
         gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().SetActivationHistogramData(counts, bins);
+        yield return null;
     }
 
 
     public void RequestPrepareForInput(ActivationImage activationImage)
     {
-        _dlClient.RequestPrepareForInput(activationImage);
+        _dlClient.RequestPrepareForInput(AcceptPrepareForInput, activationImage);
     }
 
-    public void AcceptPrepareForInput()
+    public IEnumerator AcceptPrepareForInput()
     {
         UpdateAllLayers();
+        yield return null;
     }
 
 
-    public void RequestClassificationResult()
+    public void RequestClassificationResults()
     {
-        _dlClient.RequestClassificationResult();
+        _dlClient.RequestClassificationResults(AcceptClassificationResults);
     }
 
 
-    public void AcceptClassificationResult(JObject jObject)
+    public IEnumerator AcceptClassificationResults(JObject jObject)
     {
         // Remove old classification Results
         var children = new List<GameObject>();
@@ -345,8 +356,8 @@ public class DLManager : MonoBehaviour
         children.ForEach(child => Destroy(child));
 
         // fill the foreign result canvas
-        JArray classIndices = JArray.Parse(jObject["class_indices"].ToString());
-        JArray confidenceValues = JArray.Parse(jObject["confidence_values"].ToString());
+        JArray classIndices = (JArray) jObject["class_indices"];
+        JArray confidenceValues = (JArray) jObject["confidence_values"];
         for (int i = 0; i < classIndices.Count; i++)
         {
             GameObject newResultCanvasContentElement = (GameObject)Instantiate(resultCanvasContentElementPrefab, Vector3.zero, Quaternion.identity);
@@ -369,6 +380,7 @@ public class DLManager : MonoBehaviour
         ownResultCanvasInstance.name = "ClassificationResultCanvas";
         ownResultCanvasInstance.localPosition = new Vector3(0f, 1.3f, 0f);
         ownResultCanvasInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        yield return null;
     }
 
 
@@ -488,7 +500,7 @@ public class DLManager : MonoBehaviour
         {
             RequestLayerActivation(i);
         }
-        RequestClassificationResult();
+        RequestClassificationResults();
 
         if (showActivationHistograms)
         {
