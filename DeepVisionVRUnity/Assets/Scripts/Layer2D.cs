@@ -11,8 +11,6 @@ public class Layer2D : NetLayer
     [SerializeField]
     private GameObject channel2DPrefab;
     [SerializeField]
-    private Transform horizontalShift;
-    [SerializeField]
     private Material colormapMaterial;
     [SerializeField]
     private Material rgbMaterial;
@@ -46,7 +44,7 @@ public class Layer2D : NetLayer
         GenerateWeightHistogram();
         GenerateActivationHistogram();
 
-        // refresh layout so that the width and height of the into elements are set correctly
+        // refresh layout so that the width and height of the info elements are set correctly
         LayoutRebuilder.ForceRebuildLayoutImmediate(infoRectTransform);
         LayoutRebuilder.ForceRebuildLayoutImmediate(infoRectTransform);
         // disable the info elements until they are needed
@@ -185,28 +183,19 @@ public class Layer2D : NetLayer
         float scale = featureMaps.localScale.x * newScale;
         featureMaps.localScale = new Vector3(scale, scale, scale);
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
-        PositionAndScaleReloadOverlay();
-        Center();
+        ScaleReloadOverlay();
     }
 
 
-    private void PositionAndScaleReloadOverlay()
+    private void ScaleReloadOverlay()
     {
         float layerWidth = GetWidth(true);
-        reloadOverlay.localPosition = new Vector3(0.5f * layerWidth, 0.5f * layerWidth, reloadOverlay.localPosition.z);
-
         Vector3[] fourCornersArray = new Vector3[4];
         reloadOverlay.GetLocalCorners(fourCornersArray);
         float overlayWidth = Mathf.Abs(fourCornersArray[0].x - fourCornersArray[3].x) * reloadOverlay.localScale.x;
         float targetWidth = 0.5f * layerWidth;
         float scale = targetWidth / overlayWidth * reloadOverlay.localScale.x;
         reloadOverlay.localScale = new Vector3(scale, scale, scale);
-    }
-
-
-    public void Center()
-    {
-        horizontalShift.localPosition = new Vector3(- 0.5f * GetWidth(true), 0f, 0f);
     }
 
 

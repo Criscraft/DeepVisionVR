@@ -909,7 +909,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5825506eb7452c1e585297a0526de439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerCanvasPrefab: {fileID: 6169735619824728506, guid: bbe3f1179a194ed4ea8fdc61392a4e25, type: 3}
+  layerCanvasPrefab: {fileID: 6169735619824728506, guid: 0b9e2494107ba3b4cbbdb5b4e20e672d, type: 3}
   layer1DParticleSystemPrefab: {fileID: 7338802684524934001, guid: 434c93dbf25053e4794da4d9db884498, type: 3}
   networkImageInputFramePrefab: {fileID: 3431989500897937002, guid: 7118912ddf43ca74588536cea1e50ef6, type: 3}
   textPrefab: {fileID: 2951441993171094716, guid: 58175c3fa66f78c42ae5549dea9cc001, type: 3}
