@@ -36,6 +36,10 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [ ] button to enable or disable histograms
 - [x] fix loading the image input frame
 - [x] all feature maps are imagegetterbuttons
+- [ ] fix tools get stuck in ground when dropped
+- [ ] fix VR mode
+- [ ] Teleportation Mode in VR
+- [ ] VR UI for enabling disabling teleportation mode and free movement
 
 
 ## Notes

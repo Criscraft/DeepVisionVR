@@ -22,6 +22,9 @@ public class Layer2D : NetLayer
     private RectTransform infoRectTransform;
     [SerializeField]
     private GameObject linePlotterPrefab;
+    [SerializeField]
+    private RectTransform reloadOverlay;
+    private DLManager dlManager;
 
 
     private LinePlotter weightHistogram;
@@ -31,8 +34,10 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, Camera mainCamera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
+    public void Prepare(Vector3Int size, Camera mainCamera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor, DLManager _dlManager)
     {
+        dlManager = _dlManager;
+
         transform.GetComponent<Canvas>().worldCamera = mainCamera;
 
         GenerateFeatureMaps(size, rightInteractor, leftInteractor);
@@ -64,6 +69,8 @@ public class Layer2D : NetLayer
             ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
             imageGetterButton.Prepare(rightInteractor, leftInteractor);
             imageGetterButton.MaterialUsed = material;
+            FeatureVisualizationButton featureVisualizationButton = newChannel2DInstance.GetComponent<FeatureVisualizationButton>();
+            featureVisualizationButton.Prepare(rightInteractor, leftInteractor, dlManager);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
@@ -144,6 +151,8 @@ public class Layer2D : NetLayer
             imageGetterButton.MaterialUsed = material;
         }
         rgb = isRGB;
+
+        DisableReloadOverlay();
     }
 
 
@@ -176,12 +185,38 @@ public class Layer2D : NetLayer
         float scale = featureMaps.localScale.x * newScale;
         featureMaps.localScale = new Vector3(scale, scale, scale);
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
+        PositionAndScaleReloadOverlay();
         Center();
+    }
+
+
+    private void PositionAndScaleReloadOverlay()
+    {
+        float layerWidth = GetWidth(true);
+        reloadOverlay.localPosition = new Vector3(0.5f * layerWidth, 0.5f * layerWidth, reloadOverlay.localPosition.z);
+
+        Vector3[] fourCornersArray = new Vector3[4];
+        reloadOverlay.GetLocalCorners(fourCornersArray);
+        float overlayWidth = Mathf.Abs(fourCornersArray[0].x - fourCornersArray[3].x) * reloadOverlay.localScale.x;
+        float targetWidth = 0.5f * layerWidth;
+        float scale = targetWidth / overlayWidth * reloadOverlay.localScale.x;
+        reloadOverlay.localScale = new Vector3(scale, scale, scale);
     }
 
 
     public void Center()
     {
         horizontalShift.localPosition = new Vector3(- 0.5f * GetWidth(true), 0f, 0f);
+    }
+
+
+    private void DisableReloadOverlay()
+    {
+        reloadOverlay.gameObject.SetActive(false);
+    }
+
+    public void EnableReloadOverlay()
+    {
+        reloadOverlay.gameObject.SetActive(true);
     }
 }

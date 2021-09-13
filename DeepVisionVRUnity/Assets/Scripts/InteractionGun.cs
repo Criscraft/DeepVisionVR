@@ -8,16 +8,6 @@ public class InteractionGun : MonoBehaviour
     [SerializeField]
     private InputManager inputManager;
     [SerializeField]
-    private XRGrabInteractable xrInteractable;
-    [SerializeField]
-    private Transform raycastTransform;
-    [SerializeField]
-    private float range = 10f;
-    [SerializeField]
-    private LayerMask layerMask;
-
-    private bool hasLoadedItem = false;
-    [SerializeField]
     private GameObject holoImageGo;
     [SerializeField]
     private Renderer holoImageRenderer;
@@ -29,6 +19,8 @@ public class InteractionGun : MonoBehaviour
     private Material colormapMaterial;
     [SerializeField]
     private Material rgbMaterial;
+
+    private bool hasLoadedItem = false;
 
     private ActivationImage activationImageUsed;
     public ActivationImage ActivationImageUsed
@@ -107,7 +99,6 @@ public class InteractionGun : MonoBehaviour
             screenOverlay.enabled = true;
             screenOverlay.texture = holoImageRenderer.material.GetTexture("_MainTex");
             screenOverlay.material = holoImageRenderer.material;
-            screenOverlay.material.CopyPropertiesFromMaterial(holoImageRenderer.material);
         }
     }
 
