@@ -137,7 +137,7 @@ class DataNoiseImageResource:
 
     def on_get(self, req, resp):
         image = dl_performer.generate_noise_image()
-        image = image.numpy()
+        image = image.detach().cpu().numpy()
         image = image * 255
         image = image.astype("uint8")
         image = image[np.array([2,1,0])] # for sorting color channels

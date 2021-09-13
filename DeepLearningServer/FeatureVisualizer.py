@@ -17,7 +17,7 @@ class FeatureVisualizer(object):
         init_img_shape=(80, 80),
         norm_mean = [0.5487017, 0.5312975, 0.50504637],
         norm_std = [0.1878664, 0.18194826, 0.19830684],
-        epochs = 10,
+        epochs = 200,
         scaleup_schedule = {}):
         
         super().__init__()
@@ -39,6 +39,7 @@ class FeatureVisualizer(object):
 
 
     def visualize(self, model, module, device, n_channels, init_image):
+        init_image = init_image.to(device)
         regularize_transformation = Regularizer()
         export_transformation = ToImage(target_mean=self.norm_mean, target_std=self.norm_std)
         created_image = init_image.repeat(n_channels, 1, 1, 1)
@@ -54,7 +55,7 @@ class FeatureVisualizer(object):
             created_image.requires_grad = True
             out_dict = model.forward_features({'data' : created_image}, module)
             output = out_dict['activations'][0]['activation']
-            loss_max = torch.stack([output[i, i].mean() for i in range(n_channels)]).sum()
+            loss_max = -torch.stack([output[i, i].mean() for i in range(n_channels)]).sum()
             #loss_l2_reg = torch.norm(created_image, p=2) / (torch.tensor(np.sqrt(created_image.shape[1] * created_image.shape[2] * created_image.shape[3]), device=device))
             #loss_l2_reg = (created_image**2).mean()
             loss_tv_re = self.total_variation_loss(created_image)
@@ -82,7 +83,7 @@ class FeatureVisualizer(object):
             path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
             cv2.imwrite(path, export_image[0].transpose((1,2,0)))
 
-        return export_image, created_image
+        return export_image, created_image.detach()
 
 
     def total_variation_loss(self, x):

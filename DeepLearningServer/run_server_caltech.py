@@ -21,6 +21,7 @@ def get_dl_performer():
     dataset.prepare({'transform_test' : transform_test})
     dataset_to_tensor = DatasetClassesFromFolders(transform='transform_to_tensor', datapath=DATAPATH, copy_data_to='')
     dataset_to_tensor.prepare({'transform_to_tensor' : transform_to_tensor})
+    np.random.seed(42)
     data_indices = np.random.randint(len(dataset), size=N_IMAGES)
     model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='resnet018_finetuning.pt')
 
