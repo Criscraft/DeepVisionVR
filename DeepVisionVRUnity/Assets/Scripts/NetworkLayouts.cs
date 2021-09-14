@@ -102,7 +102,6 @@ public class NetworkLayouts
         // move and scale layers in x direction to their grid positions
         Vector3 position;
         NetLayer netLayerScript;
-        Layer2D layer2DScript;
         Transform textInstance;
         TextMeshPro textMesh;
         Transform gridLayerElement;

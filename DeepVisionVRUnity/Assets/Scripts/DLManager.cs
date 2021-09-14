@@ -371,7 +371,19 @@ public class DLManager : MonoBehaviour
         if (ownResultCanvasInstance != null)
         {
             Destroy(ownResultCanvasInstance.gameObject);
+            ownResultCanvasInstance = null;
         }
+        
+        StartCoroutine(CreateOwnResultCanvasInstance());
+        
+        yield return null;
+    }
+
+
+    private IEnumerator CreateOwnResultCanvasInstance()
+    {
+        // wait for one frame
+        yield return null;
         // create new own canvas instance
         var pos = layerIDToGridPosition[architecture.Count - 1];
         Transform lastLayer = gridLayerElements[pos[0], pos[1]];
@@ -380,7 +392,6 @@ public class DLManager : MonoBehaviour
         ownResultCanvasInstance.name = "ClassificationResultCanvas";
         ownResultCanvasInstance.localPosition = new Vector3(0f, 1.3f, 0f);
         ownResultCanvasInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
-        yield return null;
     }
 
 
@@ -415,7 +426,7 @@ public class DLManager : MonoBehaviour
                 newLayerInstance.transform.localRotation = transform.localRotation;
                 newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "2D_feature_map_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera, rightInteractor, leftInteractor);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera, rightInteractor, leftInteractor, this);
             }
             else if (datatype == "1D_vector")
             {
@@ -511,6 +522,12 @@ public class DLManager : MonoBehaviour
         }
     }
 
+
+    public void SetLoading(int layerID)
+    {
+        var pos = layerIDToGridPosition[layerID];
+        gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>().EnableReloadOverlay();
+    }
 
     private void Start()
     {
