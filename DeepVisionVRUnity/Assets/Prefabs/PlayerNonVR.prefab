@@ -672,6 +672,7 @@ GameObject:
   - component: {fileID: 8992139984299397355}
   - component: {fileID: 8992139984299397352}
   - component: {fileID: 8992139984299397353}
+  - component: {fileID: 6622384750283388721}
   - component: {fileID: 8992139984299397358}
   - component: {fileID: 8992139984299397359}
   - component: {fileID: 8992139984299397354}
@@ -728,9 +729,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7fe5f1d2674464479aa0bbbc194c41f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  screenshotPath: Screenshots
+--- !u!114 &6622384750283388721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8992139984299397356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b8b65d08ef834a488eeaa047b259ae4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   movement: {fileID: 8992139984299397358}
   mouseLook: {fileID: 8992139984299397359}
-  screenshotPath: .
 --- !u!114 &8992139984299397358
 MonoBehaviour:
   m_ObjectHideFlags: 0

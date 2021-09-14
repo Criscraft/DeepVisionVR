@@ -36,11 +36,11 @@ https://downloads.imagej.net/fiji/snapshots/arc_length.pdf
 - [ ] button to enable or disable histograms
 - [x] fix loading the image input frame
 - [x] all feature maps are imagegetterbuttons
-- [ ] fix tools get stuck in ground when dropped
+- [x] fix tools get stuck in ground when dropped
 - [ ] fix VR mode
 - [ ] Teleportation Mode in VR
 - [ ] VR UI for enabling disabling teleportation mode and free movement
-
+- [ ] input manager registers if an interaction gun fires and is able to reset the firing states as soon as some button is pressed. The interactiongun script is a generic script. The featurevisualizer and the imageselector subclass the interaction gun scipt 
 
 ## Notes
 Steps to enable/disable VR:

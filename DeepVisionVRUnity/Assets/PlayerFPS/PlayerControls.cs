@@ -1,4 +1,4 @@
-// GENERATED AUTOMATICALLY FROM 'Assets/Player/PlayerControls.inputactions'
+// GENERATED AUTOMATICALLY FROM 'Assets/PlayerFPS/PlayerControls.inputactions'
 
 using System;
 using System.Collections;
@@ -166,17 +166,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             ""id"": ""4b96e8c1-cb79-4c27-b36a-09cb229cba24"",
             ""actions"": [
                 {
-                    ""name"": ""Pickup"",
+                    ""name"": ""SwitchTool"",
                     ""type"": ""Button"",
                     ""id"": ""2df3d066-235b-496f-9779-b5027d257d11"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """"
-                },
-                {
-                    ""name"": ""Drop"",
-                    ""type"": ""Button"",
-                    ""id"": ""d0871d46-2dd0-45c2-8981-71ab0ec9a48a"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
@@ -214,18 +206,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Pickup"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""22d0e5a8-8beb-4c63-8826-ea0f7c2feb80"",
-                    ""path"": ""<Keyboard>/q"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Drop"",
+                    ""action"": ""SwitchTool"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -276,8 +257,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_GroundMovement_MouseY = m_GroundMovement.FindAction("MouseY", throwIfNotFound: true);
         // Interact
         m_Interact = asset.FindActionMap("Interact", throwIfNotFound: true);
-        m_Interact_Pickup = m_Interact.FindAction("Pickup", throwIfNotFound: true);
-        m_Interact_Drop = m_Interact.FindAction("Drop", throwIfNotFound: true);
+        m_Interact_SwitchTool = m_Interact.FindAction("SwitchTool", throwIfNotFound: true);
         m_Interact_Fire1 = m_Interact.FindAction("Fire1", throwIfNotFound: true);
         m_Interact_Fire2 = m_Interact.FindAction("Fire2", throwIfNotFound: true);
         m_Interact_Screenshot = m_Interact.FindAction("Screenshot", throwIfNotFound: true);
@@ -395,8 +375,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     // Interact
     private readonly InputActionMap m_Interact;
     private IInteractActions m_InteractActionsCallbackInterface;
-    private readonly InputAction m_Interact_Pickup;
-    private readonly InputAction m_Interact_Drop;
+    private readonly InputAction m_Interact_SwitchTool;
     private readonly InputAction m_Interact_Fire1;
     private readonly InputAction m_Interact_Fire2;
     private readonly InputAction m_Interact_Screenshot;
@@ -404,8 +383,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     {
         private @PlayerControls m_Wrapper;
         public InteractActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Pickup => m_Wrapper.m_Interact_Pickup;
-        public InputAction @Drop => m_Wrapper.m_Interact_Drop;
+        public InputAction @SwitchTool => m_Wrapper.m_Interact_SwitchTool;
         public InputAction @Fire1 => m_Wrapper.m_Interact_Fire1;
         public InputAction @Fire2 => m_Wrapper.m_Interact_Fire2;
         public InputAction @Screenshot => m_Wrapper.m_Interact_Screenshot;
@@ -418,12 +396,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         {
             if (m_Wrapper.m_InteractActionsCallbackInterface != null)
             {
-                @Pickup.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
-                @Pickup.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
-                @Pickup.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnPickup;
-                @Drop.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
-                @Drop.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
-                @Drop.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnDrop;
+                @SwitchTool.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnSwitchTool;
+                @SwitchTool.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnSwitchTool;
+                @SwitchTool.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnSwitchTool;
                 @Fire1.started -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
                 @Fire1.performed -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
                 @Fire1.canceled -= m_Wrapper.m_InteractActionsCallbackInterface.OnFire1;
@@ -437,12 +412,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
             m_Wrapper.m_InteractActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @Pickup.started += instance.OnPickup;
-                @Pickup.performed += instance.OnPickup;
-                @Pickup.canceled += instance.OnPickup;
-                @Drop.started += instance.OnDrop;
-                @Drop.performed += instance.OnDrop;
-                @Drop.canceled += instance.OnDrop;
+                @SwitchTool.started += instance.OnSwitchTool;
+                @SwitchTool.performed += instance.OnSwitchTool;
+                @SwitchTool.canceled += instance.OnSwitchTool;
                 @Fire1.started += instance.OnFire1;
                 @Fire1.performed += instance.OnFire1;
                 @Fire1.canceled += instance.OnFire1;
@@ -466,8 +438,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     }
     public interface IInteractActions
     {
-        void OnPickup(InputAction.CallbackContext context);
-        void OnDrop(InputAction.CallbackContext context);
+        void OnSwitchTool(InputAction.CallbackContext context);
         void OnFire1(InputAction.CallbackContext context);
         void OnFire2(InputAction.CallbackContext context);
         void OnScreenshot(InputAction.CallbackContext context);

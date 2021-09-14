@@ -34,13 +34,7 @@ public class DLManager : MonoBehaviour
     [SerializeField]
     private Transform foreignResultCanvasInstance;
     private Transform ownResultCanvasInstance;
-    [SerializeField]
-    private XRBaseInteractor rightInteractor;
-    [SerializeField]
-    private XRBaseInteractor leftInteractor;
     private Transform networkImageInputFrameInstance;
-    [SerializeField]
-    private Camera mainCamera;
 
     // network data
     [SerializeField]
@@ -112,22 +106,6 @@ public class DLManager : MonoBehaviour
     private float maxEdgeLabelSize = 1f;
     private List<Transform> edges = new List<Transform>();
     private List<Transform> edgeLabels = new List<Transform>();
-    
-
-    [SerializeField]
-    private bool manualUpdate = false;
-    [SerializeField]
-    private int manualUpdateVisualizationLayerID = 1;
-
-
-    private void Update()
-    {
-        if (manualUpdate)
-        {
-            RequestLayerFeatureVisualization(manualUpdateVisualizationLayerID);
-            manualUpdate = false;
-        }
-    }
 
 
     public void RequestNetworkArchitecture()
@@ -138,7 +116,6 @@ public class DLManager : MonoBehaviour
 
     public IEnumerator AcceptNetworkArchitecture(JObject jObject)
     {
-        Debug.Log("Received AcceptNetworkArchitecture");
         architecture = (JArray)jObject["architecture"];
 
         // find grid size
@@ -154,7 +131,6 @@ public class DLManager : MonoBehaviour
         gridSize[0] = gridSize[0] + 1;
         gridSize[1] = gridSize[1] + 1;
         
-        Debug.Log("Create Layers");
         CreateLayers();
         
         UpdateAllLayers();
@@ -194,7 +170,6 @@ public class DLManager : MonoBehaviour
 
     public IEnumerator AcceptDatasetImages(JObject jObject)
     {
-        Debug.Log("Received AcceptDatasetImages");
         //nClasses = (int)jObject["n_classes"];
         lenDataset = (int)jObject["len"];
         classNames = (JArray)jObject["class_names"];
@@ -221,7 +196,6 @@ public class DLManager : MonoBehaviour
         newImageGetterButton.name = "ImageGetterButton " + string.Format("{0}", imgIndex);
         newImageGetterButton.transform.SetParent(imagePickerCanvasContent, false);
         var imageGetterButtonScript = newImageGetterButton.GetComponent<ImageGetterButton>();
-        imageGetterButtonScript.Prepare(rightInteractor, leftInteractor);
         imageGetterButtonScript.ActivationImageUsed = activationImage;
     }
 
@@ -252,8 +226,6 @@ public class DLManager : MonoBehaviour
         ActivationImage.Mode mode = (ActivationImage.Mode) Enum.Parse(typeof(ActivationImage.Mode), (string)jObject["mode"]);
         float zeroValue = 0f;
         if (jObject["zeroValue"] != null) zeroValue = (float)jObject["zeroValue"];
-
-        Debug.Log("Received AcceptLayerActivation for layer " + string.Format("{0}", layerID));
 
         bool isRGB = false;
         if (mode == ActivationImage.Mode.Activation) isRGB = false;
@@ -293,7 +265,6 @@ public class DLManager : MonoBehaviour
     public IEnumerator AcceptWeightHistogram(JObject jObject)
     {
         int layerID = (int)jObject["layer_id"];
-        Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
         if ((string)jObject["has_weights"] == "True")
@@ -319,7 +290,6 @@ public class DLManager : MonoBehaviour
     public IEnumerator AcceptActivationHistogram(JObject jObject)
     {
         int layerID = (int)jObject["layer_id"];
-        Debug.Log("Received AcceptWeightHistogram for layer " + string.Format("{0}", layerID));
         float[] counts;
         float[] bins;
         counts = jObject["counts"].ToObject<float[]>();
@@ -404,7 +374,7 @@ public class DLManager : MonoBehaviour
         networkImageInputFrameInstance.localPosition = new Vector3(0f, 0f, -minimalZOffset);
         networkImageInputFrameInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
         networkImageInputFrameInstance.name = "Network Image Input Frame";
-        networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this, mainCamera, rightInteractor, leftInteractor);
+        networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this);
 
         // create network layers without positioning or scaling them
         gridLayerElements = new Transform[gridSize[0], gridSize[1]];
@@ -426,7 +396,7 @@ public class DLManager : MonoBehaviour
                 newLayerInstance.transform.localRotation = transform.localRotation;
                 newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "2D_feature_map_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.GetComponent<Layer2D>().Prepare(size, mainCamera, rightInteractor, leftInteractor, this);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, this);
             }
             else if (datatype == "1D_vector")
             {

@@ -153,17 +153,9 @@
             "id": "4b96e8c1-cb79-4c27-b36a-09cb229cba24",
             "actions": [
                 {
-                    "name": "Pickup",
+                    "name": "SwitchTool",
                     "type": "Button",
                     "id": "2df3d066-235b-496f-9779-b5027d257d11",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
-                    "name": "Drop",
-                    "type": "Button",
-                    "id": "d0871d46-2dd0-45c2-8981-71ab0ec9a48a",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -201,18 +193,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Pickup",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "22d0e5a8-8beb-4c63-8826-ea0f7c2feb80",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Drop",
+                    "action": "SwitchTool",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -12,11 +12,14 @@ public class NetworkImageInputFrame : MonoBehaviour
     private Canvas canvas;
 
 
-    public void Prepare(DLManager dlManager, Camera camera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
+    private void Start()
+    {
+        canvas.worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+    }
+
+    public void Prepare(DLManager dlManager)
     {
         _dlManager = dlManager;
-        canvas.worldCamera = camera;
-        imageGetterButton.Prepare(rightInteractor, leftInteractor);
     }
 
     public void LoadImageFromImageGetterButton()

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit;
 
 
 public class Layer2D : NetLayer
@@ -32,13 +31,13 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, Camera mainCamera, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor, DLManager _dlManager)
+    public void Prepare(Vector3Int size, DLManager _dlManager)
     {
         dlManager = _dlManager;
 
-        transform.GetComponent<Canvas>().worldCamera = mainCamera;
+        transform.GetComponent<Canvas>().worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
-        GenerateFeatureMaps(size, rightInteractor, leftInteractor);
+        GenerateFeatureMaps(size);
 
         // generate plots and disable them for later use
         GenerateWeightHistogram();
@@ -53,7 +52,7 @@ public class Layer2D : NetLayer
     }
 
 
-    private void GenerateFeatureMaps(Vector3Int size, XRBaseInteractor rightInteractor, XRBaseInteractor leftInteractor)
+    private void GenerateFeatureMaps(Vector3Int size)
     {
         Material material = Instantiate(colormapMaterial);
         for (int i = 0; i < size[0]; i++)
@@ -65,10 +64,9 @@ public class Layer2D : NetLayer
             newChannel2DInstance.localRotation = Quaternion.identity;
             newChannel2DInstance.localScale = Vector3.one;
             ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
-            imageGetterButton.Prepare(rightInteractor, leftInteractor);
             imageGetterButton.MaterialUsed = material;
             FeatureVisualizationButton featureVisualizationButton = newChannel2DInstance.GetComponent<FeatureVisualizationButton>();
-            featureVisualizationButton.Prepare(rightInteractor, leftInteractor, dlManager);
+            featureVisualizationButton.Prepare(dlManager);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
