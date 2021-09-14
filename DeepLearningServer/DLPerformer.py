@@ -161,6 +161,9 @@ class DLPerformer(object):
     def get_feature_visualization(self, layer_id, debug=False):
         if self.features is None:
             self.prepare_for_input(0)
+            
+        if layer_id == 0:
+            return np.zeros((self.features[layer_id]["size"][1], 3, 1, 1))
         
         module = self.features[layer_id]["module"]
         n_channels = self.features[layer_id]["size"][1]
@@ -171,7 +174,6 @@ class DLPerformer(object):
             return self.feature_visualizer, self.model, module, self.device, n_channels, self.active_data_item.data
         
         self.feature_visualizations[layer_id] = created_images
-        
         return export_images
 
 

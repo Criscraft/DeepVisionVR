@@ -146,15 +146,7 @@ class DataNoiseImageResource:
         out = {'tensor' : image_enc}
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
         print("send DataNoiseImageResource")
-
-
         
-
-
-
-
-
-
 
 class TestShortResource:
 
