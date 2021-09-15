@@ -5,6 +5,10 @@ import torch.nn.functional as F
 from torchvision import transforms
 import numpy as np
 
+
+BATCHSIZE = 256
+
+
 class FeatureVisualizer(object):
     
     def __init__(self, 
@@ -34,56 +38,64 @@ class FeatureVisualizer(object):
         self.scaleup_schedule = scaleup_schedule
 
 
-    def generate_noise_image(self, device):
-        return torch.randn((3, self.init_img_shape[0], self.init_img_shape[1]), device=device)
-
-
     def visualize(self, model, module, device, n_channels, init_image):
         init_image = init_image.to(device)
         regularize_transformation = Regularizer()
         export_transformation = ToImage(target_mean=self.norm_mean, target_std=self.norm_std)
-        created_image = init_image.repeat(n_channels, 1, 1, 1)
-        created_image.requires_grad = True
-
-        for epoch in range(self.epochs):
-            with torch.no_grad():
-                created_image = regularize_transformation(created_image)
-                if epoch in self.scaleup_schedule:
-                    created_image = F.interpolate(created_image, size=self.scaleup_schedule[epoch], mode='bilinear')
-            
-            created_image = created_image.detach()
-            created_image.requires_grad = True
-            out_dict = model.forward_features({'data' : created_image}, module)
-            output = out_dict['activations'][0]['activation']
-            loss_max = -torch.stack([output[i, i].mean() for i in range(n_channels)]).sum()
-            #loss_l2_reg = torch.norm(created_image, p=2) / (torch.tensor(np.sqrt(created_image.shape[1] * created_image.shape[2] * created_image.shape[3]), device=device))
-            #loss_l2_reg = (created_image**2).mean()
-            loss_tv_re = self.total_variation_loss(created_image)
-            #loss = self.max_factor * loss_max + self.l2_reg * loss_l2_reg + self.tv_reg * loss_tv_re
-            loss = self.max_factor * loss_max + self.tv_reg * loss_tv_re
-            
-            loss.backward()
-            gradients = created_image.grad / (torch.sqrt((created_image.grad**2).mean()) + 1e-6)
-            created_image = created_image - gradients * self.lr
-
-            #print(epoch, loss_max.item(), loss_l2_reg.item(), loss_tv_re.item())
-            print(epoch, loss_max.item(), loss_tv_re.item())
-
-            if self.export and epoch % self.export_interval == 0:
-                with torch.no_grad():
-                    export_image = export_transformation(created_image.detach().cpu())[0]
-                path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
-                cv2.imwrite(path, export_image.transpose((1,2,0)))
-
+        n_batches = int( np.ceil( n_channels / float(BATCHSIZE) ) )
         
+        created_image_aggregate = []
+        for batchid in range(n_batches):
+            
+            n_batch_items = BATCHSIZE
+            if batchid == n_batches - 1:
+                n_batch_items = n_channels - (n_batches - 1) * BATCHSIZE
+            
+            created_image = init_image.repeat(n_batch_items, 1, 1, 1).detach()
+            created_image.requires_grad = True
+
+            for epoch in range(self.epochs):
+                with torch.no_grad():
+                    created_image = regularize_transformation(created_image)
+                    if epoch in self.scaleup_schedule:
+                        created_image = F.interpolate(created_image, size=self.scaleup_schedule[epoch], mode='bilinear')
+                
+                created_image = created_image.detach()
+                created_image.requires_grad = True
+                out_dict = model.forward_features({'data' : created_image}, module)
+                output = out_dict['activations'][0]['activation']
+                loss_max = -torch.stack([output[i, i].mean() for i in range(n_batch_items)]).sum()
+                #loss_l2_reg = torch.norm(created_image, p=2) / (torch.tensor(np.sqrt(created_image.shape[1] * created_image.shape[2] * created_image.shape[3]), device=device))
+                #loss_l2_reg = (created_image**2).mean()
+                loss_tv_re = self.total_variation_loss(created_image)
+                #loss = self.max_factor * loss_max + self.l2_reg * loss_l2_reg + self.tv_reg * loss_tv_re
+                loss = self.max_factor * loss_max + self.tv_reg * loss_tv_re
+                
+                loss.backward()
+                gradients = created_image.grad / (torch.sqrt((created_image.grad**2).mean()) + 1e-6)
+                created_image = created_image - gradients * self.lr
+
+                #print(epoch, loss_max.item(), loss_l2_reg.item(), loss_tv_re.item())
+                print(epoch, loss_max.item(), loss_tv_re.item())
+
+                if self.export and epoch % self.export_interval == 0 and batchid == 0:
+                    with torch.no_grad():
+                        export_image = export_transformation(created_image.detach().cpu())[0]
+                    path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
+                    cv2.imwrite(path, export_image.transpose((1,2,0)))
+
+            created_image_aggregate.append(created_image.detach().cpu())
+
+        created_image = torch.cat(created_image_aggregate, 0)
+
         with torch.no_grad():
-            export_image = export_transformation(created_image.detach().cpu())
+            export_image = export_transformation(created_image)
         
         if self.export:
             path = os.path.join("tmp_images", '{:d}.jpg'.format(epoch))
             cv2.imwrite(path, export_image[0].transpose((1,2,0)))
 
-        return export_image, created_image.detach()
+        return export_image, created_image
 
 
     def total_variation_loss(self, x):

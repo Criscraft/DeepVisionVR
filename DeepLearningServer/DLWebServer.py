@@ -1,90 +1,143 @@
 import json
 import time
+import torch
 import numpy as np
+import falcon
+import utils
 import run_server_caltech
 from ActivationImage import ActivationImage
 
+networks = run_server_caltech.get_dl_networks()
+datasets = run_server_caltech.get_datasets()
+noise_generators = run_server_caltech.get_noise_generators()
 
-dl_performer = run_server_caltech.get_dl_performer()
+for i, network in enumerate(networks):
+    dataset = datasets[0]
+    data = torch.zeros(dataset.get_data_item(0, True)[0].shape)
+    activation_image = ActivationImage(image_ID=0, mode=ActivationImage.Mode.DatasetImage, data=data)
+    network.prepare_for_input(activation_image)
 
 
 class NetworkResource:
 
     def on_get(self, req, resp):
-        out = dl_performer.get_architecture()
+        out = {
+            "nnetworks" : len(networks),
+            "ndatasets" : len(datasets),
+            "nnoiseGenerators" : len(noise_generators),
+        }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
         print("send NetworkResource")
 
 
+class NetworkArchitectureResource:
+
+    def on_get(self, req, resp, networkid):
+        out = networks[networkid].get_architecture()
+        out["networkid"] = networkid
+        resp.text = json.dumps(out, indent=1, ensure_ascii=False)
+        print("send NetworkArchitectureResource for network {networkid}")
+
+
 class NetworkActivationImageResource:
 
-    def on_get(self, req, resp, layerid : int):
-        tensor = dl_performer.get_activation(layerid)
+    def on_get(self, req, resp, networkid : int, layerid : int):
+        network = networks[networkid]
+        tensor = network.get_activation(layerid)
         # give first element of activations because we do not want to have the batch dimension
         tensor = tensor[0]
-        data = dl_performer.tensor_to_uint_transform(tensor, True)
-        zero_value = dl_performer.tensor_to_uint_transform(0., False)
+        tensor_to_uint_transform = utils.TransformToUint()
+        data = tensor_to_uint_transform(tensor, True)
+        zero_value = tensor_to_uint_transform(0., False)
         
         # if the layer has 1D data, make a 2D image out of it
         if len(data.shape) == 1:
             data = data[None, None, ...]
 
-        tensors = [dl_performer.encode_image(ten) for ten in data]
+        tensors = [utils.encode_image(ten) for ten in data]
         out = {
             "tensors" : tensors,
+            "networkid" : networkid,
             "layerID" : layerid,
             "zeroValue" : int(zero_value),
             "mode" : "Activation",
             }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print(f"send NetworkActivationImageResource {layerid}")
+        print(f"send NetworkActivationImageResource for network {networkid} layer {layerid}")
 
 
 class NetworkFeatureVisualizationResource:
 
-    def on_get(self, req, resp, layerid : int):
-        data = dl_performer.get_feature_visualization(layerid)
+    def on_get(self, req, resp, networkid : int, layerid : int):
+        network = networks[networkid]
+        data = network.get_feature_visualization(layerid)
         data = data[:,np.array([2, 1, 0])] # for sorting color channels
         data = data.transpose([0, 2, 3, 1]) # put channel dimension to last
-        tensors = [dl_performer.encode_image(ten) for ten in data]
+        tensors = [utils.encode_image(ten) for ten in data]
         out = {
             "tensors" : tensors,
+            "networkid" : networkid,
             "layerID" : layerid,
             "mode" : "FeatureVisualization",
             }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print(f"send NetworkFeatureVisualizationResource {layerid}")
+        print(f"send NetworkFeatureVisualizationResource for network {networkid} layer {layerid}")
 
 
 class NetworkPrepareForInputResource:
 
-    def on_put(self, req, resp):
+    def on_put(self, req, resp, networkid : int):
         jsonfile = json.load(req.stream)
         activation_image = ActivationImage(
+            network_ID = jsonfile["networkID"],
+            dataset_ID = jsonfile["datasetID"],
             image_ID = jsonfile["imageID"],
             layer_ID = jsonfile["layerID"],
             channel_ID = jsonfile["channelID"],
+            noise_generator_ID = jsonfile["noiseGeneratorID"],
             mode = ActivationImage.Mode(jsonfile["mode"]))
-        dl_performer.prepare_for_input(activation_image)
-        print("send NetworkPrepareForInputResource")
+        
+        network = networks[networkid]
+
+        image = None
+        if activation_image.mode == ActivationImage.Mode.DatasetImage and activation_image.image_ID >= 0:
+            image = datasets[activation_image.dataset_ID].get_data_item(activation_image.image_ID, True)[0]
+        elif activation_image.mode == ActivationImage.Mode.FeatureVisualization:
+            image = networks[activation_image.network_ID].feature_visualizations[activation_image.layer_ID][activation_image.channel_ID]
+        elif activation_image.mode == ActivationImage.Mode.NoiseImage:
+            image = noise_generators[activation_image.noise_generator_ID].get_noise_image()
+        elif activation_image.mode == ActivationImage.Mode.Activation:
+            raise falcon.HTTPBadRequest(title="You cannot load an activation")
+            return None
+        else:
+            image = torch.zeros(dataset.get_data_item(0, True)[0].shape)
+        activation_image.data = image
+
+        network.prepare_for_input(activation_image)
+        print(f"send NetworkPrepareForInputResource for network {networkid}")
 
 
 class NetworkClassificationResultResource:
 
-    def on_get(self, req, resp):
-        posteriors, class_indices = dl_performer.get_classification_result()
+    def on_get(self, req, resp, networkid : int):
+        network = networks[networkid]
+        dataset = datasets[network.active_data_item.dataset_ID]
+        class_names = dataset.class_names
+        posteriors, class_indices = network.get_classification_result()
         out = {
-            'class_indices' : [f'{item}' for item in class_indices], 
-            'confidence_values' : [f'{item:.2f}' for item in posteriors],
+            "networkid" : networkid,
+            "class_names" : list(class_names[class_indices]), 
+            "confidence_values" : [f"{item:.2f}" for item in posteriors],
+
         }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print("send NetworkClassificationResultResource")
+        print(f"send NetworkClassificationResultResource for network {networkid}")
 
 
 class NetworkWeightHistogramResource:
 
-    def on_get(self, req, resp, layerid : int):
-        weights = dl_performer.get_weights(layerid)
+    def on_get(self, req, resp, networkid : int, layerid : int):
+        weights = networks[networkid].get_weights(layerid)
         has_weights = weights is not None
         if has_weights:
             hist, bins = np.histogram(weights.detach().cpu().numpy(), 16)
@@ -92,60 +145,60 @@ class NetworkWeightHistogramResource:
         else:
             hist, bins = [], []
         out = {
-            'layer_id' : layerid,
-            'has_weights' : str(has_weights),
-            'counts' : [f'{item}' for item in hist], 
-            'bins' : [f'{item}' for item in bins],
+            "networkid" : networkid,
+            "layer_id" : layerid,
+            "has_weights" : str(has_weights),
+            "counts" : [f"{item}" for item in hist], 
+            "bins" : [f"{item}" for item in bins],
         }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print(f"send NetworkWeightHistogramResource {layerid}")
+        print(f"send NetworkWeightHistogramResource for network {networkid} layer {layerid}")
 
 
 class NetworkActivationHistogramResource:
 
-    def on_get(self, req, resp, layerid : int):
-        activations = dl_performer.get_activation(layerid)
+    def on_get(self, req, resp, networkid : int, layerid : int):
+        activations = networks[networkid].get_activation(layerid)
         hist, bins = np.histogram(activations.detach().cpu().numpy(), 16)
         bins = 0.5 * (bins[1:] + bins[:-1])
         out = {
-            'layer_id' : layerid,
-            'counts' : [f'{item}' for item in hist], 
-            'bins' : [f'{item}' for item in bins],
+            "networkid" : networkid,
+            "layer_id" : layerid,
+            "counts" : [f"{item}" for item in hist], 
+            "bins" : [f"{item}" for item in bins],
         }
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print(f"send NetworkActivationHistogramResource {layerid}")
+        print(f"send NetworkActivationHistogramResource for network {networkid} layer {layerid}")
 
         
 class DataImagesResource:
 
-    def on_get(self, req, resp):
-        out = dl_performer.get_data_overview()
+    def on_get(self, req, resp, datasetid : int):
+        dataset = datasets[datasetid]
+        out = dataset.get_data_overview()
         tensors = []
         labels = []
         for i in range(out["len"]):
-            tensor, label = dl_performer.get_data_item(i)
-            tensors.append(dl_performer.tensor_to_string(tensor))
+            tensor, label = dataset.get_data_item(i, False)
+            tensors.append(utils.tensor_to_string(tensor))
             labels.append(label)
         out['tensors'] = tensors
         out['label_ids'] = labels
-        out["class_names"] = dl_performer.dataset.class_names
+        out["class_names"] = list(dataset.class_names)
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print("send DataImagesResource")
+        print("send DataImagesResource for dataset {datasetid}")
 
 
 class DataNoiseImageResource:
 
-    def on_get(self, req, resp):
-        image = dl_performer.generate_noise_image()
-        image = image.detach().cpu().numpy()
-        image = image * 255
-        image = image.astype("uint8")
-        image = image[np.array([2,1,0])] # for sorting color channels
-        image = image.transpose([1,2,0]) # put channel dimension to last
-        image_enc = dl_performer.encode_image(image)
+    def on_get(self, req, resp, noiseid : int):
+        noise_generator = noise_generators[noiseid]
+        noise_generator.generate_noise_image()
+        image = noise_generator.get_noise_image()
+        image_enc = utils.tensor_to_string(image)
         out = {'tensor' : image_enc}
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
-        print("send DataNoiseImageResource")
+        print("send DataNoiseImageResource for noise generator {noiseid}")
         
 
 class TestShortResource:

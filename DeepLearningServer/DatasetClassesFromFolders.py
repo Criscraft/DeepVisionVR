@@ -43,7 +43,7 @@ class DatasetClassesFromFolders(object):
         
         classfolder_paths = [os.path.join(self.datapath, name) for name in sorted(os.listdir(self.datapath)) if os.path.isdir(os.path.join(self.datapath, name))]
         self.n_classes = len(classfolder_paths)
-        self.class_names = [item.split('/')[-1] for item in classfolder_paths]
+        self.class_names = np.array([item.split('/')[-1] for item in classfolder_paths])
 
         self.image_paths = []
         self.image_labels = []
