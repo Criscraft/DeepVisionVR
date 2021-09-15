@@ -12,7 +12,9 @@ public struct ActivationImage
     }
 
     public ActivationImage(
-        int _imageID = -1,
+        int _networkID = -1,
+        int _datasetID = -1,
+        int _noiseGeneratorID = -1,
         int _layerID = -1,
         int _channelID = -1,
         string _className = "",
@@ -22,7 +24,10 @@ public struct ActivationImage
         int _nDim = -1,
         Texture _tex = null)
     {
-        imageID = _imageID;
+        networkID = _networkID;
+        datasetID = _datasetID;
+        noiseGeneratorID = _noiseGeneratorID;
+        imageID = _layerID;
         layerID = _layerID;
         channelID = _channelID;
         className = _className;
@@ -33,6 +38,9 @@ public struct ActivationImage
         tex = _tex;
     }
 
+    public int networkID;
+    public int datasetID;
+    public int noiseGeneratorID;
     public int imageID;
     public int layerID;
     public int channelID;

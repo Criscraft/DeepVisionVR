@@ -384,7 +384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.001
+      value: -0.01
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -409,6 +409,18 @@ PrefabInstance:
     - target: {fileID: 7842651195149900020, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: canReturnImage
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842651195149900020, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: canAcceptNoiseImage
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842651195149900020, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: canAcceptDatasetImage
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842651195149900020, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: canAcceptFeatureVisualizationImage
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}

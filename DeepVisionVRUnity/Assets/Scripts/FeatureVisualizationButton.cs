@@ -3,15 +3,15 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class FeatureVisualizationButton : MonoBehaviour
 {
-	private DLManager dlManager;
+	private DLNetwork dlNetwork;
 	[SerializeField]
 	private ImageGetterButton imageGetterButton;
 
 
 
-	public void Prepare(DLManager _dlManager)
+	public void Prepare(DLNetwork _dlNetwork)
 	{
-		dlManager = _dlManager;
+		dlNetwork = _dlNetwork;
 	}
 
 
@@ -27,8 +27,8 @@ public class FeatureVisualizationButton : MonoBehaviour
 		FeatureVisualizer featureVisualizer = selectTarget.gameObject.GetComponent<FeatureVisualizer>();
 		if (featureVisualizer != null)
 		{
-			dlManager.RequestLayerFeatureVisualization(imageGetterButton.ActivationImageUsed.layerID);
-			dlManager.SetLoading(imageGetterButton.ActivationImageUsed.layerID);
+			dlNetwork.RequestLayerFeatureVisualization(imageGetterButton.ActivationImageUsed.layerID);
+			dlNetwork.SetLoading(imageGetterButton.ActivationImageUsed.layerID);
 		}
 	}
 }

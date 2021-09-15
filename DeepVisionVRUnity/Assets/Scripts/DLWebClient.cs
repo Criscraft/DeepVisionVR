@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Globalization;
 using UnityEngine.Networking;
 using System.Text;
 
@@ -12,7 +11,13 @@ public class DLWebClient : MonoBehaviour
     [SerializeField]
     private string url = "http://127.0.0.1:5570/";
     [SerializeField]
-    private DLManager dlManager;
+    private GameObject dlNetworkPrefab;
+    [SerializeField]
+    private GameObject datasetPrefab;
+    [SerializeField]
+    private GameObject noiseGeneratorPrefab;
+
+    private List<DLNetwork> dlNetworkList;
     public delegate IEnumerator HandleJSONDelegate(JObject jObject);
     public delegate IEnumerator HandleUploadDelegate();
 
@@ -30,8 +35,7 @@ public class DLWebClient : MonoBehaviour
             }
             else
             {
-                Debug.Log("Received");
-                Debug.Log(url + resource);
+                Debug.Log("Received: " + url + resource);
                 JObject jObject = JObject.Parse(www.downloadHandler.text);
                 UnityMainThreadDispatcher.Instance().Enqueue(handleJSONDelegate(jObject));
             }
@@ -53,72 +57,146 @@ public class DLWebClient : MonoBehaviour
             else
             {
                 // Show results as text
-                Debug.Log("Upload Complete!");
-                Debug.Log(url + resource);
+                Debug.Log("Upload Complete: " + url + resource);
                 UnityMainThreadDispatcher.Instance().Enqueue(HandleUploadDelegate());
             }
         }
     }
 
-    public void RequestNetworkArchitecture(HandleJSONDelegate handleJSONDelegate)
+    public void RequestNetworkArchitecture(HandleJSONDelegate handleJSONDelegate, int networkID)
     {
-        StartCoroutine(GetJSON("network", handleJSONDelegate));
+        StartCoroutine(GetJSON(string.Format("network/{0}", networkID), handleJSONDelegate));
     }
 
 
-    public IEnumerator DoNothing(JObject jObject)
+    public void RequestLayerActivation(HandleJSONDelegate handleJSONDelegate, int networkID, int layerID)
     {
+        StartCoroutine(GetJSON(string.Format("network/{0}/activation/layerid/{1}", networkID, layerID), handleJSONDelegate));
+    }
+
+
+    public void RequestLayerFeatureVisualization(HandleJSONDelegate handleJSONDelegate, int networkID, int layerID)
+    {
+        StartCoroutine(GetJSON(string.Format("network/{0}/featurevisualization/layerid/{1}", networkID, layerID), handleJSONDelegate));
+    }
+
+
+    public void RequestWeightHistogram(HandleJSONDelegate handleJSONDelegate, int networkID, int layerID)
+    {
+        StartCoroutine(GetJSON(string.Format("network/{0}/weighthistogram/layerid/{1}", networkID, layerID), handleJSONDelegate));
+    }
+
+
+    public void RequestActivationHistogram(HandleJSONDelegate handleJSONDelegate, int networkID, int layerID)
+    {
+        StartCoroutine(GetJSON(string.Format("network/{0}/activationhistogram/layerid/{1}", networkID, layerID), handleJSONDelegate));
+    }
+
+
+    public void RequestPrepareForInput(HandleUploadDelegate handleUploadDelegate, int networkID, ActivationImage activationImage)
+    {
+        if (activationImage.mode == ActivationImage.Mode.Activation) return;
+
+        ActivationImage activationImageShallowCopy = activationImage;
+        activationImageShallowCopy.tex = null;
+        string output = JsonConvert.SerializeObject(activationImageShallowCopy);
+        StartCoroutine(Upload(string.Format("network/{0}/prepareforinput", networkID), output, handleUploadDelegate));
+    }
+
+
+    public void RequestClassificationResults(HandleJSONDelegate handleJSONDelegate, int networkID)
+    {
+        StartCoroutine(GetJSON(string.Format("network/{0}/classificationresult", networkID), handleJSONDelegate));
+    }
+
+
+    public void RequestDatasetImages(HandleJSONDelegate handleJSONDelegate, int datasetID)
+    {
+        StartCoroutine(GetJSON(string.Format("dataset/{0}/images", datasetID), handleJSONDelegate));
+    }
+
+
+    public void RequestNoiseImage(HandleJSONDelegate handleJSONDelegate, int noiseID)
+    {
+        StartCoroutine(GetJSON(string.Format("noiseimage/{0}", noiseID), handleJSONDelegate));
+    }
+
+
+    public void RequestBasicInfo()
+    {
+        StartCoroutine(GetJSON("network", AcceptBasicInfo));
+    }
+
+
+    public IEnumerator AcceptBasicInfo(JObject jObject)
+    {
+        int Nnetworks = (int)jObject["nnetworks"];
+        int Ndatasets = (int)jObject["ndatasets"];
+        int NnoiseGenerators = (int)jObject["nnoiseGenerators"];
+        DLNetwork dlNetwork;
+        Dataset dataset;
+
+        for (int i = 0; i < Nnetworks; i++)
+        {
+            Transform newInstance = Instantiate(dlNetworkPrefab).transform;
+            newInstance.name = string.Format("Network{0}", i);
+            newInstance.localPosition = new Vector3(10f * i, 0f, 0f);
+            newInstance.localRotation = Quaternion.identity;
+            newInstance.localScale = new Vector3(1f, 1f, 1f);
+            newInstance.SetParent(transform);
+            dlNetwork = newInstance.GetComponentInChildren<DLNetwork>();
+            dlNetwork.Prepare(this, i);
+            dlNetwork.BuildNetwork();
+        }
+
+        for (int i = 0; i < Ndatasets; i++)
+        {
+            Transform newInstance = Instantiate(datasetPrefab).transform;
+            newInstance.name = string.Format("Dataset{0}", i);
+            newInstance.localPosition = new Vector3(10f * i + 5f, 0f, -5f);
+            newInstance.localRotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
+            newInstance.localScale = new Vector3(0.007f, 0.007f, 0.007f);
+            newInstance.SetParent(transform);
+            dataset = newInstance.GetComponent<Dataset>();
+            dataset.Prepare(this, i);
+            dataset.BuildDataset();
+        }
+
+
+        for (int i = 0; i < NnoiseGenerators; i++)
+        {
+            Transform newInstance = Instantiate(noiseGeneratorPrefab).transform;
+            newInstance.name = string.Format("NoiseGenerator{0}", i);
+            newInstance.localPosition = new Vector3(10f * i - 5f, 0f, -5f);
+            newInstance.localRotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
+            newInstance.localScale = new Vector3(0.006f, 0.006f, 0.006f);
+            newInstance.SetParent(transform);
+            newInstance.GetComponentInChildren<NoiseGenerateButton>().Prepare(this, i);
+        }
+
         yield return null;
     }
 
 
-    public void RequestLayerActivation(HandleJSONDelegate handleJSONDelegate, int layerID)
+    public static Texture2D StringToTex(string textureString)
     {
-        StartCoroutine(GetJSON(string.Format("network/activation/layerid/{0}", layerID), handleJSONDelegate));
+        byte[] b64_bytes = System.Convert.FromBase64String(textureString);
+        Texture2D tex = new Texture2D(1, 1);
+        if (ImageConversion.LoadImage(tex, b64_bytes))
+        {
+            tex.filterMode = FilterMode.Point;
+            return tex;
+        }
+        else
+        {
+            Debug.Log("Texture could not be loaded");
+            return null;
+        }
     }
 
 
-    public void RequestLayerFeatureVisualization(HandleJSONDelegate handleJSONDelegate, int layerID)
+    private void Start()
     {
-        StartCoroutine(GetJSON(string.Format("network/featurevisualization/layerid/{0}", layerID), handleJSONDelegate));
-    }
-
-
-    public void RequestWeightHistogram(HandleJSONDelegate handleJSONDelegate, int layerID)
-    {
-        StartCoroutine(GetJSON(string.Format("network/weighthistogram/layerid/{0}", layerID), handleJSONDelegate));
-    }
-
-
-    public void RequestActivationHistogram(HandleJSONDelegate handleJSONDelegate, int layerID)
-    {
-        StartCoroutine(GetJSON(string.Format("network/activationhistogram/layerid/{0}", layerID), handleJSONDelegate));
-    }
-
-
-    public void RequestPrepareForInput(HandleUploadDelegate handleUploadDelegate, ActivationImage activationImage)
-    {
-        ActivationImage activationImageShallowCopy = activationImage;
-        activationImageShallowCopy.tex = null;
-        string output = JsonConvert.SerializeObject(activationImageShallowCopy);
-        StartCoroutine(Upload("network/prepareforinput", output, handleUploadDelegate));
-    }
-
-
-    public void RequestClassificationResults(HandleJSONDelegate handleJSONDelegate)
-    {
-        StartCoroutine(GetJSON("network/classificationresult", handleJSONDelegate));
-    }
-
-
-    public void RequestDatasetImages(HandleJSONDelegate handleJSONDelegate)
-    {
-        StartCoroutine(GetJSON("data/images", handleJSONDelegate));
-    }
-
-
-    public void RequestNoiseImage(HandleJSONDelegate handleJSONDelegate)
-    {
-        StartCoroutine(GetJSON("data/noiseimage", handleJSONDelegate));
+        RequestBasicInfo();
     }
 }

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -13,7 +14,14 @@ public class ImageGetterButton : MonoBehaviour
 	[SerializeField]
 	private bool canReturnImage = true;
 	[SerializeField]
-	private bool canAcceptImage = false;
+	private bool canAcceptDatasetImage = false;
+	[SerializeField]
+	private bool canAcceptActivationImage = false;
+	[SerializeField]
+	private bool canAcceptFeatureVisualizationImage = false;
+	[SerializeField]
+	private bool canAcceptNoiseImage = false;
+
 
 	private ActivationImage activationImageUsed;
 	public ActivationImage ActivationImageUsed
@@ -25,8 +33,10 @@ public class ImageGetterButton : MonoBehaviour
 		set
 		{
 			this.activationImageUsed = value;
-			if (textMeshPro != null) textMeshPro.text = value.className;
-			image.texture = (Texture2D)value.tex;
+				if (textMeshPro != null) textMeshPro.text = value.className;
+				image.texture = (Texture2D)value.tex;
+				Vector2 wh = Helpers.SizeToMatchAspectRatioInSquare(value.tex);
+				image.rectTransform.localScale = new Vector3(wh.x, wh.y, 1f);
 		}
 	}
 
@@ -61,7 +71,14 @@ public class ImageGetterButton : MonoBehaviour
 		if (interactionGun != null)
 		{
 			if (canReturnImage) interactionGun.ActivationImageUsed = ActivationImageUsed;
-			if (canAcceptImage) ActivationImageUsed = interactionGun.ActivationImageUsed;
+			ActivationImage.Mode mode = interactionGun.ActivationImageUsed.mode;
+			if ((mode == ActivationImage.Mode.DatasetImage && canAcceptDatasetImage) ||
+				(mode == ActivationImage.Mode.Activation && canAcceptActivationImage) ||
+				(mode == ActivationImage.Mode.FeatureVisualization && canAcceptFeatureVisualizationImage) ||
+				(mode == ActivationImage.Mode.NoiseImage && canAcceptNoiseImage))
+			{
+				ActivationImageUsed = interactionGun.ActivationImageUsed;
+			}
 		}
 	}
 }

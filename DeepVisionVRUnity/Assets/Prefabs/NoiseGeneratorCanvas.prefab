@@ -121,7 +121,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1609230401249568349}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4107757233899342198}
+        m_TargetAssemblyTypeName: NoiseGenerateButton, Assembly-CSharp
+        m_MethodName: RequestNoiseImage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4107757233899342198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,8 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e410dfb4dac42a246be661f8d2ec9f53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  imageGetterButton: {fileID: 0}
-  dlClient: {fileID: 0}
+  imageGetterButton: {fileID: 7223606479724264125}
 --- !u!1 &3098378401810922188
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +294,7 @@ GameObject:
   - component: {fileID: 3098378402029002169}
   - component: {fileID: 3098378402029002148}
   m_Layer: 5
-  m_Name: NoiseImagePicker
+  m_Name: NoiseGeneratorCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -298,7 +309,7 @@ RectTransform:
   m_GameObject: {fileID: 3098378402029002175}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1}
-  m_LocalScale: {x: 0.008, y: 0.008, z: 0.008}
+  m_LocalScale: {x: 0.005, y: 0.005, z: 0.005}
   m_Children:
   - {fileID: 3098378401810922189}
   - {fileID: 219714415200017573}
@@ -308,9 +319,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -4, y: 0}
+  m_AnchoredPosition: {x: -4, y: -0.75}
   m_SizeDelta: {x: 400, y: 300}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!223 &3098378402029002170
 Canvas:
   m_ObjectHideFlags: 0
@@ -610,3 +621,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3859813243151223049, guid: 80523da7b953bdb4a8712f29fe35b177, type: 3}
   m_PrefabInstance: {fileID: 642280162248843849}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7223606479724264125 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7842651195149900020, guid: 80523da7b953bdb4a8712f29fe35b177, type: 3}
+  m_PrefabInstance: {fileID: 642280162248843849}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d23753c0433a0743a7fd4deb476ba8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -21,7 +21,7 @@ public class Layer2D : NetLayer
     private GameObject linePlotterPrefab;
     [SerializeField]
     private RectTransform reloadOverlay;
-    private DLManager dlManager;
+    private DLNetwork dlNetwork;
 
 
     private LinePlotter weightHistogram;
@@ -31,9 +31,9 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, DLManager _dlManager)
+    public void Prepare(Vector3Int size, DLNetwork _dlNetwork)
     {
-        dlManager = _dlManager;
+        dlNetwork = _dlNetwork;
 
         transform.GetComponent<Canvas>().worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
@@ -66,7 +66,7 @@ public class Layer2D : NetLayer
             ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
             imageGetterButton.MaterialUsed = material;
             FeatureVisualizationButton featureVisualizationButton = newChannel2DInstance.GetComponent<FeatureVisualizationButton>();
-            featureVisualizationButton.Prepare(dlManager);
+            featureVisualizationButton.Prepare(dlNetwork);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )

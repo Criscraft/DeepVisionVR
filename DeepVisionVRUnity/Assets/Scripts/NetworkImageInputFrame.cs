@@ -4,7 +4,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class NetworkImageInputFrame : MonoBehaviour
 {
-    private DLManager _dlManager;
+    private DLNetwork dlNetwork;
     //private bool hasLoadedItem = false;
     [SerializeField]
     private ImageGetterButton imageGetterButton;
@@ -17,15 +17,14 @@ public class NetworkImageInputFrame : MonoBehaviour
         canvas.worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
 
-    public void Prepare(DLManager dlManager)
+    public void Prepare(DLNetwork _dlNetwork)
     {
-        _dlManager = dlManager;
+        dlNetwork = _dlNetwork;
     }
 
     public void LoadImageFromImageGetterButton()
     {
         ActivationImage activationImage  = imageGetterButton.ActivationImageUsed;
-        //Debug.Log(activationImage);
-        _dlManager.RequestPrepareForInput(activationImage);
+        dlNetwork.RequestPrepareForInput(activationImage);
     }
 }

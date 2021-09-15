@@ -91,11 +91,13 @@ public class ImageSelector : MonoBehaviour
 
     public void LayHoloImageOverScreen()
     {
-        if (hasLoadedItem && screenOverlay != null)
+        if (hasLoadedItem && screenOverlay != null && gameObject.activeSelf)
         {
             screenOverlay.enabled = true;
             screenOverlay.texture = holoImageRenderer.material.GetTexture("_MainTex");
             screenOverlay.material = holoImageRenderer.material;
+            Vector2 wh = Helpers.SizeToMatchAspectRatioInCanvas(screenOverlay.texture, screenOverlay.GetComponentInParent<RectTransform>());
+            screenOverlay.rectTransform.localScale = new Vector3(wh.x, wh.y, 1f);
         }
     }
 
