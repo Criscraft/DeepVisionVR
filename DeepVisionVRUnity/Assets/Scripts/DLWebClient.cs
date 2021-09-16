@@ -140,7 +140,7 @@ public class DLWebClient : MonoBehaviour
         {
             Transform newInstance = Instantiate(dlNetworkPrefab).transform;
             newInstance.name = string.Format("Network{0}", i);
-            newInstance.localPosition = new Vector3(10f * i, 0f, 0f);
+            newInstance.localPosition = new Vector3(25f * i, 0f, 0f);
             newInstance.localRotation = Quaternion.identity;
             newInstance.localScale = new Vector3(1f, 1f, 1f);
             newInstance.SetParent(transform);
@@ -153,8 +153,8 @@ public class DLWebClient : MonoBehaviour
         {
             Transform newInstance = Instantiate(datasetPrefab).transform;
             newInstance.name = string.Format("Dataset{0}", i);
-            newInstance.localPosition = new Vector3(10f * i + 5f, 0f, -5f);
-            newInstance.localRotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
+            newInstance.localPosition = new Vector3(25f * i, 0f, -12f);
+            newInstance.localRotation = Quaternion.Euler(new Vector3(0f, 180f, 0f));
             newInstance.localScale = new Vector3(0.007f, 0.007f, 0.007f);
             newInstance.SetParent(transform);
             dataset = newInstance.GetComponent<Dataset>();
@@ -167,7 +167,7 @@ public class DLWebClient : MonoBehaviour
         {
             Transform newInstance = Instantiate(noiseGeneratorPrefab).transform;
             newInstance.name = string.Format("NoiseGenerator{0}", i);
-            newInstance.localPosition = new Vector3(10f * i - 5f, 0f, -5f);
+            newInstance.localPosition = new Vector3(-5f, 0f, -6f + 3f * i);
             newInstance.localRotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
             newInstance.localScale = new Vector3(0.006f, 0.006f, 0.006f);
             newInstance.SetParent(transform);

@@ -350,6 +350,7 @@ class ResNet(nn.Module):
         self.conv1.ID = self.ID + '_first_layer'
         
         global TRACKERINDEX
+        TRACKERINDEX = 0 # set 0 because TRACKERINDEX will be shared across all instances of this network and there will be issues if there is more than 1 instance 
         self.tracker1 = TrackerModule((TRACKERINDEX, 0), "input", precursors=[])
         self.bn1 = norm_layer(self.inplanes)
         self.relu = self._activation_layer(inplace=False)

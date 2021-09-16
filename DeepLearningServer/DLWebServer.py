@@ -4,12 +4,12 @@ import torch
 import numpy as np
 import falcon
 import utils
-import run_server_caltech
+import run_server_caltech_network_comparison as source
 from ActivationImage import ActivationImage
 
-networks = run_server_caltech.get_dl_networks()
-datasets = run_server_caltech.get_datasets()
-noise_generators = run_server_caltech.get_noise_generators()
+networks = source.get_dl_networks()
+datasets = source.get_datasets()
+noise_generators = source.get_noise_generators()
 
 for i, network in enumerate(networks):
     dataset = datasets[0]

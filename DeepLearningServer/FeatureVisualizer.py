@@ -6,7 +6,7 @@ from torchvision import transforms
 import numpy as np
 
 
-BATCHSIZE = 256
+BATCHSIZE = 128
 
 
 class FeatureVisualizer(object):
