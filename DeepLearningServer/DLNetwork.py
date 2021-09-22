@@ -1,13 +1,13 @@
 import torch
 import torch.nn.functional as F 
 import numpy as np
-from FeatureVisualizer import FeatureVisualizer
+from FeatureVisualizerRobust import FeatureVisualizer
 from ActivationImage import ActivationImage
 
 
 class DLNetwork(object):
     
-    def __init__(self, model, device, norm_mean, norm_std):
+    def __init__(self, model, device, norm_mean, norm_std, input_size):
         super().__init__()
         
         self.device = device
@@ -16,7 +16,7 @@ class DLNetwork(object):
             param.requires_grad = False
         self.model.eval()
 
-        self.feature_visualizer = FeatureVisualizer(norm_mean=norm_mean, norm_std=norm_std)
+        self.feature_visualizer = FeatureVisualizer(norm_mean=norm_mean, norm_std=norm_std, target_size=input_size)
         self.features = None
         self.active_data_item = ActivationImage()
         self.active_noise_image = None
@@ -75,7 +75,7 @@ class DLNetwork(object):
         return (int(key[0]), int(key[1]))
 
 
-    def get_feature_visualization(self, layer_id, debug=False):
+    def get_feature_visualization(self, layer_id):
         if self.features is None:
             raise ValueError("You have to prepare the input first")
             
@@ -85,13 +85,11 @@ class DLNetwork(object):
         module = self.features[layer_id]["module"]
         n_channels = self.features[layer_id]["size"][1]
         
-        if not debug:
-            export_images, created_images = self.feature_visualizer.visualize(self.model, module, self.device, n_channels, self.active_data_item.data)
-        else:
-            return self.feature_visualizer, self.model, module, self.device, n_channels, self.active_data_item.data
+        created_images, _ = self.feature_visualizer.visualize(self.model, module, self.device, self.active_data_item.data, n_channels)
+        visual_images = self.feature_visualizer.export_transformation(created_images)
         
         self.feature_visualizations[layer_id] = created_images
-        return export_images
+        return visual_images
 
 
     def get_classification_result(self):

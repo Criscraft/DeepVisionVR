@@ -25,6 +25,8 @@ device = torch.device("cuda") if use_cuda else torch.device("cpu")
 def get_dl_networks():
     
     model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='resnet018_finetuning.pt')
+    for param in model.embedded_model.parameters():
+        param.requires_grad = False
     dlnetwork = DLNetwork(model, device, NORM_MEAN, NORM_STD)
     return [dlnetwork]
 

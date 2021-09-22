@@ -24,11 +24,15 @@ device = torch.device("cuda") if use_cuda else torch.device("cpu")
 
 def get_dl_networks():
     
-    model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='resnet018_finetuning.pt')
-    dlnetwork_baseline = DLNetwork(model, device, NORM_MEAN, NORM_STD)
+    model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='model_caltech_finetuning.pt')
+    dlnetwork_baseline = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE)
+    for param in model.embedded_model.parameters():
+        param.requires_grad = False
 
-    model2 = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='resnet018_finetuning.pt')
-    dlnetwork_compare = DLNetwork(model2, device, NORM_MEAN, NORM_STD)
+    model2 = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='model_caltech_shuffle.pt')
+    dlnetwork_compare = DLNetwork(model2, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE)
+    for param in model2.embedded_model.parameters():
+        param.requires_grad = False
 
     return [dlnetwork_baseline, dlnetwork_compare]
 

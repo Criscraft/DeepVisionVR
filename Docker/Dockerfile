@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 
 # Install some basic utilities
 RUN apt-get update && apt-get install -y \
@@ -13,9 +13,12 @@ RUN addgroup --gid 250 inb
 RUN adduser --home /home/linse --shell /bin/bash --ingroup inb --uid 26268 linse
 
 # Install Python 3.8
-RUN apt-get update && apt-get install -y \
+# install python-tk, during installation process it asks questions. We cannot interact with the terminal, so we make the installer to not ask any questions
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3.8 \
-    python3-pip
+    python3-pip \
+    python3-tk \
+    xvfb 
 
 RUN pip3 install torch==1.8.1+cu111 torchvision==0.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 RUN pip3 install jupyter
