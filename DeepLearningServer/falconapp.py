@@ -15,6 +15,10 @@ app.add_route('/network/{networkid:int}/classificationresult', DLWebServer.Netwo
 app.add_route('/network/{networkid:int}/weighthistogram/layerid/{layerid:int}', DLWebServer.NetworkWeightHistogramResource())
 app.add_route('/network/{networkid:int}/activationhistogram/layerid/{layerid:int}', DLWebServer.NetworkActivationHistogramResource())
 
+app.add_route('/network/{networkid:int}/setnetworkgenfeatvis', DLWebServer.NetworkSetNetworkGenFeatVisResource())
+app.add_route('/network/{networkid:int}/setnetworkloadfeatvis', DLWebServer.NetworkSetNetworkLoadFeatVisResource())
+app.add_route('/network/{networkid:int}/setnetworkdeletefeatvis', DLWebServer.NetworkSetNetworkDeleteFeatVisResource())
+
 app.add_route('/dataset/{datasetid:int}/images', DLWebServer.DataImagesResource())
 
 app.add_route('/noiseimage/{noiseid:int}', DLWebServer.DataNoiseImageResource())

@@ -1,16 +1,20 @@
+import os
+import shutil
 import torch
 import torch.nn.functional as F 
 import numpy as np
+from enum import Enum
 from FeatureVisualizerRobust import FeatureVisualizer
 from ActivationImage import ActivationImage
 
 
 class DLNetwork(object):
     
-    def __init__(self, model, device, norm_mean, norm_std, input_size):
+    def __init__(self, model, device, norm_mean, norm_std, input_size, network_id):
         super().__init__()
         
         self.device = device
+        self.network_id = network_id
         self.model = model.to(self.device)
         for param in self.model.parameters():
             param.requires_grad = False
@@ -20,7 +24,12 @@ class DLNetwork(object):
         self.features = None
         self.active_data_item = ActivationImage()
         self.active_noise_image = None
-        self.feature_visualizations = {}
+
+        self.cache_path = f"cache/network{self.network_id}"
+        if not os.path.exists(self.cache_path): os.makedirs(self.cache_path)
+        self.feature_visualization_path = os.path.join(self.cache_path, 'FeatureVisualizations')
+        if not os.path.exists(self.feature_visualization_path): os.makedirs(self.feature_visualization_path)
+        self.feature_visualization_mode = FeatureVisualizationMode.Loading
 
     
     def prepare_for_input(self, activation_image : ActivationImage):
@@ -82,13 +91,22 @@ class DLNetwork(object):
         if layer_id == 0:
             return np.zeros((self.features[layer_id]["size"][1], 3, 1, 1))
         
-        module = self.features[layer_id]["module"]
-        n_channels = self.features[layer_id]["size"][1]
+        created_images = None
+        is_loaded = False
+        if self.feature_visualization_mode == FeatureVisualizationMode.Loading:
+            created_images = self.try_load_feature_visualization(layer_id)
+            is_loaded = True
+        if created_images is None:
+            is_loaded = False
+            module = self.features[layer_id]["module"]
+            n_channels = self.features[layer_id]["size"][1]
+            created_images, _ = self.feature_visualizer.visualize(self.model, module, self.device, self.active_data_item.data, n_channels)
         
-        created_images, _ = self.feature_visualizer.visualize(self.model, module, self.device, self.active_data_item.data, n_channels)
         visual_images = self.feature_visualizer.export_transformation(created_images)
+
+        if not is_loaded: 
+            self.save_feature_visualization(layer_id, created_images)
         
-        self.feature_visualizations[layer_id] = created_images
         return visual_images
 
 
@@ -99,3 +117,27 @@ class DLNetwork(object):
         indices_tmp = np.argsort(-out)
         indices_tmp = indices_tmp[:10]
         return out[indices_tmp], indices_tmp
+
+
+    def delete_feat_vis_cache(self):
+        shutil.rmtree(self.feature_visualization_path)
+        os.makedirs(self.feature_visualization_path)
+
+    
+    def try_load_feature_visualization(self, layerid):
+        path = os.path.join(self.feature_visualization_path, f"layer_{layerid}.pt")
+        if os.path.exists(path):
+            created_images = torch.load(path, 'cpu')
+        else:
+            created_images = None
+        return created_images
+
+
+    def save_feature_visualization(self, layerid, created_images):
+        path = os.path.join(self.feature_visualization_path, f"layer_{layerid}.pt")
+        torch.save(created_images, path)
+
+
+class FeatureVisualizationMode(Enum):
+    Generating = 0
+    Loading = 1

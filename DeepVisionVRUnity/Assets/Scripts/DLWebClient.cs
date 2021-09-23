@@ -63,6 +63,13 @@ public class DLWebClient : MonoBehaviour
         }
     }
 
+
+    public IEnumerator DoNothing()
+    {
+        yield return null;
+    }
+
+
     public void RequestNetworkArchitecture(HandleJSONDelegate handleJSONDelegate, int networkID)
     {
         StartCoroutine(GetJSON(string.Format("network/{0}", networkID), handleJSONDelegate));
@@ -128,12 +135,34 @@ public class DLWebClient : MonoBehaviour
     }
 
 
+    public void SetNetworkGenFeatVis(int networkID)
+    {
+        string output = "dummy";
+        StartCoroutine(Upload(string.Format("network/{0}/setnetworkgenfeatvis", networkID), output, DoNothing));
+    }
+
+
+    public void SetNetworkLoadFeatVis(int networkID)
+    {
+        string output = "dummy";
+        StartCoroutine(Upload(string.Format("network/{0}/setnetworkloadfeatvis", networkID), output, DoNothing));
+    }
+
+
+    public void SetNetworkDeleteFeatVis(int networkID)
+    {
+        string output = "dummy";
+        StartCoroutine(Upload(string.Format("network/{0}/setnetworkdeletefeatvis", networkID), output, DoNothing));
+    }
+
+
     public IEnumerator AcceptBasicInfo(JObject jObject)
     {
         int Nnetworks = (int)jObject["nnetworks"];
         int Ndatasets = (int)jObject["ndatasets"];
         int NnoiseGenerators = (int)jObject["nnoiseGenerators"];
         DLNetwork dlNetwork;
+        NetworkSettingsButtons networkSettingsButtons;
         Dataset dataset;
 
         for (int i = 0; i < Nnetworks; i++)
@@ -146,6 +175,8 @@ public class DLWebClient : MonoBehaviour
             newInstance.SetParent(transform);
             dlNetwork = newInstance.GetComponentInChildren<DLNetwork>();
             dlNetwork.Prepare(this, i);
+            networkSettingsButtons = newInstance.GetComponentInChildren<NetworkSettingsButtons>();
+            networkSettingsButtons.Prepare(this, i);
             dlNetwork.BuildNetwork();
         }
 

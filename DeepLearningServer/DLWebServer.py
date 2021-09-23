@@ -5,6 +5,7 @@ import numpy as np
 import falcon
 import utils
 import run_server_caltech_network_comparison as source
+from DLNetwork import FeatureVisualizationMode
 from ActivationImage import ActivationImage
 
 networks = source.get_dl_networks()
@@ -103,12 +104,15 @@ class NetworkPrepareForInputResource:
         if activation_image.mode == ActivationImage.Mode.DatasetImage and activation_image.image_ID >= 0:
             image = datasets[activation_image.dataset_ID].get_data_item(activation_image.image_ID, True)[0]
         elif activation_image.mode == ActivationImage.Mode.FeatureVisualization:
-            image = networks[activation_image.network_ID].feature_visualizations[activation_image.layer_ID][activation_image.channel_ID]
+            image = networks[activation_image.network_ID].try_load_feature_visualization(activation_image.layer_ID)
+            if image is not None:
+                image = image[activation_image.channel_ID]
+            else:
+                raise falcon.HTTPBadRequest(title="Feature Visualization is not yet produced.")
         elif activation_image.mode == ActivationImage.Mode.NoiseImage:
             image = noise_generators[activation_image.noise_generator_ID].get_noise_image()
         elif activation_image.mode == ActivationImage.Mode.Activation:
             raise falcon.HTTPBadRequest(title="You cannot load an activation")
-            return None
         else:
             image = torch.zeros(dataset.get_data_item(0, True)[0].shape)
         activation_image.data = image
@@ -199,6 +203,30 @@ class DataNoiseImageResource:
         out = {'tensor' : image_enc}
         resp.text = json.dumps(out, indent=1, ensure_ascii=False)
         print("send DataNoiseImageResource for noise generator {noiseid}")
+
+
+class NetworkSetNetworkGenFeatVisResource:
+
+    def on_put(self, req, resp, networkid : int):
+        network = networks[networkid]
+        network.feature_visualization_mode = FeatureVisualizationMode.Generating
+        print(f"NetworkSetNetworkGenFeatVisResource for network {networkid}")
+
+
+class NetworkSetNetworkLoadFeatVisResource:
+
+    def on_put(self, req, resp, networkid : int):
+        network = networks[networkid]
+        network.feature_visualization_mode = FeatureVisualizationMode.Loading
+        print(f"NetworkSetNetworkLoadFeatVisResource for network {networkid}")
+
+
+class NetworkSetNetworkDeleteFeatVisResource:
+
+    def on_put(self, req, resp, networkid : int):
+        network = networks[networkid]
+        network.delete_feat_vis_cache()
+        print(f"NetworkSetNetworkDeleteFeatVisResource for network {networkid}")
         
 
 class TestShortResource:

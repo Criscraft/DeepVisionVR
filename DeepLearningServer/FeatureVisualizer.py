@@ -22,7 +22,8 @@ class FeatureVisualizer(object):
         norm_mean = [0.5487017, 0.5312975, 0.50504637],
         norm_std = [0.1878664, 0.18194826, 0.19830684],
         epochs = 200,
-        scaleup_schedule = {}):
+        scaleup_schedule = {},
+        target_size=None):
         
         super().__init__()
         self.lr = lr

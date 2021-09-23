@@ -19,8 +19,8 @@ log = {}
 parameters = {}; log['parameters'] = parameters
 
 lr_list = [0.1, 0.2]; parameters['lr'] = lr_list
-scale_list = [0., 0.05]; parameters['scale'] = scale_list
-degrees_list = [0, 5]; parameters['degrees'] = degrees_list
+scale_list = [0., 0.04]; parameters['scale'] = scale_list
+degrees_list = [0, 4]; parameters['degrees'] = degrees_list
 roll_list = [0, 10]; parameters['roll'] = roll_list
 blur_sigma_list = [0, 0.2]; parameters['blur_sigma'] = blur_sigma_list
 
@@ -31,7 +31,7 @@ n_channels = 5
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda") if use_cuda else torch.device("cpu")
 
-model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='resnet018_finetuning.pt')
+model = ResNet_0_9(variant='resnet018', n_classes=N_CLASSES, statedict='model_caltech_finetuning.pt')
 model = model.to(device)
 for param in model.embedded_model.parameters():
     param.requires_grad = False

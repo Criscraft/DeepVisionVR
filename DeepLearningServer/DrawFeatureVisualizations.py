@@ -154,6 +154,7 @@ class ParameterScale:
             orient=tk.HORIZONTAL)
         self.scale.pack()
         self.scale.set(0)
+        self.update_label(0)
 
         self.label = tk.Label(frame, font=('', 12))
         self.label.pack()
@@ -162,8 +163,12 @@ class ParameterScale:
 
 
     def parameter_changed(self, value):
-        self.label.config(text=f"{self.parameter_list[int(value)]}")
+        self.update_label(value)
         self.feature_visualization_drawer.redraw_images()
+
+
+    def update_label(self, value):
+        self.label.config(text=f"{self.parameter_list[int(value)]}")
 
 
     def get(self):

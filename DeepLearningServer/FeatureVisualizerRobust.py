@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F 
 from torchvision import transforms
+import torchgeometry as tgm
 import numpy as np
 import random
 
@@ -56,7 +57,6 @@ class FeatureVisualizer(object):
             channels_batch = channels[batchid * BATCHSIZE : (batchid + 1) * BATCHSIZE]
             n_batch_items = len(channels_batch)
             created_image = init_image.repeat(n_batch_items, 1, 1, 1).detach()
-            created_image.requires_grad = True
 
             for epoch in range(self.epochs):
                 with torch.no_grad():
@@ -127,14 +127,14 @@ class Regularizer(object):
             scale = None
 
         if blur_sigma > 0.:
-            blurring = transforms.GaussianBlur(5, sigma=blur_sigma)
+            blurring = tgm.image.GaussianBlur((5, 5), (blur_sigma, blur_sigma))# transforms.GaussianBlur(5, sigma=(0.1, blur_sigma))
         else:
             blurring = Identity()
 
         self.transformation = transforms.Compose([
             transforms.Pad(roll*2, padding_mode='edge'),
             transforms.RandomApply(torch.nn.ModuleList([
-                transforms.RandomAffine(degrees=degrees, fill=norm_mean, interpolation=transforms.InterpolationMode.BILINEAR),
+                transforms.RandomRotation(degrees=degrees),
                 ]), p=0.5),
             transforms.RandomApply(torch.nn.ModuleList([
                 transforms.RandomAffine(degrees=0, scale=scale, interpolation=transforms.InterpolationMode.BILINEAR),

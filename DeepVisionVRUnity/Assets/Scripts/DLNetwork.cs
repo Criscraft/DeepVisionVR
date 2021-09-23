@@ -35,6 +35,8 @@ public class DLNetwork : MonoBehaviour
     private Transform networkImageInputFrameInstance;
     [SerializeField]
     private Canvas resultCanvas;
+    [SerializeField]
+    private Canvas networkSettingsCanvas;
 
     // network data
     private DLWebClient dlClient;
