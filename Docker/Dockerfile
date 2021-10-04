@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
+# Change this to your group and your user
 RUN addgroup --gid 250 inb
 RUN adduser --home /home/linse --shell /bin/bash --ingroup inb --uid 26268 linse
 
@@ -45,7 +46,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 WORKDIR /app
 
-#make port 8888 available from outside, just in case the container is supposed to run jupyter notebooks
+# make port 5570 available from outside for data transfer
 EXPOSE 5570
 
+# change this to your user
 USER linse:inb 
