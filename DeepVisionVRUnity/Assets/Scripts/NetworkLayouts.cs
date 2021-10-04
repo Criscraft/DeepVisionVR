@@ -72,6 +72,11 @@ public class NetworkLayouts
 
         // store for each stage the maximal width of an element. Ignore text elements.
         maxWidthOfStage = new float[gridSize[0]];
+        for (int i=0; i<maxWidthOfStage.Length; i++)
+        {
+            maxWidthOfStage[i] = layoutParams.minElementSize;
+        }
+        
         for (int posZ = 0; posZ < gridSize[0]; posZ++)
         {
             for (int posX = 0; posX < gridSize[1]; posX++)
@@ -350,6 +355,9 @@ public class NetworkLayouts
 
             foreach (JToken token in jObject["precursors"].Children())
             {
+                Transform precursor = gridLayerElements[(int)token[0], (int)token[1]];
+                if (precursor == null) continue;
+
                 GameObject newBezierStaticInstance = (GameObject)GameObject.Instantiate(bezierStaticPrefab, Vector3.zero, dlManagerTransform.rotation, dlManagerTransform);
                 newBezierStaticInstance.name = "NetworkGraphEdge "
                     + string.Format("{0}", (int)token[0])
@@ -364,7 +372,7 @@ public class NetworkLayouts
                 var posTmp = layerIDToGridPosition[layer_id];
                 Vector3 pos_new_layer = gridLayerElements[posTmp[0], posTmp[1]].localPosition;//.localToWorldMatrix.MultiplyPoint3x4(layers[layer_id].GetComponent<NetLayer>().center_pos);
                 //pos_new_layer = transform.worldToLocalMatrix.MultiplyPoint3x4(pos_new_layer);
-                Transform precursor = gridLayerElements[(int)token[0], (int)token[1]];
+                
                 Vector3 pos_precursor = precursor.localPosition;//.localToWorldMatrix.MultiplyPoint3x4(precursor.GetComponent<NetLayer>().center_pos);
                 //pos_precursor = transform.worldToLocalMatrix.MultiplyPoint3x4(pos_precursor);
                 // put edges on the ground
