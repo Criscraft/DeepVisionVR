@@ -40,7 +40,8 @@ public class InteractableController : MonoBehaviour
 
     private void Awake()
     {
-        switchToolAction.action.performed += _ => SwitchTool();
+        // decativated because the second tool has no unique function yet
+        //switchToolAction.action.performed += _ => SwitchTool();
     }
 
     private void Start()

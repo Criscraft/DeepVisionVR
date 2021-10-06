@@ -117,6 +117,7 @@ public class DLWebClient : MonoBehaviour
     }
 
 
+    // server side export, currently unused
     public void RequestLayerExport(int networkID, int layerID, ActivationImage activationImage)
     {
         ActivationImage activationImageShallowCopy = activationImage;
@@ -177,7 +178,7 @@ public class DLWebClient : MonoBehaviour
         int Ndatasets = (int)jObject["ndatasets"];
         int NnoiseGenerators = (int)jObject["nnoiseGenerators"];
         DLNetwork dlNetwork;
-        NetworkSettingsButtons networkSettingsButtons;
+        FeatureVisSettingsButtons featureVisSettingsButtons;
         Dataset dataset;
         dlNetworkList = new List<DLNetwork>();
 
@@ -191,8 +192,8 @@ public class DLWebClient : MonoBehaviour
             newInstance.SetParent(transform);
             dlNetwork = newInstance.GetComponentInChildren<DLNetwork>();
             dlNetwork.Prepare(this, i);
-            networkSettingsButtons = newInstance.GetComponentInChildren<NetworkSettingsButtons>();
-            networkSettingsButtons.Prepare(this, i);
+            featureVisSettingsButtons = newInstance.GetComponentInChildren<FeatureVisSettingsButtons>();
+            featureVisSettingsButtons.Prepare(this, i);
             dlNetwork.BuildNetwork();
             dlNetworkList.Add(dlNetwork);
         }

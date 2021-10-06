@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1528547877444410096}
   - component: {fileID: 3859813243151223050}
   - component: {fileID: 7842651195149900020}
-  - component: {fileID: 7781604659303464013}
   m_Layer: 5
   m_Name: FeatureMapButton
   m_TagString: Untagged
@@ -131,7 +130,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 7781604659303464013}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: FeatureVisualizationButton, Assembly-CSharp
         m_MethodName: TaskOnClick
         m_Mode: 1
@@ -155,24 +154,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d23753c0433a0743a7fd4deb476ba8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rightInteractor: {fileID: 0}
-  leftInteractor: {fileID: 0}
   image: {fileID: 1528547877444410096}
   textMeshPro: {fileID: 0}
   canReturnImage: 1
-  canAcceptImage: 0
---- !u!114 &7781604659303464013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3859813243151223048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 749be3f51884a7d488ebbf22e7610c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  imageGetterButton: {fileID: 7842651195149900020}
-  rightInteractor: {fileID: 0}
-  leftInteractor: {fileID: 0}
+  canAcceptDatasetImage: 0
+  canAcceptActivationImage: 0
+  canAcceptFeatureVisualizationImage: 0
+  canAcceptNoiseImage: 0

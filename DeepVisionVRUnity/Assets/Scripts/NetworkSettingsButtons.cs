@@ -1,62 +1,14 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NetworkSettingsButtons : MonoBehaviour
 {
-    private DLWebClient dlClient;
-    private int networkID = -1;
     [SerializeField]
-    private Image generateButtonImage;
-    [SerializeField]
-    private Image loadButtonImage;
-    [SerializeField]
-    private GameObject deleteSureButton;
-    [SerializeField]
-    private Color colorActive;
-    [SerializeField]
-    private Color colorInactive;
+    private Transform network;
 
 
-    public void Prepare(DLWebClient _dlClient, int _networkID)
+    public void OnNetworkScaleSliderChanged(float value)
     {
-        dlClient = _dlClient;
-        networkID = _networkID;
-        gameObject.GetComponent<Canvas>().worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        OnLoadButtonClick();
+        network.localScale = new Vector3(value, value, value);
     }
 
-
-    public void OnGenerateButtonClick()
-    {
-        dlClient.SetNetworkGenFeatVis(networkID);
-        generateButtonImage.color = colorActive;
-        loadButtonImage.color = colorInactive;
-    }
-
-
-    public void OnLoadButtonClick()
-    {
-        dlClient.SetNetworkLoadFeatVis(networkID);
-        generateButtonImage.color = colorInactive;
-        loadButtonImage.color = colorActive;
-    }
-
-
-    public void OnDeleteButtonClick()
-    {
-        if (deleteSureButton.activeSelf) deleteSureButton.SetActive(false);
-        else deleteSureButton.SetActive(true);
-    }
-
-
-    public void OnDeleteSureButtonClick()
-    {
-        dlClient.SetNetworkDeleteFeatVis(networkID);
-        deleteSureButton.SetActive(false);
-    }
-
-    public void OnGenerateAllButtonClick()
-    {
-        dlClient.RequestAllFeatureVisualizations(networkID);
-    }
 }

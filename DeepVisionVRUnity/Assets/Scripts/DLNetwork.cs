@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Newtonsoft.Json.Linq;
-using UnityEngine.XR.Interaction.Toolkit;
 
 public class DLNetwork : MonoBehaviour
 {
@@ -173,17 +172,7 @@ public class DLNetwork : MonoBehaviour
                 RequestLayerFeatureVisualization(i);
             }
     }
-
-
-    public void RequestLayerExport(int layerID) 
-    {
-        var pos = layerIDToGridPosition[layerID];
-        Layer2D layer2D = gridLayerElements[pos[0], pos[1]].GetComponent<Layer2D>();
-        if (layer2D == null) return; 
-        ActivationImage activationImage = layer2D.GetRepresentativeActivationImage();
-        dlClient.RequestLayerExport(networkID, layerID, activationImage);
-    }
-
+    
 
     public IEnumerator AcceptLayerActivation(JObject jObject)
     {
@@ -362,7 +351,7 @@ public class DLNetwork : MonoBehaviour
                 newLayerInstance.transform.localRotation = transform.localRotation;
                 newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "2D_feature_map_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.GetComponent<Layer2D>().Prepare(size, this, layerID);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, this, networkID, layerID);
             }
             else if (datatype == "1D_vector")
             {
@@ -470,7 +459,6 @@ public class DLNetwork : MonoBehaviour
     {
         dlClient = _dlClient;
         networkID = _networkID;
-        resultCanvas.worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
 
 

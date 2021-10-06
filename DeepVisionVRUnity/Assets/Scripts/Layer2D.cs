@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 
 public class Layer2D : NetLayer
@@ -16,14 +17,19 @@ public class Layer2D : NetLayer
     [SerializeField]
     private Transform info;
     [SerializeField]
+    private RectTransform scrollbar;
+    [SerializeField]
     private LayerSettingsButtons layerSettingsButtons;
     [SerializeField]
     private RectTransform infoRectTransform;
     [SerializeField]
     private GameObject linePlotterPrefab;
     [SerializeField]
+    private string exportPath = "Export";
+    [SerializeField]
     private RectTransform reloadOverlay;
     private DLNetwork dlNetwork;
+    private int networkID;
     private int layerID;
 
 
@@ -34,9 +40,10 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, DLNetwork _dlNetwork, int _layerID)
+    public void Prepare(Vector3Int size, DLNetwork _dlNetwork,  int _networkID, int _layerID)
     {
         dlNetwork = _dlNetwork;
+        networkID = _networkID;
         layerID = _layerID;
 
         layerSettingsButtons.Prepare(dlNetwork, layerID);
@@ -71,8 +78,8 @@ public class Layer2D : NetLayer
             newChannel2DInstance.localScale = Vector3.one;
             ImageGetterButton imageGetterButton = newChannel2DInstance.GetComponent<ImageGetterButton>();
             imageGetterButton.MaterialUsed = material;
-            FeatureVisualizationButton featureVisualizationButton = newChannel2DInstance.GetComponent<FeatureVisualizationButton>();
-            featureVisualizationButton.Prepare(dlNetwork);
+            //FeatureVisualizationButton featureVisualizationButton = newChannel2DInstance.GetComponent<FeatureVisualizationButton>();
+            //featureVisualizationButton.Prepare(dlNetwork);
             items.Add(newChannel2DInstance.gameObject);
         }
         // refresh layout so that the dimensions of the featureMaps layer is up to date ( important for applying the network layout )
@@ -120,9 +127,7 @@ public class Layer2D : NetLayer
 
     public override float GetWidth(bool local=false)
     {
-        Vector3[] fourCornersArray = new Vector3[4];
-        featureMaps.GetLocalCorners(fourCornersArray);
-        float width = Mathf.Abs(fourCornersArray[0].x - fourCornersArray[3].x) * featureMaps.localScale.x;
+        float width = featureMaps.sizeDelta.x * featureMaps.localScale.x;
         if (!local) width *= transform.localScale.x;
         return width;
     }
@@ -158,13 +163,6 @@ public class Layer2D : NetLayer
     }
 
 
-    public ActivationImage GetRepresentativeActivationImage()
-    {
-        ImageGetterButton imageGetterButton = items[0].GetComponent<ImageGetterButton>();
-        return imageGetterButton.ActivationImageUsed;
-    }
-
-
     public void SetWeightHistogramData(float[] weightCounts, float[] weightBins)
     {
         weightHistogramGO.gameObject.SetActive(true);
@@ -195,18 +193,58 @@ public class Layer2D : NetLayer
         featureMaps.localScale = new Vector3(scale, scale, scale);
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
         ScaleReloadOverlay();
+        ScaleSlider();
     }
 
 
     private void ScaleReloadOverlay()
     {
         float layerWidth = GetWidth(true);
-        Vector3[] fourCornersArray = new Vector3[4];
-        reloadOverlay.GetLocalCorners(fourCornersArray);
-        float overlayWidth = Mathf.Abs(fourCornersArray[0].x - fourCornersArray[3].x) * reloadOverlay.localScale.x;
+        float width = reloadOverlay.sizeDelta.x * reloadOverlay.localScale.x;
         float targetWidth = 0.5f * layerWidth;
-        float scale = targetWidth / overlayWidth * reloadOverlay.localScale.x;
+        float scale = targetWidth / width * reloadOverlay.localScale.x;
         reloadOverlay.localScale = new Vector3(scale, scale, scale);
+    }
+
+
+    private void ScaleSlider()
+    {
+        float layerHeight = GetWidth(true);
+        float scaleFactor = (float)layerHeight / (float)scrollbar.sizeDelta.y;
+
+        int newWidth = (int)(scrollbar.sizeDelta.x * scaleFactor);
+        scrollbar.sizeDelta = new Vector2(newWidth, layerHeight);
+    }
+
+
+    public void ExportLayer()
+    {
+        ActivationImage activationImage;
+        ActivationImage.Mode mode;
+        ImageGetterButton imageGetterButton;
+        Texture2D texture;
+        byte[] bytes;
+        string exportPathFinal;
+
+        // create export path
+        imageGetterButton = items[0].GetComponent<ImageGetterButton>();
+        activationImage = imageGetterButton.ActivationImageUsed;
+        mode = activationImage.mode;
+        exportPathFinal = Path.Combine(new string[] {Application.dataPath, exportPath, string.Format("network{0}", networkID), mode.ToString(), string.Format("layer{0}", layerID)});
+        if (!Directory.Exists(exportPathFinal))
+        {
+            Directory.CreateDirectory(exportPathFinal);
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            imageGetterButton = items[i].GetComponent<ImageGetterButton>();
+            activationImage = imageGetterButton.ActivationImageUsed;
+            texture = activationImage.tex as Texture2D;
+            // Encode texture into PNG
+            bytes = texture.EncodeToPNG();
+            File.WriteAllBytes(Path.Combine(new string[] {exportPathFinal, string.Format("{0}.png", i) }), bytes);
+        }
     }
 
 

@@ -1,16 +1,17 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LayerSettingsButtons : MonoBehaviour
 {
     private DLNetwork dLNetwork;
+    [SerializeField]
+    private Layer2D layer2D;
     private int layerID = -1;
 
 
     public void Prepare(DLNetwork _dLNetwork, int _layerID)
     {
-        layerID = _layerID;
         dLNetwork = _dLNetwork;
+        layerID = _layerID;
     }
 
 
@@ -23,7 +24,7 @@ public class LayerSettingsButtons : MonoBehaviour
 
     public void OnExportButtonClick()
     {
-        dLNetwork.RequestLayerExport(layerID);
+        layer2D.ExportLayer();
     }
 
 }
