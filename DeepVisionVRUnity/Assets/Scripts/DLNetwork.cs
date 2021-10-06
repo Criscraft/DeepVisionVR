@@ -161,6 +161,7 @@ public class DLNetwork : MonoBehaviour
         if (datatype == "2D_feature_map")
         {
             dlClient.RequestLayerFeatureVisualization(AcceptLayerActivation, networkID, layerID);
+            SetLoading(layerID);
         }
     }
 

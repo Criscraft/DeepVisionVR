@@ -91,7 +91,7 @@ MonoBehaviour:
   showWeightHistograms: 1
   showActivationHistograms: 1
   layoutMode: 0
-  xMargin: 0.5
+  xMargin: 1
   minElementSize: 0.5
   minimalInfoScreenSize: 0.75
   xCentering: 1

@@ -25,7 +25,7 @@ public class Layer2D : NetLayer
     [SerializeField]
     private GameObject linePlotterPrefab;
     [SerializeField]
-    private string exportPath = "Export";
+    private string exportPath = "E:\\Dokumente\\DeepVisVR\\Export";
     [SerializeField]
     private RectTransform reloadOverlay;
     private DLNetwork dlNetwork;

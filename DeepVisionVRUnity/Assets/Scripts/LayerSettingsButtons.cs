@@ -18,7 +18,6 @@ public class LayerSettingsButtons : MonoBehaviour
     public void OnGenFeatVisButtonClick()
     {
         dLNetwork.RequestLayerFeatureVisualization(layerID);
-        dLNetwork.SetLoading(layerID);
     }
 
 
