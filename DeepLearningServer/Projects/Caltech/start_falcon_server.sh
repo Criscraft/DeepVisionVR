@@ -1,1 +1,0 @@
-docker run --gpus all --name falconserver --rm -v $(pwd):/app -v /nfshome/linse/Documents/DeepVisionVR/DeepVisionVR/DeepLearningServer:/DeepLearningServer -e PYTHONPATH=/DeepLearningServer --shm-size 256M -p 5570:5570 -it dl_cuda_deep_vision_vr gunicorn --timeout 600 -b 0.0.0.0:5570 --reload start_falcon_server:application
