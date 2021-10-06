@@ -9,33 +9,26 @@ from torch import Tensor
 from torch.jit.annotations import List
 from ActivationTracker import ActivationTracker, TrackerModule
 
-MODEL_DIR = '/nfshome/linse/NO_INB_BACKUP/ModelZoo'
-
 class CovidDenseNet(nn.Module):
     def __init__(self, 
         variant='densenet121', 
         n_classes=100, 
         pretrained=False, 
         freeze_features_until='', #inclusive
-        n_layers_to_be_removed_from_blocks=[],
+        blocks=[6, 10, 2, 1],
+        num_transition_features=[128, 256, 512],
         no_classifier=False,
         statedict='',
         strict_loading=True):
         super().__init__()
         
         arg_dict = {
-            'pretrained' : pretrained,
             'num_classes' : n_classes,
+            'num_transition_features' : num_transition_features,
         }
 
         if variant == 'densenet121':
-            self.embedded_model = densenet121(**arg_dict)
-        elif variant == 'densenet161':
-            self.embedded_model = densenet161(**arg_dict)
-        elif variant == 'densenet169':
-            self.embedded_model = densenet169(**arg_dict)
-        elif variant == 'densenet201':
-            self.embedded_model = densenet201(**arg_dict)
+            self.embedded_model = _densenet('densenet121', 32, blocks, 64, pretrained, False, **arg_dict)
         else:
             print('select valid model variant')
         
@@ -61,33 +54,13 @@ class CovidDenseNet(nn.Module):
                 param.requires_grad = False
             
             if freeze_features_until not in module_dict:
-                raise ValueError("freeue_features_until does not match any network module")
+                raise ValueError("freeze_features_until does not match any network module")
             
             for key, module in module_dict.items():
                 if freeze_features_until == key:
                     break
                 for param in module.parameters():
                     param.requires_grad = True
-
-        if n_layers_to_be_removed_from_blocks:
-            for i, n_layers in enumerate(n_layers_to_be_removed_from_blocks):
-                denselayer = module_dict['denseblock%d' % (i + 1)]
-                keys_in_denselayer = list(denselayer.keys())
-                for j in range(n_layers):
-                    denselayer._modules[keys_in_denselayer[-2*j-2]] = nn.Identity()
-                    denselayer._modules[keys_in_denselayer[-2*j-1]] = nn.Identity()
-                if ('transition%d' % (i + 1)) in module_dict and n_layers > 0:
-                    transitionlayer = module_dict['transition%d' % (i + 1)]
-                    adapter = nn.Conv2d(transitionlayer.conv.in_channels - n_layers * self.embedded_model.growth_rate, transitionlayer.conv.in_channels, kernel_size=1, stride=1, bias=False)
-                    transitionlayer.adapter = adapter
-
-            if n_layers_to_be_removed_from_blocks[-1] > 0:
-                # correct norm5 layer
-                num_features = module_dict['norm5'].num_features
-                self.embedded_model.features._modules['norm5'] = nn.Sequential(OrderedDict([
-                    ('transition' , nn.Conv2d(num_features - n_layers_to_be_removed_from_blocks[-1] * self.embedded_model.growth_rate, num_features, kernel_size=1, stride=1, bias=False)),
-                    ('norm5' , nn.BatchNorm2d(num_features)),
-                ]))
                 
 
     def forward(self, batch):
@@ -289,7 +262,7 @@ class DenseNetTorchVision(nn.Module):
     __constants__ = ['features']
 
     def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False):
+                 num_init_features=64, num_transition_features=[], bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False):
 
         super().__init__()
         self.ID = 'Backbone'
@@ -298,19 +271,25 @@ class DenseNetTorchVision(nn.Module):
 
         global TRACKERINDEX
         TRACKERINDEX = 0 # set 0 because TRACKERINDEX will be shared across all instances of this network and there will be issues if there is more than 1 instance 
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "input", precursors=[])
+        tracker1 = TrackerModule((TRACKERINDEX, 0), "input", precursors=[])
 
-        self.first_layer = nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)
-        self.first_layer.ID = self.ID + '_first_layer'
-        self.batchnorm = nn.BatchNorm2d(num_init_features)
-        self.relu1 = nn.ReLU()
-        TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "conv1", tracked_module=self.first_layer, precursors=[(TRACKERINDEX-1, 0)])
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        TRACKERINDEX += 1
-        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "maxpool", precursors=[(TRACKERINDEX-1, 0)])
+        first_layer = nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)
+        first_layer.ID = self.ID + '_first_layer'
 
-        self.features = nn.Sequential()
+        TRACKERINDEX += 1
+        tracker2 = TrackerModule((TRACKERINDEX, 0), "conv1", tracked_module=first_layer, precursors=[(TRACKERINDEX-1, 0)])
+        TRACKERINDEX += 1
+        tracker3 = TrackerModule((TRACKERINDEX, 0), "maxpool", precursors=[(TRACKERINDEX-1, 0)])
+
+        self.features = nn.Sequential(OrderedDict([
+            ('tracker1', tracker1),
+            ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
+            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('relu0', nn.ReLU(inplace=True)),
+            ('tracker2', tracker2),
+            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+            ('tracker3', tracker3),
+        ]))
 
         self.relu2 = nn.ReLU()
 
@@ -328,9 +307,10 @@ class DenseNetTorchVision(nn.Module):
             self.features.add_module('denseblock%d' % (i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
-                trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2)
+                num_output_features = num_transition_features[i] if num_transition_features else num_features // 2
+                trans = _Transition(num_input_features=num_features, num_output_features=num_output_features)
                 self.features.add_module('transition%d' % (i + 1), trans)
-                num_features = num_features // 2
+                num_features = num_output_features
 
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
@@ -352,14 +332,6 @@ class DenseNetTorchVision(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.tracker1(x)
-        x = self.first_layer(x)
-        x = self.batchnorm(x)
-        x = self.relu1(x)
-        x = self.tracker2(x)
-        x = self.maxpool(x)
-        x = self.tracker3(x)
-
         features = self.features(x)
         
         out = self.relu2(features)
@@ -379,16 +351,25 @@ def _load_state_dict(model, model_url, progress):
     pattern = re.compile(
         r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
 
-    state_dict = load_state_dict_from_url(model_url, progress=progress, model_dir=MODEL_DIR)
+    incompatible = []
+    current_model_dict = model.state_dict()
+    state_dict = load_state_dict_from_url(model_url, progress=progress)
     for key in list(state_dict.keys()):
         res = pattern.match(key)
         if res:
             new_key = res.group(1) + res.group(2)
             state_dict[new_key] = state_dict[key]
             del state_dict[key]
-        if 'classifier' in key:
+        if key in current_model_dict and state_dict[key].size()!=current_model_dict[key].size():
             del state_dict[key]
-    model.load_state_dict(state_dict, strict=False)
+            incompatible.append(key)
+
+    print('Mismatching parameters or buffers')
+    print(incompatible)
+    missing = model.load_state_dict(state_dict, strict=False)
+    print('Loading weights from statedict. Missing and unexpected keys:')
+    print(missing)
+    
 
 
 def _densenet(arch, growth_rate, block_config, num_init_features, pretrained, progress,

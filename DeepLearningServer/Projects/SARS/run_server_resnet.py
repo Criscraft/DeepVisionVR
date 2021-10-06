@@ -29,7 +29,7 @@ def get_dl_networks():
         variant='resnet018',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0,1,1,1],
+        blocks=[2,1,1,1],
         statedict='covidresnet_finetune.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 0)
     for param in model.embedded_model.parameters():
@@ -40,7 +40,7 @@ def get_dl_networks():
         variant='resnet018',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0,1,1,1],
+        blocks=[2,1,1,1],
         statedict='covidresnet_orig_and_noise_shuffle.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 1)
     for param in model.embedded_model.parameters():
@@ -51,7 +51,7 @@ def get_dl_networks():
         variant='resnet018',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0,1,1,1],
+        blocks=[2,1,1,1],
         statedict='covidresnet_shuffle.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
     for param in model.embedded_model.parameters():

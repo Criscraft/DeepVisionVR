@@ -88,6 +88,12 @@ public class DLWebClient : MonoBehaviour
     }
 
 
+    public void RequestAllFeatureVisualizations(int networkID) 
+    {
+        dlNetworkList[networkID].RequestAllFeatureVisualizations();
+    }
+
+
     public void RequestWeightHistogram(HandleJSONDelegate handleJSONDelegate, int networkID, int layerID)
     {
         StartCoroutine(GetJSON(string.Format("network/{0}/weighthistogram/layerid/{1}", networkID, layerID), handleJSONDelegate));
@@ -108,6 +114,15 @@ public class DLWebClient : MonoBehaviour
         activationImageShallowCopy.tex = null;
         string output = JsonConvert.SerializeObject(activationImageShallowCopy);
         StartCoroutine(Upload(string.Format("network/{0}/prepareforinput", networkID), output, handleUploadDelegate));
+    }
+
+
+    public void RequestLayerExport(int networkID, int layerID, ActivationImage activationImage)
+    {
+        ActivationImage activationImageShallowCopy = activationImage;
+        activationImageShallowCopy.tex = null;
+        string output = JsonConvert.SerializeObject(activationImageShallowCopy);
+        StartCoroutine(Upload(string.Format("network/{0}/export/layerid/{1}", networkID, layerID), output, DoNothing));
     }
 
 
@@ -164,6 +179,7 @@ public class DLWebClient : MonoBehaviour
         DLNetwork dlNetwork;
         NetworkSettingsButtons networkSettingsButtons;
         Dataset dataset;
+        dlNetworkList = new List<DLNetwork>();
 
         for (int i = 0; i < Nnetworks; i++)
         {
@@ -178,6 +194,7 @@ public class DLWebClient : MonoBehaviour
             networkSettingsButtons = newInstance.GetComponentInChildren<NetworkSettingsButtons>();
             networkSettingsButtons.Prepare(this, i);
             dlNetwork.BuildNetwork();
+            dlNetworkList.Add(dlNetwork);
         }
 
         for (int i = 0; i < Ndatasets; i++)

@@ -21,6 +21,8 @@ def start_server(DLWebServer):
     app.add_route('/network/{networkid:int}/setnetworkloadfeatvis', DLWebServer.NetworkSetNetworkLoadFeatVisResource())
     app.add_route('/network/{networkid:int}/setnetworkdeletefeatvis', DLWebServer.NetworkSetNetworkDeleteFeatVisResource())
 
+    app.add_route('/network/{networkid:int}/export/layerid/{layerid:int}', DLWebServer.NetworkExportLayerResource())
+
     app.add_route('/dataset/{datasetid:int}/images', DLWebServer.DataImagesResource())
 
     app.add_route('/noiseimage/{noiseid:int}', DLWebServer.DataNoiseImageResource())

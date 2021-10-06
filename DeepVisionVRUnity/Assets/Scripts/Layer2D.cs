@@ -16,12 +16,15 @@ public class Layer2D : NetLayer
     [SerializeField]
     private Transform info;
     [SerializeField]
+    private LayerSettingsButtons layerSettingsButtons;
+    [SerializeField]
     private RectTransform infoRectTransform;
     [SerializeField]
     private GameObject linePlotterPrefab;
     [SerializeField]
     private RectTransform reloadOverlay;
     private DLNetwork dlNetwork;
+    private int layerID;
 
 
     private LinePlotter weightHistogram;
@@ -31,9 +34,12 @@ public class Layer2D : NetLayer
     private bool rgb = false;
 
 
-    public void Prepare(Vector3Int size, DLNetwork _dlNetwork)
+    public void Prepare(Vector3Int size, DLNetwork _dlNetwork, int _layerID)
     {
         dlNetwork = _dlNetwork;
+        layerID = _layerID;
+
+        layerSettingsButtons.Prepare(dlNetwork, layerID);
 
         transform.GetComponent<Canvas>().worldCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
@@ -149,6 +155,13 @@ public class Layer2D : NetLayer
         rgb = isRGB;
 
         DisableReloadOverlay();
+    }
+
+
+    public ActivationImage GetRepresentativeActivationImage()
+    {
+        ImageGetterButton imageGetterButton = items[0].GetComponent<ImageGetterButton>();
+        return imageGetterButton.ActivationImageUsed;
     }
 
 

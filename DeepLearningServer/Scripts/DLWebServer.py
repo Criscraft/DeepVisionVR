@@ -233,6 +233,24 @@ class NetworkSetNetworkDeleteFeatVisResource:
         network = networks[networkid]
         network.delete_feat_vis_cache()
         print(f"NetworkSetNetworkDeleteFeatVisResource for network {networkid}")
+
+
+class NetworkExportLayerResource:
+
+    def on_put(self, req, resp, networkid : int, layerid : int):
+        jsonfile = json.load(req.stream)
+        activation_image = ActivationImage(
+            network_ID = jsonfile["networkID"],
+            dataset_ID = jsonfile["datasetID"],
+            image_ID = jsonfile["imageID"],
+            layer_ID = jsonfile["layerID"],
+            channel_ID = jsonfile["channelID"],
+            noise_generator_ID = jsonfile["noiseGeneratorID"],
+            mode = ActivationImage.Mode(jsonfile["mode"]))
+        
+        network = networks[networkid]
+        network.export(activation_image)
+        print(f"send NetworkPrepareForInputResource for network {networkid}")
         
 
 class TestShortResource:

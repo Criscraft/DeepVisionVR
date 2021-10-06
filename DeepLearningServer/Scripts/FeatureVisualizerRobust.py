@@ -29,7 +29,8 @@ class FeatureVisualizer(object):
         scale = 0.04,
         degrees = 4, 
         blur_sigma = 0.2,
-        roll = 10):
+        roll = 8,
+        epochs_without_robustness = 10):
         
         super().__init__()
         self.lr = lr
@@ -40,6 +41,7 @@ class FeatureVisualizer(object):
         self.epochs = epochs
         self.regularize_transformation = Regularizer(norm_mean, distribution_reg_blend, target_size, scale, degrees, blur_sigma, roll)
         self.export_transformation = ExportTransform(target_mean=norm_mean, target_std=norm_std)
+        self.epochs_without_robustness = epochs_without_robustness
 
 
     def visualize(self, model, module, device, init_image, n_channels, channels=None):
@@ -49,6 +51,11 @@ class FeatureVisualizer(object):
             channels = np.arange(n_channels)
 
         init_image = init_image.to(device)
+
+        if torch.all(init_image[0] == init_image[1]) and torch.all(init_image[0] == init_image[2]):
+            grayscale = True
+        else:
+            grayscale = False
         
         n_batches = int( np.ceil( n_channels / float(BATCHSIZE) ) )
         
@@ -59,8 +66,9 @@ class FeatureVisualizer(object):
             created_image = init_image.repeat(n_batch_items, 1, 1, 1).detach()
 
             for epoch in range(self.epochs):
-                with torch.no_grad():
-                    created_image = self.regularize_transformation(created_image)
+                if epoch < self.epochs - self.epochs_without_robustness:
+                    with torch.no_grad():
+                        created_image = self.regularize_transformation(created_image)
                 
                 created_image = created_image.detach().clone()
                 created_image.requires_grad = True
@@ -82,6 +90,10 @@ class FeatureVisualizer(object):
 
                 gradients = created_image.grad / (torch.sqrt((created_image.grad**2).mean()) + 1e-6)
                 created_image = created_image - gradients * self.lr
+                if grayscale:
+                    created_image = created_image.mean(1, keepdims=True)
+                    created_image = created_image.expand(-1, 3, -1, -1)
+
 
                 if epoch % 10 == 0:
                     print(epoch, loss_max.item())

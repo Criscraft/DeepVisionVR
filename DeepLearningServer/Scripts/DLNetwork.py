@@ -4,8 +4,15 @@ import torch
 import torch.nn.functional as F 
 import numpy as np
 from enum import Enum
+import cv2
+import Scripts.utils as utils
 from Scripts.FeatureVisualizerRobust import FeatureVisualizer
 from Scripts.ActivationImage import ActivationImage
+
+
+class FeatureVisualizationMode(Enum):
+    Generating = 0
+    Loading = 1
 
 
 class DLNetwork(object):
@@ -27,10 +34,14 @@ class DLNetwork(object):
 
         self.cache_path = f"cache/network{self.network_id}"
         if not os.path.exists(self.cache_path): os.makedirs(self.cache_path)
+
         self.feature_visualization_path = os.path.join(self.cache_path, 'FeatureVisualizations')
         if not os.path.exists(self.feature_visualization_path): os.makedirs(self.feature_visualization_path)
         self.feature_visualization_mode = FeatureVisualizationMode.Loading
 
+        self.export_path = os.path.join(self.cache_path, 'Export')
+        if not os.path.exists(self.export_path): os.makedirs(self.export_path)
+        
     
     def prepare_for_input(self, activation_image : ActivationImage):
         with torch.no_grad():
@@ -137,7 +148,23 @@ class DLNetwork(object):
         path = os.path.join(self.feature_visualization_path, f"layer_{layerid}.pt")
         torch.save(created_images, path)
 
+    
+    def export(self, activation_image : ActivationImage):
+        images = None
+        if activation_image.mode == ActivationImage.Mode.FeatureVisualization:
+            images = self.get_feature_visualization(activation_image.layer_ID)
+            images = images[:,np.array([2, 1, 0])] # for sorting color channels
+            images = images.transpose([0, 2, 3, 1]) # put channel dimension to last
+        elif activation_image.mode == ActivationImage.Mode.Activation:
+            tensor = self.get_activation(activation_image.layer_ID)
+            # give first element of activations because we do not want to have the batch dimension
+            tensor = tensor[0]
+            tensor_to_uint_transform = utils.TransformToUint()
+            images = tensor_to_uint_transform(tensor, True)
+        
+        path = os.path.join(self.export_path, f"layer_{activation_image.layer_ID}")
+        if not os.path.exists(path): os.makedirs(path)
+        for i, image in enumerate(images):
+            cv2.imwrite(os.path.join(path, f"{i}.png"), image)
 
-class FeatureVisualizationMode(Enum):
-    Generating = 0
-    Loading = 1
+

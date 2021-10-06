@@ -15,7 +15,7 @@ class CovidResNet(nn.Module):
         freeze_features_until='', #exclusive
         no_gradient_required=False,
         enforce_batchnorm_requires_gradient=False,
-        n_layers_to_be_removed_from_blocks=[],
+        blocks=[2, 1, 1, 1],
         no_classifier=False,
         activation='relu',
         init_mode='kaiming_normal',
@@ -24,30 +24,21 @@ class CovidResNet(nn.Module):
         super().__init__()
 
         arg_dict = {
-            'pretrained' : pretrained,
             'num_classes' : n_classes,
             'init_mode' : init_mode,
             'activation' : activation,
         }
 
         if variant == 'resnet018':
-            self.embedded_model = resnet18(**arg_dict)
+            self.embedded_model = _resnet('resnet18', BasicBlock, blocks, pretrained, False, **arg_dict)
         elif variant == 'resnet034':
-            self.embedded_model = resnet34(**arg_dict)
+            self.embedded_model = _resnet('resnet34', BasicBlock, blocks, pretrained, False, **arg_dict)
         elif variant == 'resnet050':
-            self.embedded_model = resnet50(**arg_dict)
+            self.embedded_model = _resnet('resnet50', Bottleneck, blocks, pretrained, False, **arg_dict)
         elif variant == 'resnet101':
-            self.embedded_model = resnet101(**arg_dict)
+            self.embedded_model = _resnet('resnet101', Bottleneck, blocks, pretrained, False, **arg_dict)
         elif variant == 'resnet152':
-            self.embedded_model = resnet152(**arg_dict)
-        elif variant == 'resnext050_32x4d':
-            self.embedded_model = resnext50_32x4d(**arg_dict)
-        elif variant == 'resnext101_32x8d':
-            self.embedded_model = resnext101_32x8d(**arg_dict)
-        elif variant == 'wide_resnet050_2':
-            self.embedded_model = wide_resnet50_2(**arg_dict)
-        elif variant == 'wide_resnet101_2':
-            self.embedded_model = wide_resnet101_2(**arg_dict)
+            self.embedded_model = _resnet('resnet152', Bottleneck, blocks, pretrained, False, **arg_dict)
         else:
             print('select valid model variant')
 
@@ -74,17 +65,6 @@ class CovidResNet(nn.Module):
                     param.requires_grad = True
                 if freeze_features_until == key:
                     break
-
-        if n_layers_to_be_removed_from_blocks:
-            modules = [
-                self.embedded_model.layer1,
-                self.embedded_model.layer2,
-                self.embedded_model.layer3,
-                self.embedded_model.layer4,
-            ]
-            for n_layers, layer in zip(n_layers_to_be_removed_from_blocks, modules):
-                for i in range(n_layers):
-                    layer[-i-1] = nn.Identity()
 
         if statedict:
             pretrained_dict = torch.load(statedict, map_location=torch.device('cpu'))
@@ -125,9 +105,6 @@ class CovidResNet(nn.Module):
             
     def save(self, statedict_name):
         torch.save(self.state_dict(), statedict_name)
-
-        
-MODEL_DIR = '/nfshome/linse/NO_INB_BACKUP/ModelZoo'
 
 
 model_urls = {
@@ -461,8 +438,10 @@ def _resnet(
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress, model_dir=MODEL_DIR)
-        model.load_state_dict(state_dict, strict=False)
+        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+        missing = model.load_state_dict(state_dict, strict=False)
+        print('Loading weights from statedict. Missing and unexpected keys:')
+        print(missing)
     return model
 
 

@@ -54,4 +54,9 @@ public class NetworkSettingsButtons : MonoBehaviour
         dlClient.SetNetworkDeleteFeatVis(networkID);
         deleteSureButton.SetActive(false);
     }
+
+    public void OnGenerateAllButtonClick()
+    {
+        dlClient.RequestAllFeatureVisualizations(networkID);
+    }
 }

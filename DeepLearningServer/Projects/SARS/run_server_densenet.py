@@ -29,7 +29,7 @@ def get_dl_networks():
         variant='densenet121',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0, 2, 22, 15],
+        blocks=[6, 10, 2, 1],
         statedict='coviddensenet_finetune.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 0)
     for param in model.embedded_model.parameters():
@@ -40,7 +40,7 @@ def get_dl_networks():
         variant='densenet121',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0, 2, 22, 15],
+        blocks=[6, 10, 2, 1],
         statedict='coviddensenet_orig_and_noise_shuffle.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 1)
     for param in model.embedded_model.parameters():
@@ -51,7 +51,7 @@ def get_dl_networks():
         variant='densenet121',
         n_classes=N_CLASSES, 
         pretrained=False,
-        n_layers_to_be_removed_from_blocks=[0, 2, 22, 15],
+        blocks=[6, 10, 2, 1],
         statedict='coviddensenet_shuffle.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
     for param in model.embedded_model.parameters():
