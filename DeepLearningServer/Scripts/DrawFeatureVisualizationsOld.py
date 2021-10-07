@@ -1,10 +1,9 @@
 import os
-from PIL import Image, ImageDraw, ImageTk
+from PIL import Image, ImageTk
 import tkinter as tk
-from tkinter import ttk, colorchooser, filedialog
 import json
 
-SOURCEPATH = "/nfshome/linse/Documents/DeepVisionVR/DeepVisionVR/DeepLearningServer/Projects/SARS/FeatureVisualizationParameterTuning"
+SOURCEPATH = "Z:\Documents\DeepVisionVR\DeepVisionVR\DeepLearningServer"
 
 
 class FeatureVisualizationDrawer:
@@ -32,7 +31,7 @@ class FeatureVisualizationDrawer:
 
         # draw title
         title = tk.Frame(self.master, padx=5, pady=5)
-        tk.Label(title, text='FeatureVisualization', font=('', 15)).pack()
+        tk.Label(title, text='Meine Flipsige Anwendung', font=('', 15)).pack()
         title.pack()
 
         # draw module selection
@@ -69,9 +68,7 @@ class FeatureVisualizationDrawer:
         image_display_frame = tk.Frame(self.master, padx=5, pady=5)
         for epoch in parameters["epochs"]:
             sub_frame = tk.Frame(image_display_frame, padx=5, pady=5)
-            path = visualizations[0]["path"]
-            path = path.split("/")[-1]
-            with Image.open(os.path.join(SOURCEPATH, path)) as im:
+            with Image.open(os.path.join(SOURCEPATH, visualizations[0]["path"])) as im:
                 image = ImageTk.PhotoImage(im)
             self.images.append(image)
             label = tk.Label(sub_frame, image=image)
@@ -99,52 +96,37 @@ class FeatureVisualizationDrawer:
             parameter_query_dict = {"epoch" : epoch, "channel" : self.current_channel}
             for parameter_slider in self.parameter_sliders:
                 parameter_query_dict[parameter_slider.parameter_name] = parameter_slider.get()
-            path = self.get_image_path(parameter_query_dict)
-            path = path.split("/")[-1]
+            path = ""
+            for parameter_dict in self.visualizations:
+                mismatches = False
+                for key, value in parameter_query_dict.items():
+                    if float(parameter_dict[key]) != float(value):
+                        mismatches = True
+                        break
+                if not mismatches:
+                    path = parameter_dict["path"]
+                    break
+            print("Path:")
+            print(path)
+            print("Params")
+            print(parameter_query_dict)
             with Image.open(os.path.join(SOURCEPATH, path)) as im:
                 image = ImageTk.PhotoImage(im)
             self.images.append(image)
-            image_label.config(image=image)
-
-
-    def get_image_path(self, parameter_query_dict):
-        path = ""
-        for parameter_dict in self.visualizations:
-            mismatches = False
-            for key, value in parameter_query_dict.items():
-                if float(parameter_dict[key]) != float(value):
-                    mismatches = True
-                    break
-            if not mismatches:
-                path = parameter_dict["path"]
-                break
-        return path
+            image_label.config(image = image)
 
 
 class ChannelButton:
     def __init__(self, feature_visualization_drawer, master):
-        self.frame = tk.Frame(master, padx=5, pady=5)
         self.feature_visualization_drawer = feature_visualization_drawer
-        self.button = tk.Button(self.frame, command=self.on_press)
-        self.button.pack()
-        self.label = tk.Label(self.frame, font=('', 12))
-        self.label.pack()
+        self.button = tk.Button(master, command=self.on_press)
+        self.button.pack(side=tk.LEFT)
         self.channel = None
-        self.image = None
-        self.frame.pack(side=tk.LEFT)
 
 
     def set_channel(self, channel):
         self.channel = channel
-        self.label.config(text=f"{channel}")
-        parameter_query_dict = {"epoch": self.feature_visualization_drawer.parameters["epochs"][-1], "channel": channel}
-        for parameter_slider in self.feature_visualization_drawer.parameter_sliders:
-            parameter_query_dict[parameter_slider.parameter_name] = parameter_slider.get()
-        path = self.feature_visualization_drawer.get_image_path(parameter_query_dict)
-        path = path.split("/")[-1]
-        with Image.open(os.path.join(SOURCEPATH, path)) as im:
-            self.image = ImageTk.PhotoImage(im)
-        self.button.config(image=self.image)
+        self.button.config(text=f"{channel}")
 
 
     def on_press(self):
@@ -171,6 +153,7 @@ class ParameterScale:
             orient=tk.HORIZONTAL)
         self.scale.pack()
         self.scale.set(0)
+        self.update_label(0)
 
         self.label = tk.Label(frame, font=('', 12))
         self.label.pack()
@@ -179,9 +162,12 @@ class ParameterScale:
 
 
     def parameter_changed(self, value):
-        self.label.config(text=f"{self.parameter_list[int(value)]}")
+        self.update_label(value)
         self.feature_visualization_drawer.redraw_images()
-        self.feature_visualization_drawer.update_channels()
+
+
+    def update_label(self, value):
+        self.label.config(text=f"{self.parameter_list[int(value)]}")
 
 
     def get(self):
@@ -189,7 +175,7 @@ class ParameterScale:
 
 
 if __name__ == '__main__':
-    with open(os.path.join(SOURCEPATH, "meta.json"), "r") as outfile:
+    with open(os.path.join(SOURCEPATH, "FeatureVisualizationExampleImages", "meta.json"), "r") as outfile:
         json_object = json.load(outfile)
     
     my_parameters = json_object['parameters']

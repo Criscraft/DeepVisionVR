@@ -36,7 +36,8 @@
 		"**/.git/subtree-cache/**": true,
 		"**/node_modules/*/**": true,
 		"**/.hg/store/**": true,
-        "**/Datasets/*": true
+        "**/Datasets/*": true,
+        "**/FeatureVisualizationParameterTuning/*": true
 	},
     
 }

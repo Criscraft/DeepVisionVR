@@ -24,28 +24,28 @@ device = torch.device("cuda") if use_cuda else torch.device("cpu")
 def get_dl_networks():
 
     network_list = []
-    
-    model = CovidDenseNet(
-        variant='densenet121',
-        n_classes=N_CLASSES, 
-        pretrained=False,
-        blocks=[6, 10, 2, 1],
-        statedict='coviddensenet_finetune.pt')
-    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 0)
-    for param in model.embedded_model.parameters():
-        param.requires_grad = False
-    network_list.append(dl_network)
 
     model = CovidDenseNet(
         variant='densenet121',
         n_classes=N_CLASSES, 
         pretrained=False,
         blocks=[6, 10, 2, 1],
-        statedict='coviddensenet_orig_and_noise_shuffle.pt')
+        statedict='coviddensenet_scratch.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 1)
     for param in model.embedded_model.parameters():
         param.requires_grad = False
     network_list.append(dl_network)
+
+    # model = CovidDenseNet(
+    #     variant='densenet121',
+    #     n_classes=N_CLASSES, 
+    #     pretrained=False,
+    #     blocks=[6, 10, 2, 1],
+    #     statedict='coviddensenet_orig_and_noise_shuffle.pt')
+    # dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
+    # for param in model.embedded_model.parameters():
+    #     param.requires_grad = False
+    # network_list.append(dl_network)
 
     model = CovidDenseNet(
         variant='densenet121',
@@ -53,7 +53,7 @@ def get_dl_networks():
         pretrained=False,
         blocks=[6, 10, 2, 1],
         statedict='coviddensenet_shuffle.pt')
-    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
+    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 3)
     for param in model.embedded_model.parameters():
         param.requires_grad = False
     network_list.append(dl_network)
@@ -93,5 +93,5 @@ def get_datasets():
 
 
 def get_noise_generators():
-    noise_generator = NoiseGenerator(device, IMAGE_SHAPE)
+    noise_generator = NoiseGenerator(device, IMAGE_SHAPE, grayscale=True)
     return [noise_generator]

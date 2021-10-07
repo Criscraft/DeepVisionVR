@@ -24,24 +24,13 @@ device = torch.device("cuda") if use_cuda else torch.device("cpu")
 def get_dl_networks():
 
     network_list = []
-    
-    model = CovidResNet(
-        variant='resnet018',
-        n_classes=N_CLASSES, 
-        pretrained=False,
-        blocks=[2,1,1,1],
-        statedict='covidresnet_finetune.pt')
-    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 0)
-    for param in model.embedded_model.parameters():
-        param.requires_grad = False
-    network_list.append(dl_network)
 
     model = CovidResNet(
         variant='resnet018',
         n_classes=N_CLASSES, 
         pretrained=False,
         blocks=[2,1,1,1],
-        statedict='covidresnet_orig_and_noise_shuffle.pt')
+        statedict='covidresnet_scratch.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 1)
     for param in model.embedded_model.parameters():
         param.requires_grad = False
@@ -52,8 +41,19 @@ def get_dl_networks():
         n_classes=N_CLASSES, 
         pretrained=False,
         blocks=[2,1,1,1],
-        statedict='covidresnet_shuffle.pt')
+        statedict='covidresnet_orig_and_noise_shuffle.pt')
     dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
+    for param in model.embedded_model.parameters():
+        param.requires_grad = False
+    network_list.append(dl_network)
+
+    model = CovidResNet(
+        variant='resnet018',
+        n_classes=N_CLASSES, 
+        pretrained=False,
+        blocks=[2,1,1,1],
+        statedict='covidresnet_shuffle.pt')
+    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 3)
     for param in model.embedded_model.parameters():
         param.requires_grad = False
     network_list.append(dl_network)
@@ -93,5 +93,5 @@ def get_datasets():
 
 
 def get_noise_generators():
-    noise_generator = NoiseGenerator(device, IMAGE_SHAPE)
+    noise_generator = NoiseGenerator(device, IMAGE_SHAPE, grayscale=True)
     return [noise_generator]

@@ -25,6 +25,7 @@ def get_dl_networks():
 
     network_list = []
     
+    
     model = CovidResNet(
         variant='resnet018',
         n_classes=N_CLASSES, 
@@ -57,7 +58,7 @@ def get_dl_networks():
     for param in model.embedded_model.parameters():
         param.requires_grad = False
     network_list.append(dl_network)
-
+    
     return network_list
 
 
@@ -93,5 +94,5 @@ def get_datasets():
 
 
 def get_noise_generators():
-    noise_generator = NoiseGenerator(device, IMAGE_SHAPE)
+    noise_generator = NoiseGenerator(device, IMAGE_SHAPE, grayscale=False)
     return [noise_generator]

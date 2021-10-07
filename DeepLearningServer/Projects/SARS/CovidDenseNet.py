@@ -70,11 +70,11 @@ class CovidDenseNet(nn.Module):
             return self.embedded_model(batch)
 
 
-    def forward_features(self, batch):
+    def forward_features(self, batch, module=None):
         track_modules = ActivationTracker()
 
         if isinstance(batch, dict) and 'data' in batch:
-            logits, activation_dict = track_modules.collect_stats(self.embedded_model, batch['data'])
+            logits, activation_dict = track_modules.collect_stats(self.embedded_model, batch['data'], module)
             out = {'logits' : logits, 'activations' : activation_dict}
             return out
         else:
@@ -178,6 +178,7 @@ class _DenseBlock(nn.ModuleDict):
         tracker_base_index = TRACKERINDEX
         marker = TrackerModule((TRACKERINDEX, 0), "DenseBlock", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         self.add_module("marker", marker)
+        precursors = []
 
         for i in range(num_layers):
             layer = _DenseLayer(
@@ -190,32 +191,38 @@ class _DenseBlock(nn.ModuleDict):
             self.add_module('denselayer%d' % (i + 1), layer)
             TRACKERINDEX += 1
             tracker_second_index += 1
-            tracker = TrackerModule((TRACKERINDEX, tracker_second_index), "DenseLayer", tracked_module=layer, precursors=[(tracker_base_index, 0)])
+            pos = (TRACKERINDEX, tracker_second_index)
+            precursors.append(pos)
+            tracker = TrackerModule(pos, "DenseLayer", tracked_module=layer, precursors=[(tracker_base_index, 0)])
             self.add_module('tracker%d' % (i + 1), tracker)
 
-            
+        TRACKERINDEX += 1
+        tracker = TrackerModule((TRACKERINDEX, 0), "DenseLayer", precursors=precursors)
+        self.add_module('tracker_final', tracker)
         
 
     def forward(self, init_features):
         features = [init_features]
-        for layer in self.values():
-            if isinstance(layer, nn.Identity):
-                continue
+        new_features = features
+        for i, layer in enumerate(self.values()):
             if isinstance(layer, _DenseLayer):
                 new_features = layer(features)
                 features.append(new_features)
             elif isinstance(layer, TrackerModule):
-                new_features = layer(new_features)
+                if i<len(self)-1:
+                    new_features = layer(new_features)
+                else:
+                    #this is the last module
+                    features = torch.cat(features, 1)
+                    features = layer(features)
             else:
                 raise ValueError
-        features = torch.cat(features, 1)
         return features
 
 
 class _Transition(nn.Module):
     def __init__(self, num_input_features, num_output_features):
         super().__init__()
-        self.adapter = nn.Identity()
         self.norm = nn.BatchNorm2d(num_input_features)
         self.relu = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(num_input_features, num_output_features,
@@ -226,20 +233,16 @@ class _Transition(nn.Module):
         TRACKERINDEX += 1
         self.marker = TrackerModule((TRACKERINDEX, 0), "Transition", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         TRACKERINDEX += 1
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "Adapter", tracked_module=self.adapter, precursors=[(TRACKERINDEX-1, 0)])
-        TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "Transition Output", tracked_module=self.conv, precursors=[(TRACKERINDEX-1, 0)])
+        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "Transition Output", tracked_module=self.conv, precursors=[(TRACKERINDEX-1, 0)])
 
     
     def forward(self, x):
         x = self.marker(x)
-        x = self.adapter(x)
-        x = self.tracker1(x)
         x = self.norm(x)
         x = self.relu(x)
         x = self.conv(x)
         x = self.pool(x)
-        x = self.tracker2(x)
+        x = self.tracker1(x)
         return x
 
 
