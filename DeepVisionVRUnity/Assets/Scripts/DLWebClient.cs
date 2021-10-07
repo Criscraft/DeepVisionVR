@@ -16,6 +16,9 @@ public class DLWebClient : MonoBehaviour
     private GameObject datasetPrefab;
     [SerializeField]
     private GameObject noiseGeneratorPrefab;
+    [SerializeField]
+    private float networkSpacing = 25f;
+    
 
     private List<DLNetwork> dlNetworkList;
     public delegate IEnumerator HandleJSONDelegate(JObject jObject);
@@ -186,7 +189,7 @@ public class DLWebClient : MonoBehaviour
         {
             Transform newInstance = Instantiate(dlNetworkPrefab).transform;
             newInstance.name = string.Format("Network{0}", i);
-            newInstance.localPosition = new Vector3(25f * i, 0f, 0f);
+            newInstance.localPosition = new Vector3(networkSpacing * i, 0f, 0f);
             newInstance.localRotation = Quaternion.identity;
             newInstance.localScale = new Vector3(1f, 1f, 1f);
             newInstance.SetParent(transform);
@@ -202,7 +205,7 @@ public class DLWebClient : MonoBehaviour
         {
             Transform newInstance = Instantiate(datasetPrefab).transform;
             newInstance.name = string.Format("Dataset{0}", i);
-            newInstance.localPosition = new Vector3(25f * i, 0f, -12f);
+            newInstance.localPosition = new Vector3(networkSpacing * i, 0f, -12f);
             newInstance.localRotation = Quaternion.Euler(new Vector3(0f, 180f, 0f));
             newInstance.localScale = new Vector3(0.007f, 0.007f, 0.007f);
             newInstance.SetParent(transform);

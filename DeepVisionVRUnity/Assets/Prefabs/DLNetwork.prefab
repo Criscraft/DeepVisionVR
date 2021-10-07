@@ -94,7 +94,7 @@ MonoBehaviour:
   xMargin: 1
   minElementSize: 0.5
   minimalInfoScreenSize: 0.75
-  xCentering: 1
+  xCentering: 0
   xStrictGridPlacement: 0
   minimalZOffset: 0.5
   maximalZOffset: 10
@@ -479,6 +479,22 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7506384320470702372, guid: f7aaf46728d93ba3881c1c1c8c212ed4, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7759110814764328126, guid: f7aaf46728d93ba3881c1c1c8c212ed4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7759110814764328126, guid: f7aaf46728d93ba3881c1c1c8c212ed4, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7759110814764328126, guid: f7aaf46728d93ba3881c1c1c8c212ed4, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7759110814764328126, guid: f7aaf46728d93ba3881c1c1c8c212ed4, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}

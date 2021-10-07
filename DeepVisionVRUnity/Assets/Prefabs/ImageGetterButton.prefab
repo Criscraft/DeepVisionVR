@@ -146,7 +146,10 @@ MonoBehaviour:
   image: {fileID: 1528547877444410096}
   textMeshPro: {fileID: 3859813243902066314}
   canReturnImage: 1
-  canAcceptImage: 0
+  canAcceptDatasetImage: 0
+  canAcceptActivationImage: 0
+  canAcceptFeatureVisualizationImage: 0
+  canAcceptNoiseImage: 0
 --- !u!1 &3859813243902066312
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,8 +224,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278255410
-  m_fontColor: {r: 0.19421315, g: 1, b: 0, a: 1}
+    rgba: 4292266667
+  m_fontColor: {r: 0.67058825, g: 0.7921569, b: 0.8392157, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

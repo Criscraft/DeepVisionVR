@@ -315,14 +315,18 @@ PrefabInstance:
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_renderer
       value: 
+      objectReference: {fileID: 297902883474848346}
+    - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.8392157
       objectReference: {fileID: 0}
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_fontColor.g
-      value: 1
+      value: 0.7921569
       objectReference: {fileID: 0}
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_fontColor.r
-      value: 0.19607843
+      value: 0.67058825
       objectReference: {fileID: 0}
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_fontSizeBase
@@ -334,7 +338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_fontColor32.rgba
-      value: 4278255410
+      value: 4292266667
       objectReference: {fileID: 0}
     - target: {fileID: 7914852323879496538, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
       propertyPath: m_enableWordWrapping
@@ -345,5 +349,10 @@ PrefabInstance:
 --- !u!224 &57580932018487886 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5886249652560883173, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
+  m_PrefabInstance: {fileID: 5871771776675229611}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &297902883474848346 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6151605148552599025, guid: e210f5b3e1d9c53409ffecb674889409, type: 3}
   m_PrefabInstance: {fileID: 5871771776675229611}
   m_PrefabAsset: {fileID: 0}

@@ -24,8 +24,7 @@ public class Layer2D : NetLayer
     private RectTransform infoRectTransform;
     [SerializeField]
     private GameObject linePlotterPrefab;
-    [SerializeField]
-    private string exportPath = "E:\\Dokumente\\DeepVisVR\\Export";
+    private string exportPath;
     [SerializeField]
     private RectTransform reloadOverlay;
     private DLNetwork dlNetwork;
@@ -62,6 +61,8 @@ public class Layer2D : NetLayer
         // disable the info elements until they are needed
         weightHistogramGO.SetActive(false);
         activationHistogramGO.SetActive(false);
+
+        exportPath = Path.Combine(new string[] {Application.dataPath, "..", "..", "Export"});
     }
 
 
@@ -230,7 +231,7 @@ public class Layer2D : NetLayer
         imageGetterButton = items[0].GetComponent<ImageGetterButton>();
         activationImage = imageGetterButton.ActivationImageUsed;
         mode = activationImage.mode;
-        exportPathFinal = Path.Combine(new string[] {Application.dataPath, exportPath, string.Format("network{0}", networkID), mode.ToString(), string.Format("layer{0}", layerID)});
+        exportPathFinal = Path.Combine(new string[] {exportPath, string.Format("network{0}", networkID), mode.ToString(), string.Format("layer{0}", layerID)});
         if (!Directory.Exists(exportPathFinal))
         {
             Directory.CreateDirectory(exportPathFinal);

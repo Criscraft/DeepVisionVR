@@ -802,12 +802,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 8992139983840131256, guid: f0dae0bddad39954282678a7dec46d41, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8992139983840131257, guid: f0dae0bddad39954282678a7dec46d41, type: 3}
       propertyPath: m_InteractionManager
       value: 
       objectReference: {fileID: 1938678141}
     - target: {fileID: 8992139983840131258, guid: f0dae0bddad39954282678a7dec46d41, type: 3}
       propertyPath: m_SelectAction.m_UseReference
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8992139983840131259, guid: f0dae0bddad39954282678a7dec46d41, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8992139984299397355, guid: f0dae0bddad39954282678a7dec46d41, type: 3}

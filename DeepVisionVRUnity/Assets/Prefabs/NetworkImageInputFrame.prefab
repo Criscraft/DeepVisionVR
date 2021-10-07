@@ -238,6 +238,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5840018241392110897}
     m_Modifications:
+    - target: {fileID: 1528547877444410096, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_Texture
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3859813243151223048, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_Name
       value: ImageGetterButton
@@ -356,7 +360,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_Pivot.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_AnchorMax.x
@@ -384,7 +388,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.01
+      value: -0.009999999
       objectReference: {fileID: 0}
     - target: {fileID: 3859813243902066313, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -397,6 +401,18 @@ PrefabInstance:
     - target: {fileID: 3859813243902066314, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: m_text
       value: Insert Image
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243902066314, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_fontSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243902066314, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_fontStyle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859813243902066314, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7842651195149900020, guid: 8e33f5ec5bc3dd84383bde57f95acc25, type: 3}
       propertyPath: textMeshPro
