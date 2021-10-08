@@ -1,4 +1,6 @@
+using System.IO;
 using UnityEngine;
+
 
 public class InputManagerFPSInteraction : MonoBehaviour
 {
@@ -7,7 +9,7 @@ public class InputManagerFPSInteraction : MonoBehaviour
     private PlayerControls.InteractActions interaction;
 
     [SerializeField]
-    private string screenshotPath = "Screenshots";
+    private string screenshotPath;
     private int screenshotCounter = 1;
 
 
@@ -31,6 +33,13 @@ public class InputManagerFPSInteraction : MonoBehaviour
         controls = new PlayerControls();
 
         interaction = controls.Interact;
+
+        screenshotPath = Path.Combine(new string[] { Application.dataPath, "..", "..", "Screenshots" });
+        if (!Directory.Exists(screenshotPath))
+        {
+            Directory.CreateDirectory(screenshotPath);
+        }
+
         interaction.Screenshot.performed += _ => ScreenShot();
     }
 
@@ -63,7 +72,8 @@ public class InputManagerFPSInteraction : MonoBehaviour
 
     private void ScreenShot()
     {
-        ScreenCapture.CaptureScreenshot(screenshotPath + "\\screenshot" + string.Format("{0}.jpg", screenshotCounter));
+        string screenshotPathFinal = Path.Combine(new string[] { screenshotPath, string.Format("{0}.png", screenshotCounter) });
+        ScreenCapture.CaptureScreenshot(screenshotPathFinal);
         screenshotCounter++;
     }
 }

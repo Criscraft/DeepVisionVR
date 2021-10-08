@@ -27,6 +27,8 @@ public class Layer2D : NetLayer
     private string exportPath;
     [SerializeField]
     private RectTransform reloadOverlay;
+    [SerializeField]
+    private RectTransform background;
     private DLNetwork dlNetwork;
     private int networkID;
     private int layerID;
@@ -195,6 +197,7 @@ public class Layer2D : NetLayer
         LayoutRebuilder.ForceRebuildLayoutImmediate(featureMaps);
         ScaleReloadOverlay();
         ScaleSlider();
+        ScaleBackground();
     }
 
 
@@ -205,6 +208,16 @@ public class Layer2D : NetLayer
         float targetWidth = 0.5f * layerWidth;
         float scale = targetWidth / width * reloadOverlay.localScale.x;
         reloadOverlay.localScale = new Vector3(scale, scale, scale);
+    }
+
+
+    private void ScaleBackground()
+    {
+        float layerWidth = GetWidth(true);
+        float width = background.sizeDelta.x * background.localScale.x;
+        float targetWidth = layerWidth;
+        float scale = targetWidth / width * background.localScale.x;
+        background.localScale = new Vector3(scale, scale, scale);
     }
 
 

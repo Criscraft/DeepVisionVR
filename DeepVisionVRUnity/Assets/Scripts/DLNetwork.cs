@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using Newtonsoft.Json.Linq;
 
@@ -158,7 +159,7 @@ public class DLNetwork : MonoBehaviour
     public void RequestLayerFeatureVisualization(int layerID)
     {
         string datatype = (string)architecture[layerID]["data_type"];
-        if (datatype == "2D_feature_map")
+        if (datatype == "2D_feature_map" || datatype == "1D_vector")
         {
             dlClient.RequestLayerFeatureVisualization(AcceptLayerActivation, networkID, layerID);
             SetLoading(layerID);
@@ -316,8 +317,9 @@ public class DLNetwork : MonoBehaviour
         ownResultCanvasInstance = Instantiate(foreignResultCanvasInstance);
         ownResultCanvasInstance.SetParent(lastLayer);
         ownResultCanvasInstance.name = "ClassificationResultCanvas";
-        ownResultCanvasInstance.localPosition = new Vector3(0f, 1.3f, 0f);
-        ownResultCanvasInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        ownResultCanvasInstance.localScale = new Vector3(3f, 3f, 3f);
+        ownResultCanvasInstance.localRotation = Quaternion.identity;
+        ownResultCanvasInstance.localPosition = new Vector3(0f, 0f, 0f);
     }
 
 
@@ -328,7 +330,7 @@ public class DLNetwork : MonoBehaviour
         networkImageInputFrameInstance.SetParent(transform);
         networkImageInputFrameInstance.localScale = new Vector3(3f, 3f, 3f);
         networkImageInputFrameInstance.localPosition = new Vector3(0f, 0f, -minimalZOffset);
-        networkImageInputFrameInstance.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        networkImageInputFrameInstance.localRotation = Quaternion.identity;
         networkImageInputFrameInstance.name = "Network Image Input Frame";
         networkImageInputFrameInstance.GetComponent<NetworkImageInputFrame>().Prepare(this);
 
@@ -356,13 +358,14 @@ public class DLNetwork : MonoBehaviour
             }
             else if (datatype == "1D_vector")
             {
-                int size = (int)jObject["size"][1];
-                newLayerInstance = new GameObject();
+                Vector3Int size = new Vector3Int((int)jObject["size"][1], 1, 1);
+                newLayerInstance = (GameObject)Instantiate(layerCanvasPrefab);
                 newLayerInstance.transform.SetParent(transform);
+                newLayerInstance.transform.localPosition = Vector3.zero;
+                newLayerInstance.transform.localRotation = transform.localRotation;
+                newLayerInstance.transform.localScale = new Vector3(0.0005f, 0.0005f, 0.0005f);
                 newLayerInstance.name = "1D_vector_layer " + string.Format("{0}", gridPos[0]) + "," + string.Format("{0}", gridPos[1]);
-                newLayerInstance.AddComponent<Layer1D>();
-                Layer1D layer1DScript = newLayerInstance.GetComponent<Layer1D>();
-                layer1DScript.Prepare(layer1DParticleSystemPrefab, size);
+                newLayerInstance.GetComponent<Layer2D>().Prepare(size, this, networkID, layerID);
             }
             else if (datatype == "None") // could change to "InfoScreen"
             {
