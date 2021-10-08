@@ -36,16 +36,16 @@ def get_dl_networks():
         param.requires_grad = False
     network_list.append(dl_network)
 
-    # model = CovidDenseNet(
-    #     variant='densenet121',
-    #     n_classes=N_CLASSES, 
-    #     pretrained=False,
-    #     blocks=[6, 10, 2, 1],
-    #     statedict='coviddensenet_orig_and_noise_shuffle.pt')
-    # dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
-    # for param in model.embedded_model.parameters():
-    #     param.requires_grad = False
-    # network_list.append(dl_network)
+    model = CovidDenseNet(
+        variant='densenet121',
+        n_classes=N_CLASSES, 
+        pretrained=False,
+        blocks=[6, 10, 2, 1],
+        statedict='coviddensenet_orig_and_noise_shuffle.pt')
+    dl_network = DLNetwork(model, device, NORM_MEAN, NORM_STD, IMAGE_SHAPE, 2)
+    for param in model.embedded_model.parameters():
+        param.requires_grad = False
+    network_list.append(dl_network)
 
     model = CovidDenseNet(
         variant='densenet121',

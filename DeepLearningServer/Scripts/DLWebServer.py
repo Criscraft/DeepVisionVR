@@ -59,7 +59,7 @@ class NetworkActivationImageResource:
         
         # if the layer has 1D data, make a 2D image out of it
         if len(data.shape) == 1:
-            data = data[None, None, ...]
+            data = data.reshape((-1, 1, 1))
 
         tensors = [utils.encode_image(ten) for ten in data]
         out = {

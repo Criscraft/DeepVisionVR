@@ -27,10 +27,10 @@ class FeatureVisualizer(object):
         lr=0.15,
         distribution_reg_blend=0.05,
         scale = 0.05,
-        degrees = 3, 
-        blur_sigma = 0.2,
+        degrees = 10, 
+        blur_sigma = 0.5,
         roll = 5,
-        epochs_without_robustness = 10):
+        epochs_without_robustness = 5):
         
         super().__init__()
         self.lr = lr
@@ -147,17 +147,15 @@ class Regularizer(object):
             transforms.Pad(roll*2, padding_mode='edge'),
             transforms.RandomApply(torch.nn.ModuleList([
                 transforms.RandomRotation(degrees=degrees),
-                ]), p=0.4),
+                ]), p=0.3),
             transforms.RandomApply(torch.nn.ModuleList([
                 transforms.RandomAffine(degrees=0, scale=scale, interpolation=transforms.InterpolationMode.BILINEAR),
-                ]), p=0.04),
-            transforms.RandomApply(torch.nn.ModuleList([
-                blurring,
-                ]), p=0.4),
+                ]), p=0.05),
+            blurring,
             transforms.CenterCrop(target_size),
             transforms.RandomApply(torch.nn.ModuleList([
                 RandomRoll(roll),
-                ]), p=0.4),
+                ]), p=0.3),
             DistributionRegularizer(distribution_reg_blend)
         ])
 

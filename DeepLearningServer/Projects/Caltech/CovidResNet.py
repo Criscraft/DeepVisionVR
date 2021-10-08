@@ -328,14 +328,14 @@ class ResNet(nn.Module):
         
         global TRACKERINDEX
         TRACKERINDEX = 0 # set 0 because TRACKERINDEX will be shared across all instances of this network and there will be issues if there is more than 1 instance 
-        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "input", precursors=[])
+        self.tracker1 = TrackerModule((TRACKERINDEX, 0), "Input", precursors=[])
         self.bn1 = norm_layer(self.inplanes)
         self.relu = self._activation_layer(inplace=False)
         TRACKERINDEX += 1
-        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "conv1", tracked_module=self.conv1, precursors=[(TRACKERINDEX-1, 0)])
+        self.tracker2 = TrackerModule((TRACKERINDEX, 0), "Conv1", tracked_module=self.conv1, precursors=[(TRACKERINDEX-1, 0)])
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         TRACKERINDEX += 1
-        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "maxpool", precursors=[(TRACKERINDEX-1, 0)])
+        self.tracker3 = TrackerModule((TRACKERINDEX, 0), "Maxpool", precursors=[(TRACKERINDEX-1, 0)])
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
@@ -345,10 +345,12 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         TRACKERINDEX += 1
-        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "avgpool")
+        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "Avgpool", precursors=[(TRACKERINDEX-1, 0)])
+        TRACKERINDEX += 1
+        self.marker = TrackerModule((TRACKERINDEX, 0), "Flatten to 1D vector", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         self.classifier = nn.Linear(512 * block.expansion, num_classes)
         TRACKERINDEX += 1
-        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "output")
+        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "Output", precursors=[(TRACKERINDEX-1, 0)])
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -419,6 +421,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.tracker4(x)
+        x = self.marker(x)
         x = self.classifier(x)
         x = self.tracker5(x)
 

@@ -319,10 +319,12 @@ class DenseNetTorchVision(nn.Module):
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
         TRACKERINDEX += 1
-        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "avgpool")
+        self.tracker4 = TrackerModule((TRACKERINDEX, 0), "avgpool", precursors=[(TRACKERINDEX-1, 0)])
+        TRACKERINDEX += 1
+        self.marker = TrackerModule((TRACKERINDEX, 0), "Flatten to 1D vector", precursors=[(TRACKERINDEX-1, 0)], ignore_activation=True)
         self.classifier = nn.Linear(num_features, num_classes)
         TRACKERINDEX += 1
-        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "output")
+        self.tracker5 = TrackerModule((TRACKERINDEX, 0), "output", precursors=[(TRACKERINDEX-1, 0)])
 
         # Official init from torch repo.
         for m in self.modules():
