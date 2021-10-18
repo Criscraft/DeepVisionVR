@@ -1,10 +1,8 @@
-![Title](Title.png)
+![Title](Panorama.png)
 
 # DeepVisionVR - Interactive 3D Visualization of Deep Neural Networks
 
-This repository is the implementation of DeepVisionVR. It serves as a tool to inspect the activations in deep neural networks in three dimensions. VR Support is currently available for the HTC Vive. The repository contains the Unity project to vision the deep networks, the Python based implementation of the networks and a Docker file to create the Python environment. Currently, the implementation covers two ResNet018 models trained on the CalTech dataset.
-
-The project is still in an early development phase and such is the documentation. 
+This repository is the implementation of DeepVisionVR. It serves as a tool to inspect the activations in deep neural networks in three dimensions. With this tool you can take a walk in your image processing Convolutional Neural Network (CNN) and get a more intuitive understanding of what it is doing and how it processes information. It provides visualization algorithms like feature visualization to reveal  what visual concepts it has learned. Currently, it can display CNNs for image classification and segmentation. VR Support is available. The repository contains the Unity project to display the networks, the Python based implementation of the networks themselves and a Docker file to create the Python environment. Soon an easy demo will be published to make it easy to get started.
 
 
 ## Requirements
@@ -16,11 +14,11 @@ For the Deep Learining part:
 Install Docker and NVIDIA-docker
 Build the Docker image.
 
-The project is easy to set up in Linux, however, in Windows I had issues with the GPU support for Docker containers. Docker Desktop did not grant access to GPU computing. I circumvented the problem by installing Ubuntu in Windows 11 beta using WSL and running the container inside WSL. I recommend this guide https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+It is advised to run server and client on different machines due to GPU memory limitations.
 
 
 ## Results
 
-![Inference Result](inference_results.png)
-![Basic Block of Resnet018](basic_block.png)
-![Outputs of a convolutional layer](convolutional_layer.png)
+![Network](Netzwerk.png)
+![Architektur](Architektur.png)
+![Feature Visualisierung](FeatureVisualisierung.png)
