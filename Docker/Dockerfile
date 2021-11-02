@@ -9,10 +9,6 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
-# Change this to your group and your user
-RUN addgroup --gid 250 inb
-RUN adduser --home /home/linse --shell /bin/bash --ingroup inb --uid 26268 linse
-
 # Install Python 3.8
 # install python-tk, during installation process it asks questions. We cannot interact with the terminal, so we make the installer to not ask any questions
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -48,6 +44,3 @@ WORKDIR /app
 
 # make port 5570 available from outside for data transfer
 EXPOSE 5570
-
-# change this to your user
-USER linse:inb 
