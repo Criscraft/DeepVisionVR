@@ -1,26 +1,36 @@
-![Title](Title.png)
+![Title](Panorama.png)
 
-# DeepVisionVR - Interactive 3D Visualization of Deep Neural Networks
+# A Walk in the Black-Box: Deep Convolutional Neural Network Visualization in Virtual Reality 
 
-This repository is the implementation of DeepVisionVR. It serves as a tool to inspect the activations in deep neural networks in three dimensions. VR Support is currently available for the HTC Vive. The repository contains the Unity project to vision the deep networks, the Python based implementation of the networks and a Docker file to create the Python environment. Currently, the implementation covers two ResNet018 models trained on the CalTech dataset.
+This repository visualizes deep convolutional neural networks (CNNs) in 3D. Take a walk in your CNN and interact with it to get a more intuitive understanding of Deep Learning or to analyze your models. The software provides visualization algorithms like feature visualization to reveal what visual concepts the models have learned. Virtual Reality and desktop mode are available. Currently, CNNs for image classification and segmentation are supported. 
 
-The project is still in an early development phase and such is the documentation. 
+The repository consists of the client and the server part. The client contains the Unity project to display and to interact with the networks. The server is a Python based implementation, handles the networks and provides the client with data. The server can be run in Docker and an appropriate Dockerfile is included in the repository. 
 
 
 ## Requirements
 
-For the Unity Project:
+For the client:
 Unity 2021.1.14f1
 
-For the Deep Learining part:
-Install Docker and NVIDIA-docker
-Build the Docker image.
+For the server:
+Docker and NVIDIA-docker
+Use the Dockerfile to build your Docker image.
 
-The project is easy to set up in Linux, however, in Windows I had issues with the GPU support for Docker containers. Docker Desktop did not grant access to GPU computing. I circumvented the problem by installing Ubuntu in Windows 11 beta using WSL and running the container inside WSL. I recommend this guide https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+
+## Get started with the demo
+
+Follow the instructions to set up the [Server](https://github.com/Criscraft/DeepVisionVRServer) and the [Client](https://github.com/Criscraft/DeepVisionVRClient). Start the server first and then start the client to take a walk in the black-box.
+
+
+## How to visualize your own CNN
+
+To visualize your own networks and datasets you will have to modify some scripts on the server side. Go to the server directory and create a new project folder in DeepVisionVR/DeepLearningServer/Projects/ 
+To get started, copy the Demo project and replace the network or the datset. Currently, the software expects the networks to written in the Pytorch framework. 
+Check out the other projects to see what the visualization software can be used for. 
 
 
 ## Results
 
-![Inference Result](inference_results.png)
-![Basic Block of Resnet018](basic_block.png)
-![Outputs of a convolutional layer](convolutional_layer.png)
+![Network](Netzwerk.png)
+![Architektur](Architektur.png)
+![Feature Visualisierung](FeatureVisualisierung.png)
