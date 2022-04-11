@@ -2,32 +2,29 @@
 
 # A Walk in the Black-Box: Deep Convolutional Neural Network Visualization in Virtual Reality 
 
-This repository visualizes deep convolutional neural networks (CNNs) in 3D. Take a walk in your CNN and interact with it to get a more intuitive understanding of Deep Learning or to analyze your models. The software provides visualization algorithms like feature visualization to reveal what visual concepts the models have learned. Virtual Reality and desktop mode are available. Currently, CNNs for image classification and segmentation are supported. 
+This repository visualizes deep convolutional neural networks (CNNs) in 3D. The project is split into the client repository ([HERE](https://github.com/Criscraft/DeepVisionVRClient)) and the server repository ([HERE](https://github.com/Criscraft/DeepVisionVRServer)). You will find the releases and the code in these repositories.
 
-The repository consists of the client and the server part. The client contains the Unity project to display and to interact with the networks. The server is a Python based implementation, handles the networks and provides the client with data. The server can be run in Docker and an appropriate Dockerfile is included in the repository. 
+Take a walk in your CNN and interact with it to get a more intuitive understanding of Deep Learning. You can visualize your own CNNs or simply start with the demo. The software presents the network layers in 3D. Move and look around, put images into the network and explore how it processes the information. Virtual Reality and desktop mode are available. Currently, CNNs for image classification and segmentation are supported. The software includes some visualization algorithms like feature visualization to reveal what visual concepts the models have learned. 
 
-
-## Requirements
-
-For the client:
-Unity 2021.1.14f1
-
-For the server:
-Docker and NVIDIA-docker
-Use the Dockerfile to build your Docker image.
-
+The repository consists of the client and the server part. The client contains the Unity project to display and to interact with the networks. The server is a Python based implementation, handles the networks and provides the client with data. The server can be run in Docker and an appropriate Dockerfile is included in the respective repository. It uses the Pytorch framework.
 
 ## Get started with the demo
 
-Follow the instructions to set up the [Server](https://github.com/Criscraft/DeepVisionVRServer) and the [Client](https://github.com/Criscraft/DeepVisionVRClient). Start the server first and then start the client to take a walk in the black-box.
+Install the client [HERE](https://github.com/Criscraft/DeepVisionVRClient).
 
+Setup the server [HERE](https://github.com/Criscraft/DeepVisionVRServer).
+
+Start the server first by executing
+    bash start_falcon_server.sh
+and then start the client to take a walk in the black-box.
+
+It is advised to run server and client on different machines due to GPU memory limitations.
+
+The client and server repositories have more detailed information about how to develop DeepVisionVR further.
 
 ## How to visualize your own CNN
 
-To visualize your own networks and datasets you will have to modify some scripts on the server side. Go to the server directory and create a new project folder in DeepVisionVR/DeepLearningServer/Projects/ 
-To get started, copy the Demo project and replace the network or the datset. Currently, the software expects the networks to written in the Pytorch framework. 
-Check out the other projects to see what the visualization software can be used for. 
-
+To visualize your own networks and datasets you will have to modify some scripts on the server side. Nevertheless, it is quite simple! Take a look [HERE](https://github.com/Criscraft/DeepVisionVRServer) for more detailed information.
 
 ## Results
 
